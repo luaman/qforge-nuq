@@ -57,7 +57,7 @@ void GIB_Load_f (void)
 	char filename[256];
 	QFile *f;
 
-	sprintf(filename, "%s/%s.gib", com_gamedir, Cmd_Argv(1));
+	snprintf(filename, sizeof(filename), "%s/%s.gib", com_gamedir, Cmd_Argv(1));
 	f = Qopen(filename, "r");
 	if (f)
 	{

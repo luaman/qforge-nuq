@@ -163,11 +163,11 @@ int GIB_Run_Sub (gib_module_t *mod, gib_sub_t *sub)
 
 	for (i = 0; i <= gib_subargc; i++)
 	{
-		sprintf(buf, "arg%i", i);
+		snprintf(buf, sizeof(buf), "arg%i", i);
 		GIB_Var_Set (buf, gib_subargv[i]);
 	}
 
-	sprintf(buf, "%i", gib_subargc);
+	snprintf(buf, sizeof(buf), "%i", gib_subargc);
 	GIB_Var_Set ("argc", buf);
 
 	ret = GIB_Execute_Sub ();

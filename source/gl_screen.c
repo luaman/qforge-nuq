@@ -509,7 +509,7 @@ void SCR_DrawFPS (void)
 		lastframetime = t;
 	}
 
-	sprintf(st, "%3d FPS", lastfps);
+	snprintf(st, sizeof(st), "%3d FPS", lastfps);
 	x = vid.width - strlen(st) * 8 - 8;
 	y = vid.height - sb_lines - 8;
 	Draw_String8 (x, y, st);
