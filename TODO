@@ -1,0 +1,5 @@
+ o  windows port (Hey, Coderjoe, make some time!:)
+ o  fix sky rendering
+        too slow due to overdraw
+        areas that should be black are greenish
+ o  make alsa support more generic for odd hw (eg gus)
