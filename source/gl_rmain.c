@@ -204,12 +204,12 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 
 void R_RotateForEntity (entity_t *e)
 {
-    glTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
+	glTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
 
-    glRotatef (e->angles[1],  0, 0, 1);
-    glRotatef (-e->angles[0],  0, 1, 0);
+	glRotatef (e->angles[1],  0, 0, 1);
+	glRotatef (-e->angles[0],  0, 1, 0);
 	//ZOID: fixed z angle
-    glRotatef (e->angles[2],  1, 0, 0);
+	glRotatef (e->angles[2],  1, 0, 0);
 }
 
 /*
@@ -308,10 +308,7 @@ static void R_DrawSpriteModel (entity_t *e)
 	else
 		glColor4f(1,1,1,1);
 
-    glBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
-
-	glEnable (GL_ALPHA_TEST);
-	glBegin (GL_QUADS);
+	glBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
 
 	glEnable (GL_ALPHA_TEST);
 	glBegin (GL_QUADS);
@@ -387,6 +384,10 @@ static void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 	verts += posenum * paliashdr->poseverts;
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 
+	if (fb)
+		glColor3f(1,1,1);
+	else if (lighthalf)
+		shadelight *= 2;
 	while (1)
 	{
 		// get the vertex count and primitive type
@@ -407,17 +408,11 @@ static void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 			glTexCoord2f (((float *)order)[0], ((float *)order)[1]);
 			order += 2;
 
-			if (fb) {
-				glColor4f (1, 1, 1, 1);
-			} else {
+			if (!fb)
+			{
 				// normals and vertexes come from the frame list
 				l = shadedots[verts->lightnormalindex] * shadelight;
-
-				// LordHavoc: cleanup after Endy
-				if (!lighthalf) {
-					l *= 2;
-				}
-				glColor4f(l, l, l, 1);
+				glColor3f(l, l, l);
 			}
 
 			glVertex3f (verts->v[0], verts->v[1], verts->v[2]);
@@ -591,9 +586,9 @@ static void R_DrawAliasModel (entity_t *e)
 	{
 		if (ambientlight < 8)
 			ambientlight = shadelight = 8;
-	} else if (!gl_fb_models->value && (
-			!strcmp (clmodel->name, "progs/flame.mdl") ||
-			!strcmp (clmodel->name, "progs/flame2.mdl"))) {
+	}
+	else if (!gl_fb_models->value && (!strcmp (clmodel->name, "progs/flame.mdl") || !strcmp (clmodel->name, "progs/flame2.mdl")))
+	{
 		// HACK HACK HACK -- no fullbright colors, so make torches full light
 		ambientlight = shadelight = 256;
 	}
@@ -620,6 +615,9 @@ static void R_DrawAliasModel (entity_t *e)
 
 	glPushMatrix ();
 	R_RotateForEntity (e);
+
+	// LordHavoc: must be in modulate mode for reasons of lighting as well as fullbright support
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	if (!strcmp (clmodel->name, "progs/eyes.mdl") )
 	{
@@ -654,17 +652,16 @@ static void R_DrawAliasModel (entity_t *e)
 	R_SetupAliasFrame (currententity->frame, paliashdr, false);
 
 	// This block is GL fullbright support for objects...
-	if (clmodel->hasfullbrights && gl_fb_models->value &&
-			paliashdr->gl_fb_texturenum[currententity->skinnum][anim]) {
-		/*
+	if (clmodel->hasfullbrights && gl_fb_models->value && paliashdr->gl_fb_texturenum[currententity->skinnum][anim])
+	{
+		glBlendFunc(GL_ONE, GL_ONE);
 		glEnable (GL_BLEND);
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		*/
 
 		glBindTexture (GL_TEXTURE_2D, paliashdr->gl_fb_texturenum[currententity->skinnum][anim]);
 		R_SetupAliasFrame (currententity->frame, paliashdr, true);
 
-		//glDisable (GL_BLEND);
+		glDisable (GL_BLEND);
+		gkBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	glShadeModel (GL_FLAT);
@@ -841,18 +838,17 @@ static void R_SetupFrame (void)
 }
 
 
-static void MYgluPerspective( GLdouble fovy, GLdouble aspect,
-		     GLdouble zNear, GLdouble zFar )
+static void MYgluPerspective( GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar )
 {
-   GLdouble xmin, xmax, ymin, ymax;
+	GLdouble xmin, xmax, ymin, ymax;
 
-   ymax = zNear * tan( fovy * M_PI / 360.0 );
-   ymin = -ymax;
+	ymax = zNear * tan( fovy * M_PI / 360.0 );
+	ymin = -ymax;
 
-   xmin = ymin * aspect;
-   xmax = ymax * aspect;
+	xmin = ymin * aspect;
+	xmax = ymax * aspect;
 
-   glFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
+	glFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
 }
 
 
@@ -897,12 +893,12 @@ static void R_SetupGL (void)
 	}
 
 	glViewport (glx + x, gly + y2, w, h);
-    screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
+	screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
 //	yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
 //	yfov = (2.0 * tan (scr_fov->value/360*M_PI)) / screenaspect;
 //	yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*(scr_fov->value*2)/M_PI;
-//    MYgluPerspective (yfov,  screenaspect,  4,  4096);
-    MYgluPerspective (r_refdef.fov_y,  screenaspect,  4,  4096);
+//	MYgluPerspective (yfov,  screenaspect,  4,  4096);
+	MYgluPerspective (r_refdef.fov_y,  screenaspect,  4,  4096);
 
 	if (mirror)
 	{
@@ -916,14 +912,14 @@ static void R_SetupGL (void)
 		glCullFace(GL_FRONT);
 
 	glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity ();
+	glLoadIdentity ();
 
-    glRotatef (-90,  1, 0, 0);	    // put Z going up
-    glRotatef (90,  0, 0, 1);	    // put Z going up
-    glRotatef (-r_refdef.viewangles[2],  1, 0, 0);
-    glRotatef (-r_refdef.viewangles[0],  0, 1, 0);
-    glRotatef (-r_refdef.viewangles[1],  0, 0, 1);
-    glTranslatef (-r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+	glRotatef (-90,  1, 0, 0);	    // put Z going up
+	glRotatef (90,  0, 0, 1);	    // put Z going up
+	glRotatef (-r_refdef.viewangles[2],  1, 0, 0);
+	glRotatef (-r_refdef.viewangles[0],  0, 1, 0);
+	glRotatef (-r_refdef.viewangles[1],  0, 0, 1);
+	glTranslatef (-r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
 
 	glGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
