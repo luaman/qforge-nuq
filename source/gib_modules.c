@@ -4,6 +4,8 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
+
 #include "cvar.h"
 #include "console.h"
 #include "qargs.h"
