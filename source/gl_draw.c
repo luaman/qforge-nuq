@@ -57,7 +57,7 @@
 
 static int GL_LoadPicTexture (qpic_t *pic);
 
-extern  byte            *host_basepal;
+extern byte            *host_basepal;
 extern unsigned char d_15to8table[65536];
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 extern qboolean lighthalf;
@@ -143,7 +143,7 @@ static int			numgltextures = 0;
 
 #ifdef gl_draw_scraps
 
-#define	MAX_SCRAPS		1
+#define	MAX_SCRAPS		2
 #define	BLOCK_WIDTH		256
 #define	BLOCK_HEIGHT	256
 
@@ -193,8 +193,14 @@ static int Scrap_AllocBlock (int w, int h, int *x, int *y)
 
 static void Scrap_Upload (void)
 {
-	glBindTexture (GL_TEXTURE_2D, scrap_texnum);
-	GL_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, true);
+	int		texnum;
+
+	scrap_uploads++;
+
+	for (texnum = 0; texnum < MAX_SCRAPS; texnum++) {
+		glBindTexture (GL_TEXTURE_2D, scrap_texnum);
+		GL_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, true);
+	}
 	scrap_dirty = false;
 }
 
