@@ -50,14 +50,14 @@ qpic_t		*sb_ibar;
 qpic_t		*sb_sbar;
 qpic_t		*sb_scorebar;
 
-qpic_t		*sb_weapons[7][8];   // 0 is active, 1 is owned, 2-5 are flashes
+qpic_t		*sb_weapons[7][8];	// 0 is active, 1 is owned, 2-5 are flashes
 qpic_t		*sb_ammo[4];
 qpic_t		*sb_sigil[4];
 qpic_t		*sb_armor[3];
 qpic_t		*sb_items[32];
 
-qpic_t		*sb_faces[7][2];		// 0 is gibbed, 1 is dead, 2-6 are alive
-							// 0 is static, 1 is temporary animation
+qpic_t		*sb_faces[7][2];	// 0 is gibbed, 1 is dead, 2-6 are alive
+								// 0 is static, 1 is temporary animation
 qpic_t		*sb_face_invis;
 qpic_t		*sb_face_quad;
 qpic_t		*sb_face_invuln;
@@ -73,12 +73,13 @@ qpic_t		*rsb_items[2];
 qpic_t		*rsb_ammo[3];
 qpic_t		*rsb_teambord;		// PGM 01/19/97 - team color border
 
-//MED 01/04/97 added two more weapons + 3 alternates for grenade launcher
-qpic_t		*hsb_weapons[7][5];   // 0 is active, 1 is owned, 2-5 are flashes
-//MED 01/04/97 added array to simplify weapon parsing
-int 		hipweapons[4] = {HIT_LASER_CANNON_BIT,HIT_MJOLNIR_BIT,4,HIT_PROXIMITY_GUN_BIT};
-//MED 01/04/97 added hipnotic items array
-qpic_t		*hsb_items[2];
+								// MED 01/04/97 added two more weapons + 3
+								// alternates for grenade launcher
+qpic_t		*hsb_weapons[7][5]; // 0 is active, 1 is owned, 2-5 are flashes
+
+								// MED 01/04/97 added array to simplify weapon parsing
+int 		hipweapons[4] = {HIT_LASER_CANNON_BIT, HIT_MJOLNIR_BIT, 4, HIT_PROXIMITY_GUN_BIT};
+qpic_t		*hsb_items[2];		// MED 01/04/97 added hipnotic items array
 
 qboolean	headsup;
 qboolean	sbar_centered;
@@ -88,13 +89,31 @@ void Sbar_DeathmatchOverlay (void);
 void M_DrawPic (int, int, qpic_t *);
 
 /*
-===============
-Sbar_ShowScores
+ *
+ *	Status Bar Utility Functions
+ *
+ */
 
-Tab key down
-===============
+/*
+	Sbar_ColorForMap
+
+	I'm not exactly sure why this exists, but I'm not going to change it yet.
 */
-void Sbar_ShowScores (void)
+int
+Sbar_ColorForMap (int m)
+{
+	return m + 8;	// FIXME: Might want this to be return (bound (0, m, 13) * 16) + 8;
+}
+
+
+
+/*
+	Sbar_ShowScores
+
+	Tab key has been pressed, inform sbar it needs to show scores
+*/
+void
+Sbar_ShowScores (void)
 {
 	if (sb_showscores)
 		return;
@@ -103,232 +122,99 @@ void Sbar_ShowScores (void)
 }
 
 /*
-===============
-Sbar_DontShowScores
+	Sbar_DontShowScores
 
-Tab key up
-===============
+	Tab key up, show normal sbar again
 */
-void Sbar_DontShowScores (void)
+void
+Sbar_DontShowScores (void)
 {
+	if (!sb_showscores)
+		return;
 	sb_showscores = false;
 	sb_updates = 0;
 }
 
 /*
-===============
-Sbar_Changed
-===============
+	Sbar_Changed
+
+	Call this to signal sbar to redraw next frame.
 */
-void Sbar_Changed (void)
+void
+Sbar_Changed (void)
 {
 	sb_updates = 0;	// update next frame
 }
 
-/*
-===============
-Sbar_Init
-===============
-*/
-void Sbar_Init (void)
-{
-	int		i;
-
-	for (i=0 ; i<10 ; i++) {
-		sb_nums[0][i] = Draw_PicFromWad (va("num_%i",i));
-		sb_nums[1][i] = Draw_PicFromWad (va("anum_%i",i));
-	}
-
-	sb_nums[0][10] = Draw_PicFromWad ("num_minus");
-	sb_nums[1][10] = Draw_PicFromWad ("anum_minus");
-
-	sb_colon = Draw_PicFromWad ("num_colon");
-	sb_slash = Draw_PicFromWad ("num_slash");
-
-	sb_weapons[0][0] = Draw_PicFromWad ("inv_shotgun");
-	sb_weapons[0][1] = Draw_PicFromWad ("inv_sshotgun");
-	sb_weapons[0][2] = Draw_PicFromWad ("inv_nailgun");
-	sb_weapons[0][3] = Draw_PicFromWad ("inv_snailgun");
-	sb_weapons[0][4] = Draw_PicFromWad ("inv_rlaunch");
-	sb_weapons[0][5] = Draw_PicFromWad ("inv_srlaunch");
-	sb_weapons[0][6] = Draw_PicFromWad ("inv_lightng");
-
-	sb_weapons[1][0] = Draw_PicFromWad ("inv2_shotgun");
-	sb_weapons[1][1] = Draw_PicFromWad ("inv2_sshotgun");
-	sb_weapons[1][2] = Draw_PicFromWad ("inv2_nailgun");
-	sb_weapons[1][3] = Draw_PicFromWad ("inv2_snailgun");
-	sb_weapons[1][4] = Draw_PicFromWad ("inv2_rlaunch");
-	sb_weapons[1][5] = Draw_PicFromWad ("inv2_srlaunch");
-	sb_weapons[1][6] = Draw_PicFromWad ("inv2_lightng");
-
-	for (i = 0; i < 5; i++) {
-		sb_weapons[2+i][0] = Draw_PicFromWad (va("inva%i_shotgun",i+1));
-		sb_weapons[2+i][1] = Draw_PicFromWad (va("inva%i_sshotgun",i+1));
-		sb_weapons[2+i][2] = Draw_PicFromWad (va("inva%i_nailgun",i+1));
-		sb_weapons[2+i][3] = Draw_PicFromWad (va("inva%i_snailgun",i+1));
-		sb_weapons[2+i][4] = Draw_PicFromWad (va("inva%i_rlaunch",i+1));
-		sb_weapons[2+i][5] = Draw_PicFromWad (va("inva%i_srlaunch",i+1));
-		sb_weapons[2+i][6] = Draw_PicFromWad (va("inva%i_lightng",i+1));
-	}
-
-	sb_ammo[0] = Draw_PicFromWad ("sb_shells");
-	sb_ammo[1] = Draw_PicFromWad ("sb_nails");
-	sb_ammo[2] = Draw_PicFromWad ("sb_rocket");
-	sb_ammo[3] = Draw_PicFromWad ("sb_cells");
-
-	sb_armor[0] = Draw_PicFromWad ("sb_armor1");
-	sb_armor[1] = Draw_PicFromWad ("sb_armor2");
-	sb_armor[2] = Draw_PicFromWad ("sb_armor3");
-
-	sb_items[0] = Draw_PicFromWad ("sb_key1");
-	sb_items[1] = Draw_PicFromWad ("sb_key2");
-	sb_items[2] = Draw_PicFromWad ("sb_invis");
-	sb_items[3] = Draw_PicFromWad ("sb_invuln");
-	sb_items[4] = Draw_PicFromWad ("sb_suit");
-	sb_items[5] = Draw_PicFromWad ("sb_quad");
-
-	sb_sigil[0] = Draw_PicFromWad ("sb_sigil1");
-	sb_sigil[1] = Draw_PicFromWad ("sb_sigil2");
-	sb_sigil[2] = Draw_PicFromWad ("sb_sigil3");
-	sb_sigil[3] = Draw_PicFromWad ("sb_sigil4");
-
-	sb_faces[4][0] = Draw_PicFromWad ("face1");
-	sb_faces[4][1] = Draw_PicFromWad ("face_p1");
-	sb_faces[3][0] = Draw_PicFromWad ("face2");
-	sb_faces[3][1] = Draw_PicFromWad ("face_p2");
-	sb_faces[2][0] = Draw_PicFromWad ("face3");
-	sb_faces[2][1] = Draw_PicFromWad ("face_p3");
-	sb_faces[1][0] = Draw_PicFromWad ("face4");
-	sb_faces[1][1] = Draw_PicFromWad ("face_p4");
-	sb_faces[0][0] = Draw_PicFromWad ("face5");
-	sb_faces[0][1] = Draw_PicFromWad ("face_p5");
-
-	sb_face_invis = Draw_PicFromWad ("face_invis");
-	sb_face_invuln = Draw_PicFromWad ("face_invul2");
-	sb_face_invis_invuln = Draw_PicFromWad ("face_inv2");
-	sb_face_quad = Draw_PicFromWad ("face_quad");
-
-	Cmd_AddCommand ("+showscores", Sbar_ShowScores);
-	Cmd_AddCommand ("-showscores", Sbar_DontShowScores);
-
-	sb_sbar = Draw_PicFromWad ("sbar");
-	sb_ibar = Draw_PicFromWad ("ibar");
-	sb_scorebar = Draw_PicFromWad ("scorebar");
-
-//MED 01/04/97 added new hipnotic weapons
-	if (hipnotic) {
-		hsb_weapons[0][0] = Draw_PicFromWad ("inv_laser");
-		hsb_weapons[0][1] = Draw_PicFromWad ("inv_mjolnir");
-		hsb_weapons[0][2] = Draw_PicFromWad ("inv_gren_prox");
-		hsb_weapons[0][3] = Draw_PicFromWad ("inv_prox_gren");
-		hsb_weapons[0][4] = Draw_PicFromWad ("inv_prox");
-
-		hsb_weapons[1][0] = Draw_PicFromWad ("inv2_laser");
-		hsb_weapons[1][1] = Draw_PicFromWad ("inv2_mjolnir");
-		hsb_weapons[1][2] = Draw_PicFromWad ("inv2_gren_prox");
-		hsb_weapons[1][3] = Draw_PicFromWad ("inv2_prox_gren");
-		hsb_weapons[1][4] = Draw_PicFromWad ("inv2_prox");
-
-		for (i = 0; i < 5; i++) {
-			hsb_weapons[2+i][0] = Draw_PicFromWad (va("inva%i_laser",i+1));
-			hsb_weapons[2+i][1] = Draw_PicFromWad (va("inva%i_mjolnir",i+1));
-			hsb_weapons[2+i][2] = Draw_PicFromWad (va("inva%i_gren_prox",i+1));
-			hsb_weapons[2+i][3] = Draw_PicFromWad (va("inva%i_prox_gren",i+1));
-			hsb_weapons[2+i][4] = Draw_PicFromWad (va("inva%i_prox",i+1));
-		}
-
-		hsb_items[0] = Draw_PicFromWad ("sb_wsuit");
-		hsb_items[1] = Draw_PicFromWad ("sb_eshld");
-	}
-
-	if (rogue) {
-		rsb_invbar[0] = Draw_PicFromWad ("r_invbar1");
-		rsb_invbar[1] = Draw_PicFromWad ("r_invbar2");
-
-		rsb_weapons[0] = Draw_PicFromWad ("r_lava");
-		rsb_weapons[1] = Draw_PicFromWad ("r_superlava");
-		rsb_weapons[2] = Draw_PicFromWad ("r_gren");
-		rsb_weapons[3] = Draw_PicFromWad ("r_multirock");
-		rsb_weapons[4] = Draw_PicFromWad ("r_plasma");
-
-		rsb_items[0] = Draw_PicFromWad ("r_shield1");
-		rsb_items[1] = Draw_PicFromWad ("r_agrav1");
-
-		// PGM 01/19/97 - team color border
-		rsb_teambord = Draw_PicFromWad ("r_teambord");
-		// PGM 01/19/97 - team color border
-
-		rsb_ammo[0] = Draw_PicFromWad ("r_ammolava");
-		rsb_ammo[1] = Draw_PicFromWad ("r_ammomulti");
-		rsb_ammo[2] = Draw_PicFromWad ("r_ammoplasma");
-	}
-}
-
-
-//=============================================================================
-
-// drawing routines are relative to the status bar location
 
 /*
-=============
-Sbar_DrawPic
-=============
+ *	Drawing Routines
+ *
+ *	Sbar_Draw* routines are relative to the location of the status bar.
+ */
+
+
+/*
+	Sbar_DrawPic
+
+	Draw a texture.
 */
-void Sbar_DrawPic (int x, int y, qpic_t *pic)
+void
+Sbar_DrawPic (int x, int y, qpic_t *pic)
 {
 	if (sbar_centered)
-		Draw_Pic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic);
+		Draw_Pic (x + ((vid.width - 320) >> 1), y + (vid.height - SBAR_HEIGHT), pic);
 	else
-		Draw_Pic (x, y + (vid.height-SBAR_HEIGHT), pic);
+		Draw_Pic (x, y + (vid.height - SBAR_HEIGHT), pic);
 }
 
 /*
-=============
-Sbar_DrawSubPic
-=============
-JACK: Draws a portion of the picture in the status bar.
+	Sbar_DrawSubPic
+
+	Draw a _portion_ of a texture.
 */
 
-void Sbar_DrawSubPic(int x, int y, qpic_t *pic, int srcx, int srcy, int width, int height) 
+void
+Sbar_DrawSubPic(int x, int y, qpic_t *pic, int srcx, int srcy, int width, int height) 
 {
 	if (sbar_centered)
-		Draw_SubPic (x + ((vid.width - 320)>>1), y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width, height);
+		Draw_SubPic (x + ((vid.width - 320) >> 1), y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width, height);
 	else
 		Draw_SubPic (x, y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width, height);
 }
 
 /*
-=============
-Sbar_DrawTransPic
-=============
+	Sbar_DrawTransPic
+
+	Draw a transparent pic?
 */
-void Sbar_DrawTransPic (int x, int y, qpic_t *pic)
+void
+Sbar_DrawTransPic (int x, int y, qpic_t *pic)
 {
 	if (sbar_centered)
-		Draw_TransPic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic);
+		Draw_TransPic (x + ((vid.width - 320) >> 1), y + (vid.height - SBAR_HEIGHT), pic);
 	else
-		Draw_TransPic (x, y + (vid.height-SBAR_HEIGHT), pic);
+		Draw_TransPic (x, y + (vid.height - SBAR_HEIGHT), pic);
 }
 
 /*
-================
-Sbar_DrawCharacter
+	Sbar_DrawCharacter
 
-Draws one solid graphics character
-================
+	Draw one solid graphics character
 */
-void Sbar_DrawCharacter (int x, int y, int num)
+void
+Sbar_DrawCharacter (int x, int y, int num)
 {
 	if (sbar_centered)
-		Draw_Character8 (x + ((vid.width - 320)>>1) + 4 , y + vid.height-SBAR_HEIGHT, num);
+		Draw_Character8 (x + ((vid.width - 320) >> 1) + 4 , y + vid.height - SBAR_HEIGHT, num);
 	else
-		Draw_Character8 (x + 4 , y + vid.height-SBAR_HEIGHT, num);
+		Draw_Character8 (x + 4 , y + vid.height - SBAR_HEIGHT, num);
 }
 
 /*
-================
-Sbar_DrawString
-================
+	Sbar_DrawString
+
+	Draw a string
 */
 void Sbar_DrawString (int x, int y, char *str)
 {
@@ -339,11 +225,12 @@ void Sbar_DrawString (int x, int y, char *str)
 }
 
 /*
-=============
-Sbar_itoa
-=============
+	Sbar_itoa
+
+	Convert an int to ascii
 */
-int Sbar_itoa (int num, char *buf)
+int
+Sbar_itoa (int num, char *buf)
 {
 	char	*str;
 	int		pow10;
@@ -376,11 +263,12 @@ int Sbar_itoa (int num, char *buf)
 Sbar_DrawNum
 =============
 */
-void Sbar_DrawNum (int x, int y, int num, int digits, int color)
+void
+Sbar_DrawNum (int x, int y, int num, int digits, int color)
 {
-	char			str[12];
-	char			*ptr;
-	int				l, frame;
+	char	str[12];
+	char	*ptr;
+	int		l, frame;
 
 	l = Sbar_itoa (num, str);
 	ptr = str;
@@ -395,7 +283,7 @@ void Sbar_DrawNum (int x, int y, int num, int digits, int color)
 		else
 			frame = *ptr -'0';
 
-		Sbar_DrawTransPic (x,y,sb_nums[color][frame]);
+		Sbar_DrawTransPic (x, y, sb_nums[color][frame]);
 		x += 24;
 		ptr++;
 	}
@@ -416,7 +304,8 @@ int		scoreboardlines;
 Sbar_SortFrags
 ===============
 */
-void Sbar_SortFrags (void)
+void
+Sbar_SortFrags (void)
 {
 	int		i, j, k;
 
@@ -440,17 +329,13 @@ void Sbar_SortFrags (void)
 	}
 }
 
-int Sbar_ColorForMap (int m)
-{
-	return m + 8;	// FIXME: Might want this to be return (bound (0, m, 13) * 16) + 8;
-}
-
 /*
 ===============
 Sbar_UpdateScoreboard
 ===============
 */
-void Sbar_UpdateScoreboard (void)
+void
+Sbar_UpdateScoreboard (void)
 {
 	int		i, k;
 	int		top, bottom;
@@ -479,7 +364,8 @@ void Sbar_UpdateScoreboard (void)
 Sbar_SoloScoreboard
 ===============
 */
-void Sbar_SoloScoreboard (void)
+void
+Sbar_SoloScoreboard (void)
 {
 	char	str[80];
 	int		minutes, seconds, tens, units;
@@ -512,7 +398,8 @@ void Sbar_SoloScoreboard (void)
 Sbar_DrawScoreboard
 ===============
 */
-void Sbar_DrawScoreboard (void)
+void
+Sbar_DrawScoreboard (void)
 {
 	Sbar_SoloScoreboard ();
 	if (cl.gametype == GAME_DEATHMATCH)
@@ -526,7 +413,8 @@ void Sbar_DrawScoreboard (void)
 Sbar_DrawInventory
 ===============
 */
-void Sbar_DrawInventory (void)
+void
+Sbar_DrawInventory (void)
 {
 	int			i;
 	char		num[6];
@@ -725,7 +613,8 @@ void Sbar_DrawInventory (void)
 Sbar_DrawFrags
 ===============
 */
-void Sbar_DrawFrags (void)
+void
+Sbar_DrawFrags (void)
 {
 	int				i, k, l;
 	int				top, bottom;
@@ -736,17 +625,19 @@ void Sbar_DrawFrags (void)
 
 	Sbar_SortFrags ();
 
-// draw the text
+	// draw the text
 	l = scoreboardlines <= 4 ? scoreboardlines : 4;
 
 	x = 23;
-	if (cl.gametype == GAME_DEATHMATCH)
-		xofs = 0;
+	
+	if (sbar_centered)
+		xofs = (vid.width - 320) >> 1;
 	else
-		xofs = (vid.width - 320)>>1;
+		xofs = 0;
+		
 	y = vid.height - SBAR_HEIGHT - 23;
 
-	for (i=0 ; i<l ; i++) {
+	for (i=0; i<l; i++) {
 		k = fragsort[i];
 		s = &cl.scores[k];
 		if (!s->name[0])
@@ -770,7 +661,7 @@ void Sbar_DrawFrags (void)
 		Sbar_DrawCharacter ( (x+3)*8 , -24, num[2]);
 
 		if (k == cl.viewentity - 1) {
-			Sbar_DrawCharacter ( x * 8 + 2, -24, 16);
+			Sbar_DrawCharacter (x * 8 + 2, -24, 16);
 			Sbar_DrawCharacter ((x + 4) * 8 - 4, -24, 17);
 		}
 		x += 4;
@@ -785,7 +676,8 @@ void Sbar_DrawFrags (void)
 Sbar_DrawFace
 ===============
 */
-void Sbar_DrawFace (void)
+void
+Sbar_DrawFace (void)
 {
 	int		f, anim;
 
@@ -877,7 +769,8 @@ void Sbar_DrawFace (void)
 Sbar_DrawNormal
 =============
 */
-void Sbar_DrawNormal (void)
+void
+Sbar_DrawNormal (void)
 {
 	if (!headsup)
 		Sbar_DrawPic (0, 0, sb_sbar);
@@ -953,7 +846,8 @@ void Sbar_DrawNormal (void)
 Sbar_Draw
 ===============
 */
-void Sbar_Draw (void)
+void
+Sbar_Draw (void)
 {
 	if (hipnotic || rogue) {
 		if (!cl_sbar->int_val) {
@@ -1008,7 +902,8 @@ Sbar_IntermissionNumber
 
 ==================
 */
-void Sbar_IntermissionNumber (int x, int y, int num, int digits, int color)
+void
+Sbar_IntermissionNumber (int x, int y, int num, int digits, int color)
 {
 	char			str[12];
 	char			*ptr;
@@ -1039,7 +934,8 @@ Sbar_DeathmatchOverlay
 
 ==================
 */
-void Sbar_DeathmatchOverlay (void)
+void
+Sbar_DeathmatchOverlay (void)
 {
 	qpic_t			*pic;
 	int				i, k, l;
@@ -1101,7 +997,8 @@ Sbar_DeathmatchOverlay
 
 ==================
 */
-void Sbar_MiniDeathmatchOverlay (void)
+void
+Sbar_MiniDeathmatchOverlay (void)
 {
 	int				i, k, l;
 	int				top, bottom;
@@ -1182,7 +1079,8 @@ Sbar_IntermissionOverlay
 
 ==================
 */
-void Sbar_IntermissionOverlay (void)
+void
+Sbar_IntermissionOverlay (void)
 {
 	qpic_t	*pic;
 	int		dig;
@@ -1226,7 +1124,8 @@ Sbar_FinaleOverlay
 
 ==================
 */
-void Sbar_FinaleOverlay (void)
+void
+Sbar_FinaleOverlay (void)
 {
 	qpic_t	*pic;
 
@@ -1234,4 +1133,144 @@ void Sbar_FinaleOverlay (void)
 
 	pic = Draw_CachePic ("gfx/finale.lmp");
 	Draw_TransPic ((vid.width - pic->width) / 2, 16, pic);
+}
+
+/*
+	Sbar_Init
+
+	Initialize the status bar's data
+*/
+void
+Sbar_Init (void)
+{
+	int		i;
+
+	for (i=0 ; i<10 ; i++) {
+		sb_nums[0][i] = Draw_PicFromWad (va("num_%i",i));
+		sb_nums[1][i] = Draw_PicFromWad (va("anum_%i",i));
+	}
+
+	sb_nums[0][10] = Draw_PicFromWad ("num_minus");
+	sb_nums[1][10] = Draw_PicFromWad ("anum_minus");
+
+	sb_colon = Draw_PicFromWad ("num_colon");
+	sb_slash = Draw_PicFromWad ("num_slash");
+
+	sb_weapons[0][0] = Draw_PicFromWad ("inv_shotgun");
+	sb_weapons[0][1] = Draw_PicFromWad ("inv_sshotgun");
+	sb_weapons[0][2] = Draw_PicFromWad ("inv_nailgun");
+	sb_weapons[0][3] = Draw_PicFromWad ("inv_snailgun");
+	sb_weapons[0][4] = Draw_PicFromWad ("inv_rlaunch");
+	sb_weapons[0][5] = Draw_PicFromWad ("inv_srlaunch");
+	sb_weapons[0][6] = Draw_PicFromWad ("inv_lightng");
+
+	sb_weapons[1][0] = Draw_PicFromWad ("inv2_shotgun");
+	sb_weapons[1][1] = Draw_PicFromWad ("inv2_sshotgun");
+	sb_weapons[1][2] = Draw_PicFromWad ("inv2_nailgun");
+	sb_weapons[1][3] = Draw_PicFromWad ("inv2_snailgun");
+	sb_weapons[1][4] = Draw_PicFromWad ("inv2_rlaunch");
+	sb_weapons[1][5] = Draw_PicFromWad ("inv2_srlaunch");
+	sb_weapons[1][6] = Draw_PicFromWad ("inv2_lightng");
+
+	for (i = 0; i < 5; i++) {
+		sb_weapons[2+i][0] = Draw_PicFromWad (va("inva%i_shotgun",i+1));
+		sb_weapons[2+i][1] = Draw_PicFromWad (va("inva%i_sshotgun",i+1));
+		sb_weapons[2+i][2] = Draw_PicFromWad (va("inva%i_nailgun",i+1));
+		sb_weapons[2+i][3] = Draw_PicFromWad (va("inva%i_snailgun",i+1));
+		sb_weapons[2+i][4] = Draw_PicFromWad (va("inva%i_rlaunch",i+1));
+		sb_weapons[2+i][5] = Draw_PicFromWad (va("inva%i_srlaunch",i+1));
+		sb_weapons[2+i][6] = Draw_PicFromWad (va("inva%i_lightng",i+1));
+	}
+
+	sb_ammo[0] = Draw_PicFromWad ("sb_shells");
+	sb_ammo[1] = Draw_PicFromWad ("sb_nails");
+	sb_ammo[2] = Draw_PicFromWad ("sb_rocket");
+	sb_ammo[3] = Draw_PicFromWad ("sb_cells");
+
+	sb_armor[0] = Draw_PicFromWad ("sb_armor1");
+	sb_armor[1] = Draw_PicFromWad ("sb_armor2");
+	sb_armor[2] = Draw_PicFromWad ("sb_armor3");
+
+	sb_items[0] = Draw_PicFromWad ("sb_key1");
+	sb_items[1] = Draw_PicFromWad ("sb_key2");
+	sb_items[2] = Draw_PicFromWad ("sb_invis");
+	sb_items[3] = Draw_PicFromWad ("sb_invuln");
+	sb_items[4] = Draw_PicFromWad ("sb_suit");
+	sb_items[5] = Draw_PicFromWad ("sb_quad");
+
+	sb_sigil[0] = Draw_PicFromWad ("sb_sigil1");
+	sb_sigil[1] = Draw_PicFromWad ("sb_sigil2");
+	sb_sigil[2] = Draw_PicFromWad ("sb_sigil3");
+	sb_sigil[3] = Draw_PicFromWad ("sb_sigil4");
+
+	sb_faces[4][0] = Draw_PicFromWad ("face1");
+	sb_faces[4][1] = Draw_PicFromWad ("face_p1");
+	sb_faces[3][0] = Draw_PicFromWad ("face2");
+	sb_faces[3][1] = Draw_PicFromWad ("face_p2");
+	sb_faces[2][0] = Draw_PicFromWad ("face3");
+	sb_faces[2][1] = Draw_PicFromWad ("face_p3");
+	sb_faces[1][0] = Draw_PicFromWad ("face4");
+	sb_faces[1][1] = Draw_PicFromWad ("face_p4");
+	sb_faces[0][0] = Draw_PicFromWad ("face5");
+	sb_faces[0][1] = Draw_PicFromWad ("face_p5");
+
+	sb_face_invis = Draw_PicFromWad ("face_invis");
+	sb_face_invuln = Draw_PicFromWad ("face_invul2");
+	sb_face_invis_invuln = Draw_PicFromWad ("face_inv2");
+	sb_face_quad = Draw_PicFromWad ("face_quad");
+
+	Cmd_AddCommand ("+showscores", Sbar_ShowScores);
+	Cmd_AddCommand ("-showscores", Sbar_DontShowScores);
+
+	sb_sbar = Draw_PicFromWad ("sbar");
+	sb_ibar = Draw_PicFromWad ("ibar");
+	sb_scorebar = Draw_PicFromWad ("scorebar");
+
+	// MED 01/04/97 added new hipnotic weapons
+	if (hipnotic) {
+		hsb_weapons[0][0] = Draw_PicFromWad ("inv_laser");
+		hsb_weapons[0][1] = Draw_PicFromWad ("inv_mjolnir");
+		hsb_weapons[0][2] = Draw_PicFromWad ("inv_gren_prox");
+		hsb_weapons[0][3] = Draw_PicFromWad ("inv_prox_gren");
+		hsb_weapons[0][4] = Draw_PicFromWad ("inv_prox");
+
+		hsb_weapons[1][0] = Draw_PicFromWad ("inv2_laser");
+		hsb_weapons[1][1] = Draw_PicFromWad ("inv2_mjolnir");
+		hsb_weapons[1][2] = Draw_PicFromWad ("inv2_gren_prox");
+		hsb_weapons[1][3] = Draw_PicFromWad ("inv2_prox_gren");
+		hsb_weapons[1][4] = Draw_PicFromWad ("inv2_prox");
+
+		for (i = 0; i < 5; i++) {
+			hsb_weapons[2+i][0] = Draw_PicFromWad (va("inva%i_laser",i+1));
+			hsb_weapons[2+i][1] = Draw_PicFromWad (va("inva%i_mjolnir",i+1));
+			hsb_weapons[2+i][2] = Draw_PicFromWad (va("inva%i_gren_prox",i+1));
+			hsb_weapons[2+i][3] = Draw_PicFromWad (va("inva%i_prox_gren",i+1));
+			hsb_weapons[2+i][4] = Draw_PicFromWad (va("inva%i_prox",i+1));
+		}
+
+		hsb_items[0] = Draw_PicFromWad ("sb_wsuit");
+		hsb_items[1] = Draw_PicFromWad ("sb_eshld");
+	}
+
+	if (rogue) {
+		rsb_invbar[0] = Draw_PicFromWad ("r_invbar1");
+		rsb_invbar[1] = Draw_PicFromWad ("r_invbar2");
+
+		rsb_weapons[0] = Draw_PicFromWad ("r_lava");
+		rsb_weapons[1] = Draw_PicFromWad ("r_superlava");
+		rsb_weapons[2] = Draw_PicFromWad ("r_gren");
+		rsb_weapons[3] = Draw_PicFromWad ("r_multirock");
+		rsb_weapons[4] = Draw_PicFromWad ("r_plasma");
+
+		rsb_items[0] = Draw_PicFromWad ("r_shield1");
+		rsb_items[1] = Draw_PicFromWad ("r_agrav1");
+
+		// PGM 01/19/97 - team color border
+		rsb_teambord = Draw_PicFromWad ("r_teambord");
+		// PGM 01/19/97 - team color border
+
+		rsb_ammo[0] = Draw_PicFromWad ("r_ammolava");
+		rsb_ammo[1] = Draw_PicFromWad ("r_ammomulti");
+		rsb_ammo[2] = Draw_PicFromWad ("r_ammoplasma");
+	}
 }
