@@ -1,7 +1,7 @@
 /*
 	gl_rmisc.c
 
-	@description@
+	(description)
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -30,11 +30,37 @@
 # include "config.h"
 #endif
 
-#include "glquake.h"
-#include "client.h"
-#include "r_local.h"
+#include <string.h>
+#include <stdio.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+
+#include "bspfile.h"    // needed by: glquake.h
+#include "vid.h"
 #include "sys.h"
+#include "mathlib.h"    // needed by: protocol.h, render.h, client.h,
+                        //  modelgen.h, glmodel.h
+#include "wad.h"
+#include "draw.h"
+#include "cvar.h"
+#include "net.h"        // needed by: client.h
+#include "protocol.h"   // needed by: client.h
+#include "cmd.h"
+#include "sbar.h"
+#include "render.h"     // needed by: client.h, gl_model.h, glquake.h
+#include "client.h"     // need cls in this file
+#include "model.h"   // needed by: glquake.h
 #include "console.h"
+#include "glquake.h"
+#include "r_local.h"
+
+qboolean VID_Is8bit(void);
+void R_InitBubble();
+void R_FireColor_f(void);
+
+cvar_t *gl_fires;
+qboolean	allowskybox;		// allow skyboxes?  --KB
 
 /*
 ==================
@@ -176,15 +202,36 @@ void R_Envmap_f (void)
 }
 
 /*
+   R_LoadSky_f
+*/
+void
+R_LoadSky_f (void)
+{
+	if (Cmd_Argc () != 2)
+	{
+		Con_Printf ("loadsky <name> : load a skybox\n");
+		return;
+	}
+
+	R_LoadSkys (Cmd_Argv(1));
+}
+
+
+/*
 ===============
 R_Init
 ===============
 */
 void R_Init (void)
-{	
+{
+	allowskybox = false;	// server will decide if this is allowed  --KB
+
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);	
 	Cmd_AddCommand ("envmap", R_Envmap_f);	
-	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);	
+	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
+	Cmd_AddCommand ("loadsky", R_LoadSky_f);
+
+	Cmd_AddCommand ("r_firecolor", R_FireColor_f);
 
 	r_norefresh = Cvar_Get("r_norefresh", "0", CVAR_NONE, "None");
 	r_lightmap = Cvar_Get("r_lightmap", "0", CVAR_NONE, "None");
@@ -194,14 +241,15 @@ void R_Init (void)
 	r_shadows = Cvar_Get("r_shadows", "0", CVAR_NONE, "None");
 	r_mirroralpha = Cvar_Get("r_mirroralpha", "1", CVAR_NONE, "None");
 	r_wateralpha = Cvar_Get("r_wateralpha", "1", CVAR_NONE, "None");
+	r_waterripple = Cvar_Get ("r_waterripple", "0", CVAR_NONE, "None");
 	r_dynamic = Cvar_Get("r_dynamic", "1", CVAR_NONE, "None");
 	r_novis = Cvar_Get("r_novis", "0", CVAR_NONE, "None");
 	r_speeds = Cvar_Get("r_speeds", "0", CVAR_NONE, "None");
+	r_netgraph = Cvar_Get("r_netgraph", "0", CVAR_NONE, "None");
 
-	gl_finish = Cvar_Get("gl_finish", "0", CVAR_NONE, "None");
 	gl_clear = Cvar_Get("gl_clear", "0", CVAR_NONE, "None");
 	gl_texsort = Cvar_Get("gl_texsort", "1", CVAR_NONE, "None");
-
+ 
  	if (gl_mtexable)
 		Cvar_SetValue(gl_texsort, 0.0);
 
@@ -209,7 +257,7 @@ void R_Init (void)
 	gl_smoothmodels = Cvar_Get("gl_smoothmodels", "1", CVAR_NONE, "None");
 	gl_affinemodels = Cvar_Get("gl_affinemodels", "0", CVAR_NONE, "None");
 	gl_polyblend = Cvar_Get("gl_polyblend", "1", CVAR_NONE, "None");
-	gl_flashblend = Cvar_Get("gl_flashblend", "1", CVAR_NONE, "None");
+	gl_flashblend = Cvar_Get("gl_flashblend",  "0", CVAR_NONE, "None");
 	gl_playermip = Cvar_Get("gl_playermip", "0", CVAR_NONE, "None");
 	gl_nocolors = Cvar_Get("gl_nocolors", "0", CVAR_NONE, "None");
 
@@ -219,17 +267,22 @@ void R_Init (void)
 	gl_particles = Cvar_Get ("gl_particles", "1", CVAR_ARCHIVE,
 			"whether or not to draw particles");
 
-	gl_keeptjunctions = Cvar_Get("gl_keeptjunctions", "0", CVAR_NONE, "None");
+	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_ARCHIVE,
+			"Toggles fullbright color support for models..  "
+			"This is very handy, but costs me 2 FPS.. (=:]");
+
+	gl_keeptjunctions = Cvar_Get("gl_keeptjunctions", "1", CVAR_NONE, "None");
 	gl_reporttjunctions = Cvar_Get("gl_reporttjunctions", "0", CVAR_NONE, "None");
+	
+	r_skyname = Cvar_Get("r_skyname", "none", CVAR_NONE, 
+			"name of the current skybox");
+	gl_skymultipass = Cvar_Get("gl_skymultipass", "1", CVAR_NONE,
+			"controls wether the skydome is single or double pass");
 
-	gl_doubleeyes = Cvar_Get("gl_doubleeys", "1", CVAR_NONE, "None");
-
+	R_InitBubble();
+	
 	R_InitParticles ();
 	R_InitParticleTexture ();
-
-#ifdef GLTEST
-	Test_Init ();
-#endif
 
 	playertextures = texture_extension_number;
 	texture_extension_number += 16;
@@ -257,8 +310,6 @@ void R_TranslatePlayerSkin (int playernum)
 	byte		*inrow;
 	unsigned	frac, fracstep;
 
-	GL_DisableMultitexture();
-
 	top = cl.scores[playernum].colors & 0xf0;
 	bottom = (cl.scores[playernum].colors &15)<<4;
 
@@ -284,10 +335,10 @@ void R_TranslatePlayerSkin (int playernum)
 	currententity = &cl_entities[1+playernum];
 	model = currententity->model;
 	if (!model)
-		return;		// player doesn't have a model yet
+		return;         // player doesn't have a model yet
 	if (model->type != mod_alias)
 		return; // only translate skins on alias models
-
+ 
 	paliashdr = (aliashdr_t *)Mod_Extradata (model);
 	s = paliashdr->skinwidth * paliashdr->skinheight;
 	if (currententity->skinnum < 0 || currententity->skinnum >= paliashdr->numskins) {
@@ -297,13 +348,13 @@ void R_TranslatePlayerSkin (int playernum)
 		original = (byte *)paliashdr + paliashdr->texels[currententity->skinnum];
 	if (s & 3)
 		Sys_Error ("R_TranslateSkin: s&3");
-
+ 
 	inwidth = paliashdr->skinwidth;
 	inheight = paliashdr->skinheight;
-
+ 
 	// because this happens during gameplay, do it fast
 	// instead of sending it through gl_upload 8
-    glBindTexture (GL_TEXTURE_2D, playertextures + playernum);
+	glBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
 #if 0
 	byte	translated[320*200];
@@ -381,9 +432,7 @@ void R_TranslatePlayerSkin (int playernum)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 #endif
-
 }
-
 
 /*
 ===============
@@ -393,6 +442,7 @@ R_NewMap
 void R_NewMap (void)
 {
 	int		i;
+	cvar_t		*r_skyname;
 	
 	for (i=0 ; i<256 ; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
@@ -423,9 +473,11 @@ void R_NewMap (void)
 			mirrortexturenum = i;
  		cl.worldmodel->textures[i]->texturechain = NULL;
 	}
-#ifdef QUAKE2
-	R_LoadSkys ();
-#endif
+	r_skyname = Cvar_FindVar ("r_skyname");
+	if (r_skyname != NULL)
+		R_LoadSkys (r_skyname->string);
+	else
+		R_LoadSkys ("none");
 }
 
 
@@ -436,28 +488,34 @@ R_TimeRefresh_f
 For program optimization
 ====================
 */
+// LordHavoc: improved appearance and accuracy of timerefresh
 void R_TimeRefresh_f (void)
 {
 	int			i;
-	float		start, stop, time;
+	double		start, stop, time;
 
-	glDrawBuffer  (GL_FRONT);
+//	glDrawBuffer  (GL_FRONT);
 	glFinish ();
+	GL_EndRendering ();
 
 	start = Sys_DoubleTime ();
 	for (i=0 ; i<128 ; i++)
 	{
+		GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 		r_refdef.viewangles[1] = i/128.0*360.0;
 		R_RenderView ();
+		glFinish ();
+		GL_EndRendering ();
 	}
 
-	glFinish ();
+//	glFinish ();
 	stop = Sys_DoubleTime ();
 	time = stop-start;
 	Con_Printf ("%f seconds (%f fps)\n", time, 128/time);
 
-	glDrawBuffer  (GL_BACK);
-	GL_EndRendering ();
+//	glDrawBuffer  (GL_BACK);
+//	GL_EndRendering ();
+	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 }
 
 void D_FlushCaches (void)

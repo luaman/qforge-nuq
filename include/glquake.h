@@ -163,6 +163,7 @@ extern	qboolean	envmap;
 extern	int	currenttexture;
 extern	int	cnttextures[2];
 extern	int	particletexture;
+extern	int	netgraphtexture;
 extern	int	playertextures;
 
 extern	int	skytexturenum;		// index in cl.loadmodel, not gl texture object
@@ -178,8 +179,10 @@ extern	cvar_t	*r_lightmap;
 extern	cvar_t	*r_shadows;
 extern	cvar_t	*r_mirroralpha;
 extern	cvar_t	*r_wateralpha;
+extern	cvar_t	*r_waterripple;
 extern	cvar_t	*r_dynamic;
 extern	cvar_t	*r_novis;
+extern	cvar_t	*r_netgraph;
 
 extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_cull;
@@ -200,6 +203,7 @@ extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_subdivide_size;
 extern	cvar_t	*gl_particles;
 extern	cvar_t	*gl_fires;
+extern	cvar_t	*gl_fb_models;
 
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
@@ -207,6 +211,9 @@ extern	int		gl_alpha_format;
 
 extern	cvar_t	*gl_max_size;
 extern	cvar_t	*gl_playermip;
+
+extern	cvar_t	*r_skyname;
+extern	cvar_t	*gl_skymultipass;
 
 extern	int			mirrortexturenum;	// quake texturenum, not gltexturenum
 extern	qboolean	mirror;
@@ -256,8 +263,12 @@ void EmitWaterPolys (msurface_t *fa);
 void EmitSkyPolys (msurface_t *fa);
 void EmitBothSkyLayers (msurface_t *fa);
 void R_DrawSkyChain (msurface_t *s);
-qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+void R_LoadSkys (char *);
+void R_DrawSky (void);
+
 void R_RotateForEntity (entity_t *e);
+
+qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 
 void AddLightBlend (float, float, float, float);
 

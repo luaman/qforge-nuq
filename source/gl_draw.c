@@ -476,8 +476,8 @@ void Draw_Init (void)
 	draw_backtile = Draw_PicFromWad ("backtile");
 
 	// LordHavoc: call init code for other GL renderer modules;
-	//XXXglrmain_init();
-	//XXXglrsurf_init();
+	glrmain_init();
+	glrsurf_init();
 }
 
 
@@ -1414,20 +1414,3 @@ static int GL_LoadPicTexture (qpic_t *pic)
 {
 	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true, 1);
 }
-
-/****************************************/
-
-static GLenum oldtarget = TEXTURE0_SGIS;
-
-void GL_SelectTexture (GLenum target) 
-{
-	if (!gl_mtexable)
-		return;
-	qglSelectTextureSGIS(target);
-	if (target == oldtarget) 
-		return;
-	cnttextures[oldtarget-TEXTURE0_SGIS] = currenttexture;
-	currenttexture = cnttextures[target-TEXTURE0_SGIS];
-	oldtarget = target;
-}
-
