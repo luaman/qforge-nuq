@@ -30,7 +30,7 @@
 #include "config.h"
 #endif
 
-#include <SDL/SDL.h>
+#include "SDL.h"
 
 #include "host.h"
 #include "menu.h"
