@@ -380,10 +380,6 @@ void R_SetVrect (vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
 	else
 		pvrect->y = (h - pvrect->height)/2;
 		
-	if (lcd_x->value) {
-			pvrect->y >>= 1;
-			pvrect->height >>= 1;
-	}
 }
 
 
