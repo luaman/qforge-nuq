@@ -89,6 +89,7 @@ typedef struct
 	vec3_t	origin;			// origin of sound effect
 	vec_t	dist_mult;		// distance multiplier (attenuation/clipK)
 	int		master_vol;		// 0-255 master volume
+	int		phase;			// phase shift between l-r in samples
 } channel_t;
 
 typedef struct
@@ -173,6 +174,7 @@ extern	cvar_t	*bgmvolume;
 extern	cvar_t	*volume;
 
 extern	cvar_t	*snd_interp;
+extern	cvar_t	*snd_stereo_phase_separation;
 
 extern qboolean	snd_initialized;
 

@@ -39,7 +39,7 @@
 #endif
 
 #define	PAINTBUFFER_SIZE	512
-portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE];
+portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE+100];
 int		snd_scaletable[32][256];
 int 	*snd_p, snd_linear_count, snd_vol;
 short	*snd_out;
@@ -390,9 +390,17 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 	int leftvol, rightvol;
 	signed short *sfx;
 	int	i;
+	int left_phase, right_phase;
 
 	leftvol = ch->leftvol;
 	rightvol = ch->rightvol;
+	if (ch->phase >= 0) {
+		left_phase = ch->phase;
+		right_phase = 0;
+	} else {
+		left_phase = 0;
+		right_phase = -ch->phase;
+	}
 	sfx = (signed short *)sc->data + ch->pos;
 
 	for (i=0 ; i<count ; i++)
@@ -400,8 +408,10 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 		data = sfx[i];
 		left = (data * leftvol) >> 8;
 		right = (data * rightvol) >> 8;
-		paintbuffer[i].left += left;
-		paintbuffer[i].right += right;
+		//paintbuffer[i].left += left;
+		//paintbuffer[i].right += right;
+		paintbuffer[i+left_phase].left += left;
+		paintbuffer[i+right_phase].right += right;
 	}
 
 	ch->pos += count;
