@@ -41,6 +41,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #ifdef __sun__
 #include <sys/filio.h>
 #endif
