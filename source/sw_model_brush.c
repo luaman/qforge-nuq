@@ -37,7 +37,7 @@
 #include "checksum.h"
 
 extern char loadname[];
-model_t *loadmodel;
+extern model_t *loadmodel;
 extern byte mod_novis[];
 
 /*
