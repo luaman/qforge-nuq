@@ -595,10 +595,7 @@ void Draw_CharToConback (int num, byte *dest)
 }
 
 /*
-================
-Draw_ConsoleBackground
-
-================
+	Draw_ConsoleBackground
 */
 void Draw_ConsoleBackground (int lines)
 {
@@ -607,34 +604,22 @@ void Draw_ConsoleBackground (int lines)
 	unsigned short	*pusdest;
 	int				f, fstep;
 	qpic_t			*conback;
-	char			ver[100];
 
 	conback = Draw_CachePic ("gfx/conback.lmp");
 
-// hack the version number directly into the pic
-	snprintf (ver, sizeof(ver), "%s, version %s", PROGRAM, VERSION);
-	dest = conback->data + 320*186 + 320 - 11 - 8*strlen(ver);
-
-	for (x=0 ; x<strlen(ver) ; x++)
-		Draw_CharToConback (ver[x], dest+(x<<3));
-	
-// draw the pic
-	if (r_pixbytes == 1)
-	{
+	// draw the pic
+	if (r_pixbytes == 1) {
 		dest = vid.conbuffer;
 
-		for (y=0 ; y<lines ; y++, dest += vid.conrowbytes)
-		{
+		for (y=0 ; y<lines ; y++, dest += vid.conrowbytes) {
 			v = (vid.conheight - lines + y)*200/vid.conheight;
 			src = conback->data + v*320;
 			if (vid.conwidth == 320)
 				memcpy (dest, src, vid.conwidth);
-			else
-			{
+			else {
 				f = 0;
 				fstep = 320*0x10000/vid.conwidth;
-				for (x=0 ; x<vid.conwidth ; x+=4)
-				{
+				for (x=0 ; x<vid.conwidth ; x+=4) {
 					dest[x] = src[f>>16];
 					f += fstep;
 					dest[x+1] = src[f>>16];
@@ -646,21 +631,17 @@ void Draw_ConsoleBackground (int lines)
 				}
 			}
 		}
-	}
-	else
-	{
+	} else {
 		pusdest = (unsigned short *)vid.conbuffer;
 
-		for (y=0 ; y<lines ; y++, pusdest += (vid.conrowbytes >> 1))
-		{
-		// FIXME: pre-expand to native format?
-		// FIXME: does the endian switching go away in production?
+		for (y=0 ; y<lines ; y++, pusdest += (vid.conrowbytes >> 1)) {
+			// FIXME: pre-expand to native format?
+			// FIXME: does the endian switching go away in production?
 			v = (vid.conheight - lines + y)*200/vid.conheight;
 			src = conback->data + v*320;
 			f = 0;
 			fstep = 320*0x10000/vid.conwidth;
-			for (x=0 ; x<vid.conwidth ; x+=4)
-			{
+			for (x=0 ; x<vid.conwidth ; x+=4) {
 				pusdest[x] = d_8to16table[src[f>>16]];
 				f += fstep;
 				pusdest[x+1] = d_8to16table[src[f>>16]];
