@@ -34,8 +34,8 @@ INCLUDES=	-I$(top_srcdir)/include $(GGI_CFLAGS) $(MGL_CFLAGS) $(SDL_CFLAGS) $(SV
 
 bin_PROGRAMS =	@TARGETS@
 
-EXTRA_PROGRAMS= uquake-ggi uquake-mgl uquake-sdl uquake-svga uquake-x11 \
-		uquake-3dfx uquake-glx uquake-sgl uquake-wgl
+EXTRA_PROGRAMS= nuq-ggi nuq-mgl nuq-sdl nuq-svga nuq-x11 \
+		nuq-3dfx nuq-glx nuq-sgl nuq-wgl
 
 noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -137,45 +137,45 @@ soft_SOURCES=	d_edge.c d_fill.c d_init.c d_modech.c d_part.c d_polyse.c \
 #
 ggi_SOURCES=		vid_ggi.c
 
-uquake_ggi_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(ggi_SOURCES)
-uquake_ggi_LDADD=	$(client_LIBS) $(GGI_LIBS)
-uquake_ggi_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_ggi_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(ggi_SOURCES)
+nuq_ggi_LDADD=	$(client_LIBS) $(GGI_LIBS)
+nuq_ggi_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # ... SciTech MGL
 #
 mgl_SOURCES=		vid_mgl.c in_win.c
 
-uquake_mgl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(mgl_SOURCES)
-uquake_mgl_LDADD=	$(client_LIBS) $(MGL_LIBS)
-uquake_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_mgl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(mgl_SOURCES)
+nuq_mgl_LDADD=	$(client_LIBS) $(MGL_LIBS)
+nuq_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # ... Sam Lantinga's Simple DirectMedia Layer, version 1.0 and higher
 #
 sdl_SOURCES=		vid_sdl.c
 
-uquake_sdl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(sdl_SOURCES)
-uquake_sdl_LDADD=	$(client_LIBS) $(SDL_LIBS)
-uquake_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_sdl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(sdl_SOURCES)
+nuq_sdl_LDADD=	$(client_LIBS) $(SDL_LIBS)
+nuq_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # ... Linux SVGAlib
 #
 svga_SOURCES=		d_copy.S vid_svgalib.c
 
-uquake_svga_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(svga_SOURCES)
-uquake_svga_LDADD=	$(client_LIBS) $(SVGA_LIBS)
-uquake_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_svga_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(svga_SOURCES)
+nuq_svga_LDADD=	$(client_LIBS) $(SVGA_LIBS)
+nuq_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # ... X11
 #
 x11_SOURCES=		vid_x11.c dga_check.c
 
-uquake_x11_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(x11_SOURCES)
-uquake_x11_LDADD=	$(client_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(X_SHM_LIB)
-uquake_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_x11_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(x11_SOURCES)
+nuq_x11_LDADD=	$(client_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(X_SHM_LIB)
+nuq_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 
 #
@@ -191,41 +191,41 @@ ogl_SOURCES=	gl_draw.c gl_mesh.c gl_part.c gl_refrag.c gl_rlight.c \
 #
 tdfx_SOURCES=	vid_3dfxsvga.c in_svgalib.c
 
-uquake_3dfx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(tdfx_SOURCES)
-uquake_3dfx_LDADD=	$(client_LIBS) $(TDFXGL_LIBS) $(SVGA_LIBS) $(DL_LIBS)
-uquake_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_3dfx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(tdfx_SOURCES)
+nuq_3dfx_LDADD=	$(client_LIBS) $(TDFXGL_LIBS) $(SVGA_LIBS) $(DL_LIBS)
+nuq_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # ... OpenGL in X Window
 #
 glx_SOURCES=	vid_glx.c in_x11.c context_x11.c dga_check.c
 
-uquake_glx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
-uquake_glx_LDADD=	$(client_LIBS) $(GLX_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(DL_LIBS)
-uquake_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_glx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
+nuq_glx_LDADD=	$(client_LIBS) $(GLX_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(DL_LIBS)
+nuq_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # ... Sam Lantinga's Simple DirectMedia Layer, version 1.1 and higher, in GL mode
 #
 sgl_SOURCES=	vid_sgl.c
 
-uquake_sgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(sgl_SOURCES)
-uquake_sgl_LDADD=	$(client_LIBS) $(SDL_LIBS) $(GLX_LIBS) $(DL_LIBS)
-uquake_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_sgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(sgl_SOURCES)
+nuq_sgl_LDADD=	$(client_LIBS) $(SDL_LIBS) $(GLX_LIBS) $(DL_LIBS)
+nuq_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # SGI/Microsoft WGL (Windows OpenGL)
 #
 wgl_SOURCES=	vid_wgl.c
 
-uquake_wgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(wgl_SOURCES)
-uquake_wgl_LDADD=	$(client_LIBS)
-uquake_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_wgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(wgl_SOURCES)
+nuq_wgl_LDADD=	$(client_LIBS)
+nuq_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 #
 # Stuff that doesn't get linked into an executable NEEDS to be mentioned here,
 # or it won't be distributed with 'make dist'
 #
-EXTRA_DIST=	uquake-server.mak uquake-server.dsp \
-		uquake-mgl.mak uquake-sdl.mak uquake.dsp \
-		uquake-sgl.mak uquake-wgl.mak
+EXTRA_DIST=	nuq-server.mak nuq-server.dsp \
+		nuq-mgl.mak nuq-sdl.mak nuq.dsp \
+		nuq-sgl.mak nuq-wgl.mak

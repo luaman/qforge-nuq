@@ -815,7 +815,7 @@ fi
 AC_ARG_WITH(global-cfg,
 [  --with-global-cfg=FILE  If set will change the name and location of the
                           global config file used by Thirdspace.  Defaults to
-                          /etc/uquake.conf.],
+                          /etc/quakeforge.conf.],
 globalconf="$withval", globalconf="auto")
 if test "x$globalconf" = "xauto" || test "x$globalconf" = "xyes" || \
 	test "x$globalconf" = "xno"; then  dnl yes/no sanity checks
