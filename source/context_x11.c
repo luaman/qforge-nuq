@@ -237,7 +237,9 @@ x11_create_null_cursor(void)
 void
 x11_set_vidmode(int width, int height)
 {
+#ifdef 	HAVE_VIDMODE
 	int i;
+#endif
 
 	vid_fullscreen = Cvar_Get ("vid_fullscreen","0",0,"None");
 
@@ -311,11 +313,12 @@ x11_create_window(int width, int height)
 	attr.event_mask = X_MASK;
 	mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
+#ifdef HAVE_VIDMODE
 	if (hasvidmode && vid_fullscreen->int_val) {
 		attr.override_redirect=1;
 		mask|=CWOverrideRedirect;
 	}
-
+#endif
 	x_win = XCreateWindow(x_disp, x_root, 0, 0, width, height,
 						0, x_visinfo->depth, InputOutput,
 						x_vis, mask, &attr);
