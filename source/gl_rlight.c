@@ -198,6 +198,7 @@ R_MarkLights
 */
 // LordHavoc: heavily modified, to eliminate unnecessary texture uploads,
 //            and support bmodel lighting better
+// LordHavoc: optimized to nearly eliminate recursion, and skip sky/water (who made it check those?)
 void R_MarkLights (vec3_t lightorigin, dlight_t *light, int bit, mnode_t *node)
 {
 	mplane_t	*splitplane;
@@ -205,7 +206,8 @@ void R_MarkLights (vec3_t lightorigin, dlight_t *light, int bit, mnode_t *node)
 	msurface_t	*surf;
 	int			i, j, s, t;
 	vec3_t		impact;
-	
+
+loc0:	
 	if (node->contents < 0)
 		return;
 
@@ -215,13 +217,21 @@ void R_MarkLights (vec3_t lightorigin, dlight_t *light, int bit, mnode_t *node)
 	if (dist > light->radius)
 	{
 		if (node->children[0]->contents >= 0) // save some time by not pushing another stack frame
-			R_MarkLights (lightorigin, light, bit, node->children[0]);
+//			R_MarkLights (lightorigin, light, bit, node->children[0]);
+		{
+			node = node->children[0];
+			goto loc0;
+		}
 		return;
 	}
 	if (dist < -light->radius)
 	{
 		if (node->children[1]->contents >= 0) // save some time by not pushing another stack frame
-			R_MarkLights (lightorigin, light, bit, node->children[1]);
+//			R_MarkLights (lightorigin, light, bit, node->children[1]);
+		{
+			node = node->children[1];
+			goto loc0;
+		}
 		return;
 	}
 
@@ -231,6 +241,8 @@ void R_MarkLights (vec3_t lightorigin, dlight_t *light, int bit, mnode_t *node)
 	surf = cl.worldmodel->surfaces + node->firstsurface;
 	for (i=0 ; i<node->numsurfaces ; i++, surf++)
 	{
+		if (surf->flags & (SURF_DRAWTURB | SURF_DRAWSKY)) // water or sky
+			continue;
 		// LordHavoc: MAJOR dynamic light speedup here, eliminates marking of surfaces that are too far away from light, thus preventing unnecessary renders and uploads
 		for (j=0 ; j<3 ; j++)
 			impact[j] = lightorigin[j] - surf->plane->normal[j]*dist;
@@ -255,10 +267,26 @@ void R_MarkLights (vec3_t lightorigin, dlight_t *light, int bit, mnode_t *node)
 		}
 	}
 
-	if (node->children[0]->contents >= 0) // save some time by not pushing another stack frame
-		R_MarkLights (lightorigin, light, bit, node->children[0]);
-	if (node->children[1]->contents >= 0) // save some time by not pushing another stack frame
-		R_MarkLights (lightorigin, light, bit, node->children[1]);
+//	if (node->children[0]->contents >= 0) // save some time by not pushing another stack frame
+//		R_MarkLights (lightorigin, light, bit, node->children[0]);
+//	if (node->children[1]->contents >= 0) // save some time by not pushing another stack frame
+//		R_MarkLights (lightorigin, light, bit, node->children[1]);
+	// LordHavoc: mangled to eliminate most recursive calls
+	if (node->children[0]->contents >= 0)
+	{
+		if (node->children[1]->contents >= 0)
+			R_MarkLights (lightorigin, light, bit, node->children[1]);
+		node = node->children[0];
+		goto loc0;
+	}
+	else
+	{
+		if (node->children[1]->contents >= 0)
+		{
+			node = node->children[1];
+			goto loc0;
+		}
+	}
 }
 
 
