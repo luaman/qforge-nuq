@@ -134,6 +134,12 @@ void COM_InitArgv (int argc, char **argv)
 	largv[com_argc] = argvdummy;
 	com_argv = largv;
 
+	if (COM_CheckParm ("-abyss"))
+	{
+		abyss = true;
+		standard_quake = false;
+	}
+
 	if (COM_CheckParm ("-rogue"))
 	{
 		rogue = true;

@@ -69,7 +69,7 @@
 #include "va.h"
 
 extern qboolean		is_server;
-qboolean		standard_quake = true, rogue, hipnotic;
+qboolean		standard_quake = true, abyss, rogue, hipnotic;
 cvar_t			*registered;
 
 /*
@@ -883,6 +883,15 @@ void COM_Gamedir_f (void)
 */
 }
 
+void
+COM_CreateGameDirectory (char *gamename)
+{
+	if (strcmp (fs_userpath->string, FS_USERPATH))
+		COM_CreatePath (va("%s/%s/dummy", fs_userpath->string,
+						gamename));
+	COM_AddGameDirectory (gamename);
+}
+
 /*
 	COM_InitFilesystem
 */
@@ -900,14 +909,16 @@ COM_InitFilesystem ( void )
 /*
 	start up with basegame->string by default
 */
-	if (strcmp (fs_userpath->string, FS_USERPATH))
-		COM_CreatePath (va("%s/%s/dummy", fs_userpath->string,
-						fs_basegame->string));
-	COM_AddGameDirectory(fs_basegame->string);
-	if (hipnotic)
-		COM_AddGameDirectory ("hipnotic");
-	if (rogue)
-		COM_AddGameDirectory ("rogue");
+	COM_CreateGameDirectory(fs_basegame->string);
+	if (hipnotic) {
+		COM_CreateGameDirectory("hipnotic");
+	}
+	if (rogue) {
+		COM_CreateGameDirectory("rogue");
+	}
+	if (abyss) {
+		COM_CreateGameDirectory("abyss");
+	}
 
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;

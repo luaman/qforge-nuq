@@ -661,7 +661,6 @@ dnl ==================================================================
 dnl Checks for CD-ROM
 dnl ==================================================================
 
-SNDTYPE=""
 CD_LIBS=""
 CD_CFLAGS=""
 AC_MSG_CHECKING(for CD audio support)
@@ -994,4 +993,5 @@ AC_MSG_RESULT([
 	System game data directory: $sharepath
 	Per-user game data directory: $userpath
 	Global configuration file: $globalconf
+	Sound sytem: $SNDTYPE
 ])
