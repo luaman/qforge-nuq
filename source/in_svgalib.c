@@ -117,7 +117,7 @@ int IN_Init(void)
 	if (UseMouse)
 		IN_init_mouse();
 
-	joystick_init();
+	JOY_Init();
 
 	in_svgalib_inited = 1;
 	return 1;
@@ -284,6 +284,7 @@ static void IN_init_mouse()
 
 void IN_Shutdown(void)
 {
+	JOY_Shutdown ();
 	Con_Printf("IN_Shutdown\n");
 
 	if (UseMouse) mouse_close();
@@ -304,8 +305,8 @@ void IN_SendKeyEvents(void)
 
 void IN_Commands(void)
 {
-	if (UseMouse)
-	{
+	JOY_Command ();
+	if (UseMouse) {
 		/* Poll mouse values */
 		while (mouse_update())
 			;
@@ -339,6 +340,7 @@ void IN_Commands(void)
 
 void IN_Move(usercmd_t *cmd)
 {
+	JOY_Move (cmd);
 	if (!UseMouse) return;
 
 	/* Poll mouse values */

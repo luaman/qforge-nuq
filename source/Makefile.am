@@ -37,7 +37,7 @@ bin_PROGRAMS =	@TARGETS@
 EXTRA_PROGRAMS= nuq-ggi nuq-mgl nuq-sdl nuq-svga nuq-x11 \
 		nuq-3dfx nuq-glx nuq-sgl nuq-wgl nuq-ded
 
-noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #if ASM_ARCH
 math_ASM= 	math.S cl_math.S
@@ -107,6 +107,18 @@ endif
 EXTRA_libqfcd_a_SOURCES= cd_audio.c cd_win.c cd_linux.c cd_null.c
 
 #
+# ... Joystick
+#
+if JOYTYPE_LINUX
+libqfjs_a_SOURCES=	joy_linux.c
+endif
+if JOYTYPE_NULL
+libqfjs_a_SOURCES=	joy_null.c
+endif
+libqfjs_a_CFLAGS=      $(JOY_CFLAGS)
+EXTRA_libqfjs_a_SOURCES= joy_linux.c joy_null.c
+
+#
 # ... Networking
 #
 libqfnet_a_SOURCES=	mdfour.c net_bsd.c checksum.c net_dgrm.c net_loop.c \
@@ -115,12 +127,12 @@ libqfnet_a_SOURCES=	mdfour.c net_bsd.c checksum.c net_dgrm.c net_loop.c \
 EXTRA_libqfcd_a_SOURCES=net_dos.c net_bw.c net_ipx.c net_mp.c net_ser.c \
 			net_win.c net_wins.c net_wipx.c
 
-client_LIBS=	-L. -lqfsys -lqfsnd -lqfcd -lqfnet $(SOUND_LIBS) $(NET_LIBS)
+client_LIBS=	-L. -lqfsys -lqfsnd -lqfcd -lqfjs -lqfnet $(SOUND_LIBS) $(NET_LIBS)
 
 client_SOURCES= cl_cam.c cl_demo.c cl_input.c cl_main.c cl_parse.c \
 		cl_tent.c console.c keys.c menu.c sbar.c r_part.c r_view.c \
 		nonintel.c gib.c gib_instructions.c gib_vars.c \
-		gib_interpret.c gib_modules.c gib_parse.c gib_stack.c joystick.c
+		gib_interpret.c gib_modules.c gib_parse.c gib_stack.c
 
 server_SOURCES= host.c host_cmd.c \
 		pr_cmds.c pr_edict.c pr_exec.c \
@@ -148,7 +160,7 @@ ggi_SOURCES=		vid_ggi.c
 
 nuq_ggi_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(ggi_SOURCES)
 nuq_ggi_LDADD=	$(client_LIBS) $(GGI_LIBS)
-nuq_ggi_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_ggi_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # ... SciTech MGL
@@ -157,7 +169,7 @@ mgl_SOURCES=		vid_mgl.c in_win.c
 
 nuq_mgl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(mgl_SOURCES)
 nuq_mgl_LDADD=	$(client_LIBS) $(MGL_LIBS)
-nuq_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # ... Sam Lantinga's Simple DirectMedia Layer, version 1.0 and higher
@@ -166,7 +178,7 @@ sdl_SOURCES=		vid_sdl.c
 
 nuq_sdl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(sdl_SOURCES)
 nuq_sdl_LDADD=	$(client_LIBS) $(SDL_LIBS)
-nuq_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # ... Linux SVGAlib
@@ -175,7 +187,7 @@ svga_SOURCES=		d_copy.S vid_svgalib.c in_svgalib.c
 
 nuq_svga_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(svga_SOURCES)
 nuq_svga_LDADD=	$(client_LIBS) $(SVGA_LIBS)
-nuq_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # ... X11
@@ -184,7 +196,7 @@ x11_SOURCES=		in_x11.c context_x11.c dga_check.c
 
 nuq_x11_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(x11_SOURCES) vid_x11.c
 nuq_x11_LDADD=	$(client_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(X_SHM_LIB)
-nuq_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 
 #
@@ -204,7 +216,7 @@ tdfx_SOURCES=	vid_3dfxsvga.c in_svgalib.c
 
 nuq_3dfx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(tdfx_SOURCES)
 nuq_3dfx_LDADD=	$(client_LIBS) $(TDFXGL_LIBS) $(SVGA_LIBS) $(DL_LIBS)
-nuq_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # ... OpenGL in X Window
@@ -213,7 +225,7 @@ glx_SOURCES=	vid_glx.c $(x11_SOURCES)
 
 nuq_glx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
 nuq_glx_LDADD=	$(client_LIBS) $(GLX_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(DL_LIBS)
-nuq_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # ... Sam Lantinga's Simple DirectMedia Layer, version 1.1 and higher, in GL mode
@@ -222,7 +234,7 @@ sgl_SOURCES=	vid_sgl.c
 
 nuq_sgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(sgl_SOURCES)
 nuq_sgl_LDADD=	$(client_LIBS) $(SDL_LIBS) $(GLX_LIBS) $(DL_LIBS)
-nuq_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # SGI/Microsoft WGL (Windows OpenGL)
@@ -231,7 +243,7 @@ wgl_SOURCES=	vid_wgl.c
 
 nuq_wgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(wgl_SOURCES)
 nuq_wgl_LDADD=	$(client_LIBS)
-nuq_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+nuq_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #
 # dedicated server
