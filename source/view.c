@@ -32,6 +32,12 @@
 
 #include "view.h"
 #include "r_local.h"
+#include "host.h"
+#include "chase.h"
+#include "draw.h"
+#include "screen.h"
+#include "console.h"
+#include "msg.h"
 
 /*
 

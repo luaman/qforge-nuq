@@ -32,6 +32,7 @@
 #include "mathlib.h"
 #include "cvar.h"
 #include "vid.h"
+#include "protocol.h"
 
 #define	MAXCLIPPLANES	11
 

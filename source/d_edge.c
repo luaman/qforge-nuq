@@ -31,6 +31,7 @@
 #endif
 
 #include "d_local.h"
+#include "client.h"
 
 static int	miplevel;
 

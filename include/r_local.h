@@ -26,6 +26,10 @@
 	$Id$
 */
 
+#ifndef __r_local_h
+#define __r_local_h
+
+#include "client.h"
 
 #ifndef GLQUAKE
 #include "r_shared.h"
@@ -322,3 +326,5 @@ void R_SplitEntityOnNode2 (mnode_t *node);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 
 #endif
+
+#endif // __r_local_h

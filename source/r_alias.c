@@ -30,6 +30,8 @@
 # include "config.h"
 #endif
 
+#include "console.h"
+#include "sys.h"
 #include "r_local.h"
 #include "d_local.h"	// FIXME: shouldn't be needed (is needed for patch
 						// right now, but that should move)

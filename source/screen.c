@@ -31,6 +31,16 @@
 #endif
 
 #include "r_local.h"
+#include "screen.h"
+#include "sbar.h"
+#include "view.h"
+#include "menu.h"
+#include "host.h"
+#include "sys.h"
+#include "console.h"
+#include "qendian.h"
+#include "keys.h"
+#include "draw.h"
 
 // only the refresh window will be updated unless these variables are flagged 
 int			scr_copytop;
@@ -583,11 +593,11 @@ void WritePCXfile (char *filename, byte *data, int width, int height,
 	pcx->ymax = LittleShort((short)(height-1));
 	pcx->hres = LittleShort((short)width);
 	pcx->vres = LittleShort((short)height);
-	Q_memset (pcx->palette,0,sizeof(pcx->palette));
+	memset (pcx->palette,0,sizeof(pcx->palette));
 	pcx->color_planes = 1;		// chunky image
 	pcx->bytes_per_line = LittleShort((short)width);
 	pcx->palette_type = LittleShort(2);		// not a grey scale
-	Q_memset (pcx->filler,0,sizeof(pcx->filler));
+	memset (pcx->filler,0,sizeof(pcx->filler));
 
 // pack the image
 	pack = &pcx->data;

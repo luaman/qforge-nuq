@@ -31,7 +31,12 @@
 #endif
 
 #include "r_local.h"
-
+#include "sys.h"
+#include "console.h"
+#include "server.h"
+#include "host.h"
+#include "view.h"
+#include "sbar.h"
 
 /*
 ===============

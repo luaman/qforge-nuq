@@ -30,6 +30,16 @@
 # include "config.h"
 #endif
 
+#include <string.h>
+
+#include "progs.h"
+#include "console.h"
+#include "sys.h"
+#include "va.h"
+#include "host.h"
+#include "world.h"
+#include "msg.h"
+#include "server.h"
 
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 

@@ -31,6 +31,7 @@
 #endif
 
 #include "r_local.h"
+#include "sys.h"
 
 drawsurf_t	r_drawsurf;
 

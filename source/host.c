@@ -30,7 +30,25 @@
 # include "config.h"
 #endif
 
+#include "host.h"
 #include "r_local.h"
+#include "server.h"
+#include "view.h"
+#include "chase.h"
+#include "qargs.h"
+#include "cmd.h"
+#include "cdaudio.h"
+#include "va.h"
+#include "sbar.h"
+#include "menu.h"
+#include "msg.h"
+#include "vid.h"
+#include "draw.h"
+#include "input.h"
+#include "keys.h"
+#include "console.h"
+#include "sys.h"
+#include "screen.h"
 
 /*
 
@@ -176,7 +194,7 @@ void	Host_FindMaxClients (void)
 		cls.state = ca_dedicated;
 		if (i != (com_argc - 1))
 		{
-			svs.maxclients = Q_atoi (com_argv[i+1]);
+			svs.maxclients = atoi (com_argv[i+1]);
 		}
 		else
 			svs.maxclients = 8;
@@ -190,7 +208,7 @@ void	Host_FindMaxClients (void)
 		if (cls.state == ca_dedicated)
 			Sys_Error ("Only one of -dedicated or -listen can be specified");
 		if (i != (com_argc - 1))
-			svs.maxclients = Q_atoi (com_argv[i+1]);
+			svs.maxclients = atoi (com_argv[i+1]);
 		else
 			svs.maxclients = 8;
 	}
@@ -829,7 +847,7 @@ void Host_InitVCR (quakeparms_t *parms)
 				Sys_FileWrite(vcrFile, "-playback", len);
 				continue;
 			}
-			len = Q_strlen(com_argv[i]) + 1;
+			len = strlen(com_argv[i]) + 1;
 			Sys_FileWrite(vcrFile, &len, sizeof(int));
 			Sys_FileWrite(vcrFile, com_argv[i], len);
 		}
@@ -869,7 +887,7 @@ void Host_Init (quakeparms_t *parms)
 	CL_InitCvars ();
 	SCR_InitCvars ();
 	VID_InitCvars ();
-	COM_Init (parms->basedir);
+	COM_Init ();
 
 	V_Init ();
 	Chase_Init ();

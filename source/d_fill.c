@@ -30,7 +30,7 @@
 # include "config.h"
 #endif
 
-
+#include "vid.h"
 
 /*
 ================

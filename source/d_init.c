@@ -31,6 +31,7 @@
 #endif
 
 #include "d_local.h"
+#include "vid.h"
 
 #define NUM_MIPS	4
 
@@ -86,8 +87,6 @@ void D_CopyRects (vrect_t *prects, int transparent)
 // console); Quake will then draw into wherever the driver points vid.buffer
 // and will call this function before swapping buffers
 
-	UNUSED(prects);
-	UNUSED(transparent);
 }
 
 
@@ -178,6 +177,5 @@ void D_UpdateRects (vrect_t *prect)
 
 // the software driver draws these directly to the vid buffer
 
-	UNUSED(prect);
 }
 

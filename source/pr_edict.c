@@ -30,6 +30,15 @@
 # include "config.h"
 #endif
 
+#include "progs.h"
+#include "cvar.h"
+#include "sys.h"
+#include "console.h"
+#include "host.h"
+#include "server.h"
+#include "qendian.h"
+#include "crc.h"
+#include "world.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
@@ -564,7 +573,7 @@ void ED_PrintEdict_f (void)
 {
 	int		i;
 	
-	i = Q_atoi (Cmd_Argv(1));
+	i = atoi (Cmd_Argv(1));
 	if (i >= sv.num_edicts)
 	{
 		Con_Printf("Bad edict number\n");

@@ -26,6 +26,10 @@
 	$Id$
 */
 
+#ifndef __d_iface_h
+#define __d_iface_h
+
+#include "model.h"
 
 #define WARP_WIDTH		320
 #define WARP_HEIGHT		200
@@ -235,3 +239,4 @@ extern vrect_t	scr_vrect;
 
 extern byte		*r_warpbuffer;
 
+#endif // __d_iface_h

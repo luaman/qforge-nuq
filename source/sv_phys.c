@@ -30,6 +30,11 @@
 # include "config.h"
 #endif
 
+#include "server.h"
+#include "host.h"
+#include "world.h"
+#include "console.h"
+#include "sys.h"
 
 /*
 

@@ -30,6 +30,8 @@
 # include "config.h"
 #endif
 
+#include "server.h"
+#include "world.h"
 
 #define	STEPSIZE	18
 

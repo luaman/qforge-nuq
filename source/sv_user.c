@@ -30,7 +30,14 @@
 # include "config.h"
 #endif
 
-
+#include "server.h"
+#include "msg.h"
+#include "console.h"
+#include "world.h"
+#include "keys.h"
+#include "view.h"
+#include "host.h"
+#include "sys.h"
 edict_t	*sv_player;
 
 cvar_t	*sv_edgefriction;
@@ -539,43 +546,43 @@ nextmsg:
 					ret = 2;
 				else
 					ret = 0;
-				if (Q_strncasecmp(s, "status", 6) == 0)
+				if (strncasecmp(s, "status", 6) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "god", 3) == 0)
+				else if (strncasecmp(s, "god", 3) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "notarget", 8) == 0)
+				else if (strncasecmp(s, "notarget", 8) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "fly", 3) == 0)
+				else if (strncasecmp(s, "fly", 3) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "name", 4) == 0)
+				else if (strncasecmp(s, "name", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "noclip", 6) == 0)
+				else if (strncasecmp(s, "noclip", 6) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "say", 3) == 0)
+				else if (strncasecmp(s, "say", 3) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "say_team", 8) == 0)
+				else if (strncasecmp(s, "say_team", 8) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "tell", 4) == 0)
+				else if (strncasecmp(s, "tell", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "color", 5) == 0)
+				else if (strncasecmp(s, "color", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "kill", 4) == 0)
+				else if (strncasecmp(s, "kill", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "pause", 5) == 0)
+				else if (strncasecmp(s, "pause", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "spawn", 5) == 0)
+				else if (strncasecmp(s, "spawn", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "begin", 5) == 0)
+				else if (strncasecmp(s, "begin", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "prespawn", 8) == 0)
+				else if (strncasecmp(s, "prespawn", 8) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "kick", 4) == 0)
+				else if (strncasecmp(s, "kick", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "ping", 4) == 0)
+				else if (strncasecmp(s, "ping", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "give", 4) == 0)
+				else if (strncasecmp(s, "give", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "ban", 3) == 0)
+				else if (strncasecmp(s, "ban", 3) == 0)
 					ret = 1;
 				if (ret == 2)
 					Cbuf_InsertText (s);

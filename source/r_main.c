@@ -31,6 +31,10 @@
 #endif
 
 #include "r_local.h"
+#include "sys.h"
+#include "console.h"
+#include "view.h"
+#include "screen.h"
 
 //define	PASSAGES
 

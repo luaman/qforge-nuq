@@ -28,8 +28,8 @@
 	$Id$
 */
 
-#ifndef _QARGS_H
-#define _QARGS_H
+#ifndef __qargs_h
+#define __qargs_h
 
 #include <qtypes.h>
 
@@ -43,4 +43,4 @@ void COM_AddParm (char *parm);
 void COM_Init (void);
 void COM_InitArgv (int argc, char **argv);
 
-#endif // _QARGS_H
+#endif // __qargs_h

@@ -30,6 +30,13 @@
 # include "config.h"
 #endif
 
+#include "draw.h"
+#include "vid.h"
+#include "zone.h"
+#include "sys.h"
+#include "quakefs.h"
+#include "d_iface.h"
+#include "sound.h"
 
 typedef struct {
 	vrect_t	rect;
@@ -314,7 +321,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 
 		for (v=0 ; v<pic->height ; v++)
 		{
-			Q_memcpy (dest, source, pic->width);
+			memcpy (dest, source, pic->width);
 			dest += vid.rowbytes;
 			source += pic->width;
 		}
