@@ -85,7 +85,7 @@ mleaf_t *Mod_PointInLeaf (vec3_t p, model_t *model)
 		if (node->contents < 0)
 			return (mleaf_t *)node;
 		plane = node->plane;
-		d = DotProduct (p,plane->normal) - plane->dist;
+		d = DotProduct (p, plane->normal) - plane->dist;
 		if (d > 0)
 			node = node->children[0];
 		else
@@ -175,7 +175,7 @@ model_t *Mod_FindName (char *name)
 	model_t	*mod;
 
 	if (!name[0])
-		Sys_Error ("Mod_ForName: NULL name");
+		Sys_Error ("Mod_FindName: NULL name");
 
 //
 // search the currently loaded models
@@ -228,7 +228,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	if (!buf)
 	{
 		if (crash)
-			Sys_Error ("Mod_NumForName: %s not found", mod->name);
+			Sys_Error ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
 
