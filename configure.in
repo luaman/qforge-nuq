@@ -1061,7 +1061,7 @@ if test "x$HAVE_MGL" = xyes -a "x$ENABLE_MGL" = xyes; then
 	CL_TARGETS="$CL_TARGETS MGL"
 fi
 if test "x$HAVE_GGI" = xyes -a "x$ENABLE_GGI" = xyes; then
-#	TARGETS="$TARGETS $PACKAGE-ggi\$(EXEEXT)"
+	TARGETS="$TARGETS $PACKAGE-ggi\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS GGI"
 fi
 if test "x$HAVE_SDL" = xyes -a "x$ENABLE_SDL" = xyes; then

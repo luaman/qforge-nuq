@@ -39,10 +39,6 @@
 #include <string.h>
 #include <ggi/ggi.h>
 
-#include "bothdefs.h"   // needed by: common.h, net.h, client.h
-
-#include "quakedef.h"
-
 #include "bspfile.h"    // needed by: glquake.h
 #include "vid.h"
 #include "sys.h"
@@ -59,6 +55,7 @@
 #include "sound.h"
 #include "render.h"     // needed by: client.h, gl_model.h, glquake.h
 #include "client.h"     // need cls in this file
+#include "host.h"
 #include "model.h"   // needed by: glquake.h
 #include "console.h"
 #include "qendian.h"
@@ -66,7 +63,6 @@
 #include "compat.h"
 #include "d_local.h"
 #include "input.h"
-#include "cl_input.h"
 #include "view.h"
 #include "joystick.h"
 
@@ -1021,7 +1017,11 @@ void VID_SetCaption (char *text)
 {
 }
 
-
 void VID_HandlePause (qboolean paused)
+{
+}
+
+void
+IN_HandlePause (qboolean paused)
 {
 }
