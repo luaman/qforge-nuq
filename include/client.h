@@ -42,7 +42,7 @@
 #include "quakefs.h"
 #include "qdefs.h"
 
-typedef struct
+typedef struct usercmd_s
 {
 	vec3_t	viewangles;
 
@@ -287,6 +287,7 @@ extern cvar_t	*cl_sbar;
 extern cvar_t	*cl_hudswap;
 
 extern cvar_t	*cl_pitchdriftspeed;
+extern cvar_t	*cl_freelook;
 extern cvar_t	*lookspring;
 extern cvar_t	*lookstrafe;
 extern cvar_t	*sensitivity;

@@ -63,10 +63,12 @@
 #include "input.h"
 #include "draw.h"
 #include "console.h"
+#include "va.h"
 #include "client.h"
-#include "host.h"
 #include "input.h"
 #include "context_x11.h"
+#include "host.h"
+
 #ifdef HAVE_VIDMODE
 # include <X11/extensions/xf86vmode.h>
 #endif
@@ -97,8 +99,6 @@ int	VID_options_items = 1;
 
 static byte current_palette[768];
 
-cvar_t	*vid_fullscreen;
-
 typedef unsigned short PIXEL16;
 typedef unsigned long PIXEL24;
 static PIXEL16 st2d_8to16table[256];
@@ -107,9 +107,8 @@ static int shiftmask_fl=0;
 static long r_shift,g_shift,b_shift;
 static unsigned long r_mask,g_mask,b_mask;
 
-static long X11_highhunkmark;
-
-int scr_width, scr_height;
+cvar_t	*vid_width;
+cvar_t	*vid_height;
 
 static void
 shiftmask_init( void )
@@ -299,38 +298,48 @@ void VID_Gamma_f (void)
 static void
 ResetFrameBuffer(void)
 {
-	int vid_surfcachesize, buffersize;
-	void *vid_surfcache;
-	int mem, pwidth;
+	int 	tbuffersize, tcachesize;
+	
+	void	*vid_surfcache;
+	int 	mem, pwidth;
+
+	// Calculate the sizes we want first
+	tbuffersize = vid.width * vid.height * sizeof (*d_pzbuffer);
+	tcachesize = D_SurfaceCacheForRes(vid.width, vid.height);
 
 	if (x_framebuffer[0]) {
 		XDestroyImage(x_framebuffer[0]);
 	}
 
+	// Free the old z-buffer
 	if (d_pzbuffer) {
-		D_FlushCaches ();
-		Hunk_FreeToHighMark(X11_highhunkmark);
+		free (d_pzbuffer);
 		d_pzbuffer = NULL;
 	}
-	X11_highhunkmark = Hunk_HighMark ();
+	
+	// Free the old surface cache
+	vid_surfcache = D_SurfaceCacheAddress ();
+	if (vid_surfcache) {
+		D_FlushCaches ();
+		free (vid_surfcache);
+		vid_surfcache = NULL;
+	}
 
-	/* Alloc an extra line in case we want to wrap, and allocate
-	   the z-buffer */
-	buffersize = vid.width * vid.height * sizeof(*d_pzbuffer);
-
-	vid_surfcachesize = D_SurfaceCacheForRes(vid.width, vid.height);
-
-	buffersize += vid_surfcachesize;
-
-	d_pzbuffer = Hunk_HighAllocName(buffersize, "video");
-	if (d_pzbuffer == NULL) {
+	// Allocate the new z-buffer
+	d_pzbuffer = calloc (tbuffersize, 1);
+	if (!d_pzbuffer) {
 		Sys_Error ("Not enough memory for video mode\n");
 	}
 
-	vid_surfcache = (byte *) d_pzbuffer
-		+ vid.width * vid.height * sizeof(*d_pzbuffer);
+	// Allocate the new surface cache; free the z-buffer if we fail
+	vid_surfcache = calloc (tcachesize, 1);
+	if (!vid_surfcache) {
+		free (d_pzbuffer);
+		d_pzbuffer = NULL;
+		Sys_Error ("Not enough memory for video mode\n");
+	}
 
-	D_InitCaches(vid_surfcache, vid_surfcachesize);
+	D_InitCaches (vid_surfcache, tcachesize);
 
 	pwidth = x_visinfo->depth / 8;
 	if (pwidth == 3) pwidth = 4;
@@ -351,53 +360,59 @@ ResetFrameBuffer(void)
 static void
 ResetSharedFrameBuffers(void)
 {
-	int vid_surfcachesize, buffersize;
-	void *vid_surfcache;
+	int 	tbuffersize, tcachesize;
+	void	*vid_surfcache;
+	
 	int size;
 	int key;
 	int minsize = getpagesize();
 	int frm;
 
-	if (d_pzbuffer)	{
-		D_FlushCaches ();
-		Hunk_FreeToHighMark(X11_highhunkmark);
+	// Calculate the sizes we want first
+	tbuffersize = vid.width * vid.height * sizeof (*d_pzbuffer);
+	tcachesize = D_SurfaceCacheForRes(vid.width, vid.height);
+
+	// Free the old z-buffer
+	if (d_pzbuffer) {
+		free (d_pzbuffer);
 		d_pzbuffer = NULL;
 	}
+	
+	// Free the old surface cache
+	vid_surfcache = D_SurfaceCacheAddress ();
+	if (vid_surfcache) {
+		D_FlushCaches ();
+		free (vid_surfcache);
+		vid_surfcache = NULL;
+	}
 
-	X11_highhunkmark = Hunk_HighMark ();
-
-// alloc an extra line in case we want to wrap, and allocate the z-buffer
-	buffersize = vid.width * vid.height * sizeof (*d_pzbuffer);
-
-	vid_surfcachesize = D_SurfaceCacheForRes (vid.width, vid.height);
-
-	buffersize += vid_surfcachesize;
-
-	d_pzbuffer = Hunk_HighAllocName(buffersize, "video");
-	if (d_pzbuffer == NULL) {
+	// Allocate the new z-buffer
+	d_pzbuffer = calloc (tbuffersize, 1);
+	if (!d_pzbuffer) {
 		Sys_Error ("Not enough memory for video mode\n");
 	}
 
-	vid_surfcache = (byte *) d_pzbuffer
-		+ vid.width * vid.height * sizeof (*d_pzbuffer);
+	// Allocate the new surface cache; free the z-buffer if we fail
+	vid_surfcache = calloc (tcachesize, 1);
+	if (!vid_surfcache) {
+		free (d_pzbuffer);
+		d_pzbuffer = NULL;
+		Sys_Error ("Not enough memory for video mode\n");
+	}
 
-	D_InitCaches(vid_surfcache, vid_surfcachesize);
+	D_InitCaches (vid_surfcache, tcachesize);
 
-	for (frm=0 ; frm<2 ; frm++)
-	{
+	for (frm=0 ; frm<2 ; frm++) {
 
-	// free up old frame buffer memory
-
-		if (x_framebuffer[frm])
-		{
+		// free up old frame buffer memory
+		if (x_framebuffer[frm])	{
 			XShmDetach(x_disp, &x_shminfo[frm]);
 			free(x_framebuffer[frm]);
 			shmdt(x_shminfo[frm].shmaddr);
 		}
 
-	// create the image
-
-		x_framebuffer[frm] = XShmCreateImage(	x_disp,
+		// create the image
+		x_framebuffer[frm] = XShmCreateImage (x_disp,
 						x_vis,
 						x_visinfo->depth,
 						ZPixmap,
@@ -406,10 +421,10 @@ ResetSharedFrameBuffers(void)
 						vid.width,
 						vid.height );
 
-	// grab shared memory
-
+		// grab shared memory
 		size = x_framebuffer[frm]->bytes_per_line
 			* x_framebuffer[frm]->height;
+
 		if (size < minsize)
 			Sys_Error("VID: Window must use at least %d bytes\n", minsize);
 
@@ -427,8 +442,7 @@ ResetSharedFrameBuffers(void)
 
 		x_framebuffer[frm]->data = x_shminfo[frm].shmaddr;
 
-	// get the X server to attach to it
-
+		// get the X server to attach to it
 		if (!XShmAttach(x_disp, &x_shminfo[frm]))
 			Sys_Error("VID: XShmAttach() failed\n");
 		XSync(x_disp, 0);
@@ -455,57 +469,32 @@ void VID_Init (unsigned char *palette)
 	int num_visuals;
 	int template_mask;
 
+	VID_GetWindowSize (320, 200);
+
 	//plugin_load("in_x11.so");
-	vid_fullscreen = Cvar_Get ("vid_fullscreen","0",CVAR_NONE,
-		"Toggles fullscreen game mode");
 //	Cmd_AddCommand("gamma", VID_Gamma_f);
 	for (i=0; i < 256; i++)	vid_gamma[i] = i;
 
-	vid.width = 320;
-	vid.height = 200;
+	vid.width = vid_width->int_val;
+	vid.height = vid_height->int_val;
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;
 	vid.colormap = host_colormap;
 	vid.fullbright = 256 - LittleLong (*((int *)vid.colormap + 2048));
-	//vid.cbits = VID_CBITS;
-	//vid.grades = VID_GRADES;
 
 	srandom(getpid());
 
 	verbose=COM_CheckParm("-verbose");
 
-// open the display
+	// open the display
 	x11_open_display();
 
-// check for command-line window size
-	if ((pnum=COM_CheckParm("-winsize")))
-	{
-		if (pnum >= com_argc-2)
-			Sys_Error("VID: -winsize <width> <height>\n");
-		vid.width = atoi(com_argv[pnum+1]);
-		vid.height = atoi(com_argv[pnum+2]);
-		if (!vid.width || !vid.height)
-			Sys_Error("VID: Bad window width/height\n");
-	}
-	if ((pnum=COM_CheckParm("-width"))) {
-		if (pnum >= com_argc-1)
-			Sys_Error("VID: -width <width>\n");
-		vid.width = atoi(com_argv[pnum+1]);
-		if (!vid.width)
-			Sys_Error("VID: Bad window width\n");
-	}
-	if ((pnum=COM_CheckParm("-height"))) {
-		if (pnum >= com_argc-1)
-			Sys_Error("VID: -height <height>\n");
-		vid.height = atoi(com_argv[pnum+1]);
-		if (!vid.height)
-			Sys_Error("VID: Bad window height\n");
-	}
+	// check for command-line window size
 
 	template_mask = 0;
 
-// specify a visual id
+	// specify a visual id
 	if ((pnum=COM_CheckParm("-visualid")))
 	{
 		if (pnum >= com_argc-1)
@@ -513,8 +502,7 @@ void VID_Init (unsigned char *palette)
 		template.visualid = atoi(com_argv[pnum+1]);
 		template_mask = VisualIDMask;
 	}
-
-// If not specified, use default visual
+	// If not specified, use default visual
 	else
 	{
 		template.visualid =
@@ -522,7 +510,7 @@ void VID_Init (unsigned char *palette)
 		template_mask = VisualIDMask;
 	}
 
-// pick a visual- warn if more than one was available
+	// pick a visual- warn if more than one was available
 	x_visinfo = XGetVisualInfo(x_disp, template_mask, &template, &num_visuals);
 	x_vis = x_visinfo->visual;
 
@@ -561,9 +549,6 @@ void VID_Init (unsigned char *palette)
 	/* Invisible cursor */
 	x11_create_null_cursor();
 
-	scr_width = vid.width;
-	scr_height = vid.height;
-
 	if (x_visinfo->depth == 8) {
 		/* Create and upload the palette */
 		if (x_visinfo->class == PseudoColor) {
@@ -574,7 +559,7 @@ void VID_Init (unsigned char *palette)
 		}
 	}
 
-// create the GC
+	// create the GC
 	{
 		XGCValues xgcvalues;
 		int valuemask = GCGraphicsExposures;
@@ -582,12 +567,9 @@ void VID_Init (unsigned char *palette)
 		x_gc = XCreateGC(x_disp, x_win, valuemask, &xgcvalues );
 	}
 
-// map the window
-	XMapWindow(x_disp, x_win);
-	XRaiseWindow(x_disp, x_win);
 	x11_grab_keyboard();
 
-// wait for first exposure event
+	// wait for first exposure event
 	{
 		XEvent event;
 		do
@@ -597,9 +579,9 @@ void VID_Init (unsigned char *palette)
 				oktodraw = true;
 		} while (!oktodraw);
 	}
-// now safe to draw
+	// now safe to draw
 
-// even if MITSHM is available, make sure it's a local connection
+	// even if MITSHM is available, make sure it's a local connection
 	if (XShmQueryExtension(x_disp))
 	//if (0)
 	{
@@ -636,6 +618,12 @@ void VID_Init (unsigned char *palette)
 
 //	XSynchronize(x_disp, False);
 	x11_add_event(x_shmeventtype, event_shm);
+}
+
+void
+VID_Init_Cvars ()
+{
+	x11_Init_Cvars();
 }
 
 
@@ -685,7 +673,6 @@ VID_Shutdown(void)
 	if (x_disp) {
 		x11_restore_vidmode();
 		x11_close_display();
-		x_disp = 0;
 	}
 }
 
@@ -780,7 +767,7 @@ VID_DitherOn( void )
 
 
 void
-VID_DitherOff( void )
+VID_DitherOff (void)
 {
 	if (dither) {
 		vid.recalc_refdef = 1;
@@ -788,15 +775,28 @@ VID_DitherOff( void )
 	}
 }
 
-void VID_InitCvars ()
+void    
+VID_LockBuffer ( void )
+{       
+}       
+
+void
+VID_UnlockBuffer ( void )
+{       
+}       
+
+void
+VID_SetCaption (char *text)
 {
-	// It may not look like it, but this is important
+	if (text && *text) {
+		char *temp = strdup (text);
+		x11_set_caption (va ("%s %s: %s", PROGRAM, VERSION, temp));
+		free (temp);
+	} else {
+		x11_set_caption (va ("%s %s", PROGRAM, VERSION));
+	}
 }
 
-void VID_SetCaption (char *text)
-{
-}
-
-void VID_HandlePause (qboolean pause)
+void VID_HandlePause (qboolean paused)
 {
 }

@@ -30,19 +30,8 @@
 */
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+#include "config.h"
 #endif
-
-#include "qtypes.h"
-#include "keys.h"
-#include "client.h"
-#include "sys.h"
-#include "console.h"
-#include "cvar.h"
-#include "cmd.h"
-#include "host.h"
-#include "qargs.h"
-#include "joystick.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,6 +43,19 @@
 #include <vgakeyboard.h>
 #include <vgamouse.h>
 
+#include "client.h"
+#include "cmd.h"
+#include "compat.h"
+#include "console.h"
+#include "cvar.h"
+#include "host.h"
+#include "input.h"
+#include "joystick.h"
+#include "keys.h"
+#include "qargs.h"
+#include "qtypes.h"
+#include "sys.h"
+#include "view.h"
 
 static int	UseKeyboard = 1;
 static int	UseMouse = 1;
@@ -72,7 +74,6 @@ static void IN_init_mouse();
 
 cvar_t	*_windowed_mouse;
 cvar_t	*m_filter;
-static cvar_t	*mouse_button_commands[3];
 
 static void keyhandler(int scancode, int state)
 {
@@ -107,7 +108,8 @@ void Force_CenterView_f(void)
 }
 
 
-int IN_Init(void)
+void
+IN_Init (void)
 {
 	if (COM_CheckParm("-nokbd")) UseKeyboard = 0;
 	if (COM_CheckParm("-nomouse")) UseMouse = 0;
@@ -120,10 +122,18 @@ int IN_Init(void)
 	JOY_Init();
 
 	in_svgalib_inited = 1;
-	return 1;
+	return;
 }
 
-static void IN_init_kb()
+void
+IN_Init_Cvars (void)
+{
+	JOY_Init_Cvars();
+	m_filter = Cvar_Get ("m_filter","0",0,"None");
+}
+
+static void
+IN_init_kb (void)
 {
 	int i;
 
@@ -237,22 +247,19 @@ static void IN_init_kb()
 	scantokey[111] = K_DEL;
 	scantokey[119] = K_PAUSE;
 
-	if (keyboard_init()) {
-		Sys_Error("keyboard_init() failed");
+	if (keyboard_init ()) {
+		Sys_Error ("keyboard_init() failed");
 	}
 	keyboard_seteventhandler(keyhandler);
 }
 
-static void IN_init_mouse()
+static void
+IN_init_mouse()
 {
 	int mtype;
 	char *mousedev;
 	int mouserate = MOUSE_DEFAULTSAMPLERATE;
 
-	mouse_button_commands[0] = Cvar_Get ("mouse1","+attack",0,"None");
-	mouse_button_commands[1] = Cvar_Get ("mouse2","+strafe",0,"None");
-	mouse_button_commands[2] = Cvar_Get ("mouse2","+forward",0,"None");
-	m_filter = Cvar_Get ("m_filter","0",0,"None");
 	Cmd_AddCommand("force_centerview", Force_CenterView_f);
 
 	mouse_buttons = 3;
@@ -363,23 +370,18 @@ void IN_Move(usercmd_t *cmd)
 	mouse_y *= sensitivity->value;
 
 	/* Add mouse X/Y movement to cmd */
-	if ( (in_strafe.state & 1) ||
-	     (lookstrafe->int_val && (in_mlook.state & 1) )) {
+	if ((in_strafe.state & 1) || (lookstrafe->int_val && freelook)) {
 		cmd->sidemove += m_side->value * mouse_x;
 	} else {
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 	}
 
-	if ((in_mlook.state & 1)) V_StopPitchDrift();
+	if (freelook)
+		V_StopPitchDrift();
 
-	if ((in_mlook.state & 1) && !(in_strafe.state & 1)) {
+	if (freelook && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
-		if (cl.viewangles[PITCH] > 80) {
-			cl.viewangles[PITCH] = 80;
-		}
-		if (cl.viewangles[PITCH] < -70) {
-			cl.viewangles[PITCH] = -70;
-		}
+		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {
 		if ((in_strafe.state & 1) && noclip_anglehack) {
 			cmd->upmove -= m_forward->value * mouse_y;
@@ -389,6 +391,7 @@ void IN_Move(usercmd_t *cmd)
 	}
 }
 
-void IN_HandlePause (qboolean pause)
+void 
+IN_HandlePause (qboolean paused)
 {
 }

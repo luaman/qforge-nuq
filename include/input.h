@@ -1,7 +1,7 @@
 /*
 	input.h
 
-	@description@
+	External (non-keyboard) input devices
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -26,30 +26,35 @@
 	$Id$
 */
 
-#ifndef __input_h
-#define __input_h
+#ifndef _INPUT_H
+#define _INPUT_H
 
-#include "client.h"
 #include "cvar.h"
+#include "protocol.h"
+#include "qtypes.h"
+
+#define freelook (in_mlook.state&1 || cl_freelook->int_val)
 
 void IN_Init (void);
+void IN_Init_Cvars (void);
 
 void IN_Shutdown (void);
 
 void IN_Commands (void);
 // oportunity for devices to stick commands on the script buffer
 
-void IN_Move (usercmd_t *cmd);
+void IN_SendKeyEvents (void);
+// Perform Key_Event () callbacks until the input que is empty
+
+struct usercmd_s;
+void IN_Move (struct usercmd_s *cmd);
 // add additional movement on top of the keyboard move cmd
 
-void IN_ClearStates (void);
-// restores all button and position states to defaults
+void IN_ModeChanged (void);
+// called whenever screen dimensions change
 
-void IN_SendKeyEvents (void);
+void IN_HandlePause (qboolean paused);
 
-void IN_HandlePause (qboolean pause);
+extern cvar_t		*_windowed_mouse;
 
-extern	cvar_t	*_windowed_mouse;
-
-
-#endif // __input_h
+#endif // _INPUT_H

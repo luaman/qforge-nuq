@@ -164,7 +164,8 @@ void R_PushDlights (vec3_t entorigin);
 extern	int		reinit_surfcache;	// if 1, surface cache is currently empty and
 extern qboolean	r_cache_thrash;	// set if thrashing the surface cache
 
-int	D_SurfaceCacheForRes (int width, int height);
+void *D_SurfaceCacheAddress (void);
+int D_SurfaceCacheForRes (int width, int height);
 void D_FlushCaches (void);
 void D_DeleteSurfaceCache (void);
 void D_InitCaches (void *buffer, int size);

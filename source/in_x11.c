@@ -35,11 +35,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 #include <errno.h>
+
+#include <string.h>
+
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
@@ -48,6 +55,7 @@
 #include <X11/extensions/xf86dga.h>
 #endif
 
+#include "dga_check.h"
 #include "d_local.h"
 #include "sound.h"
 #include "keys.h"
@@ -59,33 +67,30 @@
 #include "console.h"
 #include "client.h"
 #include "context_x11.h"
-#include "qargs.h"
 #include "host.h"
+#include "input.h"
 #include "joystick.h"
+#include "qargs.h"
+#include "view.h"
 
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
 
 cvar_t		*_windowed_mouse;
 cvar_t		*m_filter;
-cvar_t		*in_dgamouse;
-#ifdef HAVE_DGA
+
+cvar_t		*in_dga;
 cvar_t		*in_dga_mouseaccel;
-cvar_t		*in_nodga_grab;
-#endif
+
+static qboolean dga_avail;
+static qboolean dga_active;
 
 static qboolean	mouse_avail;
 static float	mouse_x, mouse_y;
 static float	old_mouse_x, old_mouse_y;
 static int		p_mouse_x, p_mouse_y;
-static float	old__windowed_mouse;
-
 
 #define KEY_MASK (KeyPressMask | KeyReleaseMask)
 #define MOUSE_MASK (ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
 #define INPUT_MASK (KEY_MASK | MOUSE_MASK)
-
 
 static int
 XLateKey(XKeyEvent *ev)
@@ -161,7 +166,7 @@ XLateKey(XKeyEvent *ev)
 		case XK_Meta_R:		key = K_ALT; break;
 
 		case XK_Caps_Lock:	key = K_CAPSLOCK; break;
-		case XK_KP_Begin:	key = K_AUX30; break;
+		case XK_KP_Begin:	key = KP_5; break;
 
 		case XK_Insert:		key = K_INS; break;
 		case XK_KP_Insert:	key = KP_INS; break;
@@ -215,14 +220,14 @@ XLateKey(XKeyEvent *ev)
 
 
 static void
-event_key(XEvent *event)
+event_key (XEvent *event)
 {
-	Key_Event(XLateKey(&event->xkey), event->type == KeyPress);
+	Key_Event (XLateKey (&event->xkey), event->type == KeyPress);
 }
 
 
 static void
-event_button(XEvent *event)
+event_button (XEvent *event)
 {
 	int but;
 
@@ -264,28 +269,22 @@ center_pointer(void)
 
 
 static void
-event_motion(XEvent *event)
+event_motion (XEvent *event)
 {
-#ifdef HAVE_DGA
-	if (in_dgamouse->int_val) {
+	if (dga_active) {
 		mouse_x += event->xmotion.x_root * in_dga_mouseaccel->value;
 		mouse_y += event->xmotion.y_root * in_dga_mouseaccel->value;
-	} else
-#endif
-	{
-		//printf("_windowed_mouse: %s\n", _windowed_mouse->int_val);
-		//printf("CurrentTime: %ld\n", CurrentTime);
-		if (_windowed_mouse->int_val) {
+	} else {
+		if (!p_mouse_x && !p_mouse_y) {
+			Con_Printf("event->xmotion.x: %d\n", event->xmotion.x); 
+			Con_Printf("event->xmotion.y: %d\n", event->xmotion.y); 
+		}
+		if (vid_fullscreen->int_val || _windowed_mouse->int_val) {
 			if (!event->xmotion.send_event) {
 				mouse_x += (event->xmotion.x - p_mouse_x);
 				mouse_y += (event->xmotion.y - p_mouse_y);
-#undef ABS
-#define ABS(a) (((int)(a) < 0) ? -(a) : (a))
-				if (ABS(vid.width/2 - event->xmotion.x)
-				    > vid.width / 4
-				    || ABS(vid.height/2 - event->xmotion.y)
-				    > vid.height / 4) {
-#undef ABS
+				if (abs(vid.width/2 - event->xmotion.x) > vid.width / 4
+				    || abs(vid.height/2 - event->xmotion.y) > vid.height / 4) {
 					center_pointer();
 				}
 			}
@@ -302,19 +301,34 @@ event_motion(XEvent *event)
 void
 IN_Commands (void)
 {
-	JOY_Command ();
-	if (old__windowed_mouse != _windowed_mouse->int_val) {
-		old__windowed_mouse = _windowed_mouse->int_val;
+	static int	old_windowed_mouse;
+	static int	old_in_dga;
 
-		if (!_windowed_mouse->int_val) {
-			/* ungrab the pointer */
-			XUngrabPointer(x_disp,CurrentTime);
-		} else {
-			/* grab the pointer */
-			XGrabPointer(x_disp, x_win, True, MOUSE_MASK, GrabModeAsync,
-						 GrabModeAsync, x_win, None, CurrentTime);
-			//XGrabPointer(x_disp,x_win,True,0,GrabModeAsync,
-			//		GrabModeAsync,x_win,None,CurrentTime);
+	JOY_Command ();
+
+	if ((old_windowed_mouse != _windowed_mouse->int_val)
+		|| (old_in_dga != in_dga->int_val)) {
+		old_windowed_mouse = _windowed_mouse->int_val;
+		old_in_dga = in_dga->int_val;
+
+		if (_windowed_mouse->int_val) { // grab the pointer
+			XGrabPointer (x_disp, x_win, True, MOUSE_MASK, GrabModeAsync,
+							GrabModeAsync, x_win, None, CurrentTime);
+#ifdef HAVE_DGA
+			if (dga_avail && in_dga->int_val && !dga_active) {
+				XF86DGADirectVideo (x_disp, DefaultScreen (x_disp),
+									XF86DGADirectMouse);
+				dga_active = true;
+			}
+#endif
+		} else {	// ungrab the pointer
+#ifdef HAVE_DGA
+			if (dga_avail && in_dga->int_val && dga_active) {
+				XF86DGADirectVideo (x_disp, DefaultScreen (x_disp), 0);
+				dga_active = false;
+			}
+#endif
+			XUngrabPointer (x_disp, CurrentTime);
 		}
 	}
 }
@@ -339,22 +353,23 @@ IN_Move (usercmd_t *cmd)
 	if (m_filter->int_val) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
-	}
 
-	old_mouse_x = mouse_x;
-	old_mouse_y = mouse_y;
+		old_mouse_x = mouse_x;
+		old_mouse_y = mouse_y;
+	}
 
 	mouse_x *= sensitivity->value;
 	mouse_y *= sensitivity->value;
 
-	if ( (in_strafe.state & 1) || (lookstrafe->int_val && (in_mlook.state & 1) ))
+	if ((in_strafe.state & 1) || (lookstrafe->int_val && freelook))
 		cmd->sidemove += m_side->value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
-	if (in_mlook.state & 1)
+		
+	if (freelook)
 		V_StopPitchDrift ();
 
-	if ( (in_mlook.state & 1) && !(in_strafe.state & 1)) {
+	if (freelook && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
 		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {
@@ -367,54 +382,36 @@ IN_Move (usercmd_t *cmd)
 }
 
 /*
-static void IN_ExtraOptionDraw(unsigned int options_draw_cursor)
-{
-	// Windowed Mouse
-	M_Print(16, options_draw_cursor+=8, "             Use Mouse");
-	M_DrawCheckbox(220, options_draw_cursor, _windowed_mouse->int_val);
-}
-
-static void IN_ExtraOptionCmd(int option_cursor)
-{
-	switch (option_cursor) {
-	case 1:	// _windowed_mouse
-		Cvar_SetValue (_windowed_mouse, !_windowed_mouse->int_val);
-		break;
-	}
-}
-*/
-
-/*
   Called at shutdown
 */
 void
 IN_Shutdown (void)
 {
 	JOY_Shutdown ();
-	Con_Printf("IN_Shutdown\n");
+
+	Con_Printf ("IN_Shutdown\n");
 	mouse_avail = 0;
 	if (x_disp) {
-		XAutoRepeatOn(x_disp);
+		XAutoRepeatOn (x_disp);
 
 #ifdef HAVE_DGA
-		XF86DGADirectVideo(x_disp, DefaultScreen(x_disp), 0);
+		XF86DGADirectVideo (x_disp, DefaultScreen (x_disp), 0);
 #endif
 	}
 	x11_close_display();
 }
 
-extern int scr_width, scr_height;
-
-int
+void
 IN_Init (void)
 {
-// open the display
+	// open the display
 	if (!x_disp)
 		Sys_Error("IN: No display!!\n");
 	if (!x_win)
 		Sys_Error("IN: No window!!\n");
 
 	x11_open_display ();	// call to increment the reference counter
+
 	{
 		int attribmask = CWEventMask;
 		XWindowAttributes attribs_1;
@@ -429,41 +426,16 @@ IN_Init (void)
 
 	JOY_Init ();
 
-	_windowed_mouse = Cvar_Get ("_windowed_mouse","0",CVAR_ARCHIVE,"None");
-	m_filter = Cvar_Get ("m_filter","0",CVAR_ARCHIVE,"None");
+	XAutoRepeatOff (x_disp);
 
-	XAutoRepeatOff(x_disp);
+	if (COM_CheckParm("-nomouse"))
+		return;
 
-	if (COM_CheckParm("-nomouse")) return 1;
-#ifdef HAVE_DGA
-	in_dgamouse = Cvar_Get ("in_dgamouse", "0", CVAR_ROM,
-			"1 if you have DGA mouse support");
-	in_dga_mouseaccel = Cvar_Get ("in_dga_mouseaccel", "1", CVAR_ARCHIVE,
-			"None");
-	in_nodga_grab = Cvar_Get ("in_nodga_grab", "0", CVAR_ROM,
-			"grab keyboard and mouse input when using -nodga");
-
-	if (COM_CheckParm ("-nodga")) {
-		if (in_nodga_grab->int_val) {
-			XGrabKeyboard (x_disp, x_win, True, GrabModeAsync, 
-				GrabModeAsync, CurrentTime);
-
-			XGrabPointer (x_disp, x_win, True, MOUSE_MASK, GrabModeAsync,
-				GrabModeAsync, x_win, None, CurrentTime);
-		}
-	} else {
-		XGrabKeyboard (x_disp, x_win, True, GrabModeAsync, 
-				GrabModeAsync, CurrentTime);
-
-		XF86DGADirectVideo(x_disp, DefaultScreen(x_disp),
-						   XF86DGADirectMouse|XF86DGADirectKeyb);
-
-		XGrabPointer (x_disp, x_win, True, MOUSE_MASK, GrabModeAsync,
-				GrabModeAsync, x_win, None, CurrentTime);
-
-		Cvar_SetROM (in_dgamouse, "1");
+	dga_avail = VID_CheckDGA (x_disp, NULL, NULL, NULL);
+	if (vid_fullscreen->int_val) {
+		Cvar_Set (_windowed_mouse, "1");
+		_windowed_mouse->flags |= CVAR_ROM;
 	}
-#endif
 
 	mouse_x = mouse_y = 0.0;
 	mouse_avail = 1;
@@ -474,9 +446,21 @@ IN_Init (void)
 	x11_add_event(ButtonRelease, &event_button);
 	x11_add_event(MotionNotify, &event_motion);
 
-	return 1;
+	return;
 }
 
-void IN_HandlePause (qboolean pause)
+void
+IN_Init_Cvars (void)
+{
+	JOY_Init_Cvars ();
+	_windowed_mouse = Cvar_Get ("_windowed_mouse", "0", CVAR_ARCHIVE, "None");
+	m_filter = Cvar_Get ("m_filter", "0", CVAR_ARCHIVE, "None");
+	in_dga = Cvar_Get ("in_dga", "1", CVAR_ARCHIVE, "DGA Input support");
+	in_dga_mouseaccel = Cvar_Get ("in_dga_mouseaccel", "1", CVAR_ARCHIVE,
+			"None");
+}
+
+void 
+IN_HandlePause (qboolean paused)
 {
 }

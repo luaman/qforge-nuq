@@ -132,7 +132,7 @@ client_LIBS=	-L. -lqfsys -lqfsnd -lqfcd -lqfjs -lqfnet $(SOUND_LIBS) $(NET_LIBS)
 client_SOURCES= cl_cam.c cl_demo.c cl_input.c cl_main.c cl_parse.c \
 		cl_tent.c console.c keys.c menu.c sbar.c r_part.c r_view.c \
 		nonintel.c gib.c gib_instructions.c gib_vars.c \
-		gib_interpret.c gib_modules.c gib_parse.c gib_stack.c
+		gib_interpret.c gib_modules.c gib_parse.c gib_stack.c vid.c
 
 server_SOURCES= host.c host_cmd.c \
 		pr_cmds.c pr_edict.c pr_exec.c \
@@ -174,7 +174,7 @@ nuq_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 #
 # ... Sam Lantinga's Simple DirectMedia Layer, version 1.0 and higher
 #
-sdl_SOURCES=		vid_sdl.c
+sdl_SOURCES=		vid_sdl.c in_sdl.c
 
 nuq_sdl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(sdl_SOURCES)
 nuq_sdl_LDADD=	$(client_LIBS) $(SDL_LIBS)
@@ -221,7 +221,7 @@ nuq_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 #
 # ... OpenGL in X Window
 #
-glx_SOURCES=	vid_glx.c $(x11_SOURCES)
+glx_SOURCES=	vid_glx.c vid_common_gl.c $(x11_SOURCES)
 
 nuq_glx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
 nuq_glx_LDADD=	$(client_LIBS) $(GLX_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(DL_LIBS)
@@ -230,10 +230,10 @@ nuq_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 #
 # ... Sam Lantinga's Simple DirectMedia Layer, version 1.1 and higher, in GL mode
 #
-sgl_SOURCES=	vid_sgl.c
+sgl_SOURCES=	vid_sgl.c vid_common_gl.c in_sdl.c
 
 nuq_sgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(sgl_SOURCES)
-nuq_sgl_LDADD=	$(client_LIBS) $(SDL_LIBS) $(GLX_LIBS) $(DL_LIBS)
+nuq_sgl_LDADD=	$(client_LIBS) $(X_LIBS) $(SDL_LIBS) $(GLX_LIBS) $(DL_LIBS)
 nuq_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfjs.a libqfnet.a
 
 #

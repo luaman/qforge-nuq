@@ -30,6 +30,7 @@
 # include "config.h"
 #endif
 #include "quakedef.h"
+#include "va.h"
 #include "winquake.h"
 #include "sys.h"
 #include "resource.h"
@@ -45,6 +46,9 @@
 #include "cdaudio.h"
 #include "console.h"
 #include "sbar.h"
+
+extern void (*vid_menudrawfn)(void);
+extern void (*vid_menukeyfn)(int);
 
 #define MAX_MODE_LIST	30
 #define VID_ROW_SIZE	3
@@ -127,7 +131,7 @@ HWND WINAPI InitializeWindow (HINSTANCE hInstance, int nCmdShow);
 extern 	viddef_t	vid;				// global video state
 
 unsigned short	d_8to16table[256];
-unsigned	d_8to24table[256];
+unsigned int	d_8to24table[256];
 unsigned char d_15to8table[65536];
 
 float		gldepthmin, gldepthmax;
@@ -159,30 +163,10 @@ qboolean gl_mtexable = false;
 
 //====================================
 
-cvar_t		*vid_mode;
-cvar_t		*_vid_default_mode;
-cvar_t		*_vid_default_mode_win;
-cvar_t		*vid_wait;
-cvar_t		*vid_nopageflip;
-cvar_t		*_vid_wait_override;
-cvar_t		*vid_config_x;
-cvar_t		*vid_config_y;
-cvar_t		*vid_stretch_by_2;
 cvar_t		*_windowed_mouse;
 
 int			window_center_x, window_center_y, window_x, window_y, window_width, window_height;
 RECT		window_rect;
-
-/*
-================
-VID_InitCvars
-================
-*/
-void
-VID_InitCvars ()
-{
-	// It may not look like it, but this is important
-}
 
 // direct draw software compatability stuff
 
@@ -469,7 +453,6 @@ int VID_SetMode (int modenum, unsigned char *palette)
 	SetForegroundWindow (mainwindow);
 	VID_SetPalette (palette);
 	vid_modenum = modenum;
-	Cvar_SetValue (vid_mode, (float)vid_modenum);
 
 	while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
 	{
@@ -489,7 +472,7 @@ int VID_SetMode (int modenum, unsigned char *palette)
 	ClearAllStates ();
 
 	if (!msg_suppress_1)
-		Con_SafePrintf ("Video mode %s initialized.\n", VID_GetModeDescription (vid_modenum));
+		Con_Printf ("Video mode %s initialized.\n", VID_GetModeDescription (vid_modenum));
 
 	VID_SetPalette (palette);
 
@@ -647,6 +630,8 @@ void GL_Init (void)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
+	glEnable(GL_BLEND);
+
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -712,15 +697,16 @@ void GL_EndRendering (void)
 		Sbar_Changed();
 }
 
-void	VID_SetPalette (unsigned char *palette)
+void
+VID_SetPalette (unsigned char *palette)
 {
 	byte	*pal;
-	unsigned r,g,b;
-	unsigned v;
+	unsigned int r,g,b;
+	unsigned int v;
 	int     r1,g1,b1;
         int             k;
 	unsigned short i;
-	unsigned	*table;
+	unsigned int	*table;
 	QFile *f;
 	char s[255];
 	float dist, bestdist;
@@ -1538,7 +1524,7 @@ void VID_InitFullDIB (HINSTANCE hInstance)
 	} while (!done);
 
 	if (nummodes == originalnummodes)
-		Con_SafePrintf ("No fullscreen DIB modes found\n");
+		Con_Printf ("No fullscreen DIB modes found\n");
 }
 
 qboolean VID_Is8bit() {
@@ -1559,7 +1545,7 @@ void VID_Init8bitPalette()
 		COM_CheckParm("-no8bit"))
 		return;
 
-	Con_SafePrintf("8-bit GL extensions enabled.\n");
+	Con_Printf("8-bit GL extensions enabled.\n");
     glEnable( GL_SHARED_TEXTURE_PALETTE_EXT );
 	oldPalette = (char *) d_8to24table; //d_8to24table3dfx;
 	newPalette = thePalette;
@@ -1588,20 +1574,6 @@ void	VID_Init (unsigned char *palette)
 	DEVMODE	devmode;
 
 	memset(&devmode, 0, sizeof(devmode));
-
-// Note that 0 is MODE_WINDOWED
-	vid_mode = Cvar_Get("vid_mode", "0", CVAR_NONE, "None");
-	_vid_default_mode = Cvar_Get("_vid_default_mode", "0", CVAR_ARCHIVE, "None");
-// Note that 3 is MODE_FULLSCREEN_DEFAULT
-	_vid_default_mode_win = Cvar_Get("_vid_default_mode_win", "3", CVAR_ARCHIVE, "None");
-
-	vid_wait = Cvar_Get("vid_wait", "0", CVAR_NONE, "None");
-	vid_nopageflip = Cvar_Get("vid_nopageflip", "0", CVAR_ARCHIVE, "None");
-	_vid_wait_override = Cvar_Get("_vid_wait_override",  "0", CVAR_ARCHIVE, "None");
-	vid_config_x = Cvar_Get("vid_config_x", "800", CVAR_ARCHIVE, "None");
-	vid_config_y = Cvar_Get("vid_config_y", "600", CVAR_ARCHIVE, "None");
-	vid_stretch_by_2 = Cvar_Get("vid_stretch_by_2", "1", CVAR_ARCHIVE, "None");
-	_windowed_mouse = Cvar_Get("_windowed_mouse", "0", CVAR_ARCHIVE, "None");
 
 	Cmd_AddCommand ("vid_nummodes", VID_NumModes_f);
 	Cmd_AddCommand ("vid_describecurrentmode", VID_DescribeCurrentMode_f);
@@ -1806,7 +1778,7 @@ void	VID_Init (unsigned char *palette)
 
 	DestroyWindow (hwnd_dialog);
 
-	GL_CheckGamma(palette);
+	GL_CheckBrightness (palette);
 	VID_SetPalette (palette);
 
 	VID_SetMode (vid_default, palette);
@@ -1838,6 +1810,12 @@ void	VID_Init (unsigned char *palette)
 
         if (COM_CheckParm("-nofullsbar"))
                 fullsbardraw = false;
+}
+
+void
+VID_Init_Cvars ()
+{
+	_windowed_mouse = Cvar_Get("_windowed_mouse", "0", CVAR_ARCHIVE, "None");
 }
 
 
@@ -1959,5 +1937,11 @@ void VID_MenuKey (int key)
 
 void VID_SetCaption (char *text)
 {
-        SetWindowText(mainwindow,(LPSTR) text);
+	if (text && *text) {
+		char *temp = strdup (text);
+		SetWindowText(mainwindow,(LPSTR) va ("%s %s: %s", PROGRAM, VERSION, temp));
+		free (temp);
+	} else {
+		SetWindowText(mainwindow,(LPSTR) va ("%s %s", PROGRAM, VERSION));
+	}
 }

@@ -50,6 +50,12 @@ surfcache_t                     *sc_rover, *sc_base;
 
 #define GUARDSIZE       4
 
+void *
+D_SurfaceCacheAddress (void)
+{
+    return sc_base;
+}
+
 
 int     D_SurfaceCacheForRes (int width, int height)
 {

@@ -49,7 +49,8 @@
 #include <X11/keysym.h>
 #include <X11/extensions/XShm.h>
 #include <errno.h>
-#include <values.h>
+#include <limits.h>
+#include <sys/poll.h>
 
 #ifdef HAVE_VIDMODE
 # include <X11/extensions/xf86vmode.h>
@@ -57,6 +58,8 @@
 
 #include "context_x11.h"
 #include "dga_check.h"
+#include "va.h"
+#include "qargs.h"
 #include "qtypes.h"
 #include "vid.h"
 #include "sys.h"
@@ -83,8 +86,9 @@ static Atom aWMDelete = 0;
 
 #ifdef HAVE_VIDMODE
 static XF86VidModeModeInfo **vidmodes;
-static int  nummodes, hasvidmode = 0;
+static int  nummodes;
 #endif
+static int	hasvidmode = 0;
 
 cvar_t	*vid_fullscreen;
 
@@ -94,7 +98,7 @@ static int xss_blanking;
 static int xss_exposures;
 
 qboolean
-x11_add_event(int event, void (*event_handler)(XEvent *))
+x11_add_event (int event, void (*event_handler) (XEvent *))
 {
 	if (event >= LASTEvent) {
 		printf("event: %d, LASTEvent: %d\n", event, LASTEvent);
@@ -108,7 +112,7 @@ x11_add_event(int event, void (*event_handler)(XEvent *))
 }
 
 qboolean
-x11_del_event(int event, void (*event_handler)(XEvent *))
+x11_del_event (int event, void (*event_handler) (XEvent *))
 {
 	if (event >= LASTEvent)
 		return false;
@@ -120,7 +124,7 @@ x11_del_event(int event, void (*event_handler)(XEvent *))
 }
 
 void
-x11_process_event( void )
+x11_process_event (void)
 {
 	XEvent	x_event;
 
@@ -132,15 +136,15 @@ x11_process_event( void )
 		return;
 	}
 	if (event_handlers[x_event.type])
-		event_handlers[x_event.type](&x_event);
+		event_handlers[x_event.type] (&x_event);
 }
 
 void
-x11_process_events(void)
+x11_process_events (void)
 {
 	/* Get events from X server. */
-	while ( XPending( x_disp )) {
-		x11_process_event();
+	while (XPending (x_disp)) {
+		x11_process_event ();
 	}
 }
 
@@ -149,18 +153,18 @@ x11_process_events(void)
 // ========================================================================
 
 static void
-TragicDeath(int sig)
+TragicDeath (int sig)
 {
-	printf("Received signal %d, exiting...\n", sig);
-	Sys_Quit();
-	exit(sig);
+	printf ("Received signal %d, exiting...\n", sig);
+	Sys_Quit ();
+	exit (sig);
 	//XCloseDisplay(x_disp);
 	//VID_Shutdown();
 	//Sys_Error("This death brought to you by the number %d\n", signal_num);
 }
 
 void
-x11_open_display( void )
+x11_open_display (void)
 {
 	if ( !x_disp ) {
 		x_disp = XOpenDisplay( NULL );
@@ -193,7 +197,7 @@ x11_open_display( void )
 }
 
 void
-x11_close_display( void )
+x11_close_display (void)
 {
 	if (nullcursor != None) {
 		XFreeCursor(x_disp, nullcursor);
@@ -201,7 +205,7 @@ x11_close_display( void )
 	}
 	if (!--x_disp_ref_count) {
 		XCloseDisplay( x_disp );
-		x_disp = NULL;
+		x_disp = 0;
 	}
 }
 
@@ -211,7 +215,7 @@ x11_close_display( void )
 	Create an empty cursor
 */
 void
-x11_create_null_cursor(void)
+x11_create_null_cursor (void)
 {
 	Pixmap cursormask;
 	XGCValues xgc;
@@ -237,11 +241,8 @@ x11_create_null_cursor(void)
 void
 x11_set_vidmode(int width, int height)
 {
-#ifdef 	HAVE_VIDMODE
 	int i;
-#endif
-
-	vid_fullscreen = Cvar_Get ("vid_fullscreen","0",0,"None");
+	int best_mode = 0, best_x = INT_MAX, best_y = INT_MAX;
 
 	XGetScreenSaver (x_disp, &xss_timeout, &xss_interval, &xss_blanking,
 					&xss_exposures);
@@ -260,51 +261,47 @@ x11_set_vidmode(int width, int height)
 #endif
 
 #ifdef HAVE_VIDMODE
-	hasvidmode = VID_CheckVMode(x_disp, NULL, NULL);
-	if (hasvidmode) {
-		if (! XF86VidModeGetAllModeLines(x_disp, DefaultScreen(x_disp),
-										&nummodes, &vidmodes)
-			|| nummodes <= 0) { 
-			hasvidmode = 0;
-		}
+	if (!(hasvidmode = VID_CheckVMode(x_disp, NULL, NULL))) {
+		Cvar_Set (vid_fullscreen, "0");
+		return;
 	}
-	Con_SafePrintf ("hasvidmode = %i\nnummodes = %i\n", hasvidmode, nummodes);
 
-	if (hasvidmode && vid_fullscreen->int_val) {
-		int smallest_mode=0, x=MAXINT, y=MAXINT;
+	XF86VidModeGetAllModeLines(x_disp, x_screen, &nummodes, &vidmodes);
 
-		// FIXME: does this depend on mode line order in XF86Config?
-		for (i=0; i<nummodes; i++) {
-			if (x>vidmodes[i]->hdisplay || y>vidmodes[i]->vdisplay) {
-				smallest_mode=i;
-				x=vidmodes[i]->hdisplay;
-				y=vidmodes[i]->vdisplay;
+	if (vid_fullscreen->int_val) {
+		for (i = 0; i < nummodes; i++) {
+			if ((best_x > vidmodes[i]->hdisplay) || 
+					(best_y > vidmodes[i]->vdisplay)) {
+				if ((vidmodes[i]->hdisplay >= width) && 
+						(vidmodes[i]->vdisplay >= height)) {
+					best_mode = i;
+					best_x = vidmodes[i]->hdisplay;
+					best_y = vidmodes[i]->vdisplay;
+				}
 			}
-			printf("%dx%d\n",vidmodes[i]->hdisplay,vidmodes[i]->vdisplay);
+			printf("%dx%d\n", vidmodes[i]->hdisplay, vidmodes[i]->vdisplay);
 		}
-		// chose the smallest mode that our window fits into;
-		for (i=smallest_mode;
-			 i!=(smallest_mode+1)%nummodes;
-			 i=(i?i-1:nummodes-1)) {
-			if (vidmodes[i]->hdisplay>=width
-				&& vidmodes[i]->vdisplay>=height) {
-				XF86VidModeSwitchToMode (x_disp, DefaultScreen (x_disp),
-										 vidmodes[i]);
-				break;
-			}
-		}
-		XF86VidModeSetViewPort(x_disp, DefaultScreen (x_disp), 0, 0);
-		_windowed_mouse = Cvar_Get ("_windowed_mouse","1",CVAR_ARCHIVE|CVAR_ROM,"None");
-	} else
+		XF86VidModeSwitchToMode (x_disp, x_screen, vidmodes[best_mode]);
+		x11_force_view_port ();
+	}
 #endif
-		_windowed_mouse = Cvar_Get ("_windowed_mouse","0",CVAR_ARCHIVE,"None");
 }
 
 void
-x11_create_window(int width, int height)
+x11_Init_Cvars ()
+{
+	vid_fullscreen = Cvar_Get ("vid_fullscreen", "0", CVAR_ARCHIVE,
+			"Toggles fullscreen game mode");
+}
+
+void
+x11_create_window (int width, int height)
 {
 	XSetWindowAttributes attr;
-	unsigned long mask;
+	XClassHint			*ClassHint;
+	XSizeHints			*SizeHints;
+	char				*resname;
+	unsigned long		mask;
 
 	/* window attributes */
 	attr.background_pixel = 0;
@@ -313,35 +310,69 @@ x11_create_window(int width, int height)
 	attr.event_mask = X_MASK;
 	mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
-#ifdef HAVE_VIDMODE
 	if (hasvidmode && vid_fullscreen->int_val) {
 		attr.override_redirect=1;
 		mask|=CWOverrideRedirect;
 	}
-#endif
-	x_win = XCreateWindow(x_disp, x_root, 0, 0, width, height,
-						0, x_visinfo->depth, InputOutput,
-						x_vis, mask, &attr);
-	/* Give it a title */
-	XStoreName(x_disp, x_win, "XQuake");
 
-	/* Make window respond to Delete events */
-	aWMDelete = XInternAtom(x_disp, "WM_DELETE_WINDOW", False);
-	XSetWMProtocols(x_disp, x_win, &aWMDelete, 1);
+	x_win = XCreateWindow (x_disp, x_root, 0, 0, width, height,
+							0, x_visinfo->depth, InputOutput,
+							x_vis, mask, &attr);
 
-	XMapWindow(x_disp, x_win);
-	XRaiseWindow(x_disp, x_win);
+	// Set window size hints
+	SizeHints = XAllocSizeHints ();
+	if (SizeHints) {
+		SizeHints->flags = (PMinSize | PMaxSize);
+		SizeHints->min_width = width;
+		SizeHints->min_height = height;
+		SizeHints->max_width = width;
+		SizeHints->max_height = height;
+		XSetWMNormalHints (x_disp, x_win, SizeHints);
+
+		XFree (SizeHints);
+	}
+	
+	// Set window title
+	x11_set_caption (va ("%s %s", PROGRAM, VERSION));
+
+	// Set icon name
+	XSetIconName (x_disp, x_win, PROGRAM);
+
+	// Set window class
+	ClassHint = XAllocClassHint ();
+	if (ClassHint) {
+		resname = strrchr (com_argv[0], '/');
+
+		ClassHint->res_name = (resname ? resname + 1 : resname);
+		ClassHint->res_class = PROGRAM;
+		XSetClassHint (x_disp, x_win, ClassHint);
+		XFree (ClassHint);
+	}
+
+	// Make window respond to Delete events
+	aWMDelete = XInternAtom (x_disp, "WM_DELETE_WINDOW", False);
+	XSetWMProtocols (x_disp, x_win, &aWMDelete, 1);
+	
+	if (vid_fullscreen->int_val) {
+		XMoveWindow (x_disp, x_win, 0, 0);
+		XWarpPointer(x_disp, None, x_win, 0, 0, 0, 0,
+					 vid.width+2, vid.height+2);
+		x11_force_view_port ();
+	}
+
+	XMapWindow (x_disp, x_win);
+	XRaiseWindow (x_disp, x_win);
 }
 
 void
-x11_restore_vidmode(void)
+x11_restore_vidmode (void)
 {
 	XSetScreenSaver (x_disp, xss_timeout, xss_interval, xss_blanking,
 					xss_exposures);
 
 #ifdef HAVE_VIDMODE
 	if (hasvidmode) {
-		XF86VidModeSwitchToMode (x_disp, DefaultScreen (x_disp),
+		XF86VidModeSwitchToMode (x_disp, x_screen,
 								 vidmodes[0]);
 		XFree(vidmodes);
 	}
@@ -349,12 +380,35 @@ x11_restore_vidmode(void)
 }
 
 void
-x11_grab_keyboard(void)
+x11_grab_keyboard (void)
 {
 #ifdef HAVE_VIDMODE
 	if (hasvidmode && vid_fullscreen->int_val) {
 		XGrabKeyboard(x_disp, x_win, 1, GrabModeAsync, GrabModeAsync,
 					  CurrentTime);
+	}
+#endif
+}
+
+void
+x11_set_caption (char *text)
+{
+	if (x_disp && x_win && text)
+		XStoreName (x_disp, x_win, text);
+}
+
+void
+x11_force_view_port (void)
+{
+#ifdef HAVE_VIDMODE
+	int x, y;
+
+	if (vid_fullscreen->int_val) {
+		do {
+			XF86VidModeSetViewPort (x_disp, x_screen, 0, 0);
+			poll (0, 0, 50);
+			XF86VidModeGetViewPort (x_disp, x_screen, &x, &y);
+		} while (x || y);
 	}
 #endif
 }

@@ -31,32 +31,38 @@
 #ifndef __CONTEXT_X11_H__
 #define __CONTEXT_X11_H__
 
-#include <qtypes.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "cvar.h"
+#include "qtypes.h"
+
 void GetEvent( void );
 
-extern Display		*x_disp;
+extern Display	*x_disp;
 extern int			x_screen;
 extern Window		x_root;
 extern XVisualInfo	*x_visinfo;
 extern Visual		*x_vis;
-extern Window		x_win;
-extern qboolean		doShm;
-extern int			x_shmeventtype;
-extern qboolean		oktodraw;
+extern Window	x_win;
+extern qboolean doShm;
+extern int		x_shmeventtype;
+extern qboolean oktodraw;
+extern cvar_t	*vid_fullscreen;
 
-qboolean x11_add_event( int event, void (*event_handler)(XEvent *));
-qboolean x11_del_event( int event, void (*event_handler)(XEvent *));
-void x11_process_event( void );
-void x11_process_events( void );
-void x11_open_display( void );
-void x11_close_display( void );
-void x11_create_null_cursor(void);
-void x11_set_vidmode(int width, int height);
-void x11_restore_vidmode(void);
-void x11_create_window(int width, int height);
-void x11_grab_keyboard(void);
+qboolean x11_add_event (int event, void (*event_handler)(XEvent *));
+qboolean x11_del_event (int event, void (*event_handler)(XEvent *));
+void x11_process_event (void);
+void x11_process_events (void);
+void x11_open_display (void);
+void x11_close_display (void);
+void x11_create_null_cursor (void);
+void x11_set_vidmode (int, int);
+void x11_restore_vidmode (void);
+void x11_create_window (int, int);
+void x11_grab_keyboard (void);
+void x11_set_caption (char *);
+void x11_force_view_port (void);
+void x11_Init_Cvars (void);
 
 #endif	// __CONTEXT_X11_H__

@@ -1,7 +1,7 @@
 /*
 	vid_null.c
 
-	@description@
+	null video driver to aid porting efforts
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -27,9 +27,9 @@
 */
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
 #endif
-
+#include "quakedef.h"
 #include "d_local.h"
 
 viddef_t	vid;				// global video state
@@ -42,12 +42,7 @@ short	zbuffer[BASEWIDTH*BASEHEIGHT];
 byte	surfcache[256*1024];
 
 unsigned short	d_8to16table[256];
-unsigned	d_8to24table[256];
-
-void
-VID_InitCvars(void)
-{
-}
+unsigned int	d_8to24table[256];
 
 void	VID_SetPalette (unsigned char *palette)
 {
@@ -70,6 +65,10 @@ void	VID_Init (unsigned char *palette)
 	
 	d_pzbuffer = zbuffer;
 	D_InitCaches (surfcache, sizeof(surfcache));
+}
+
+void VID_Init_Cvars ()
+{
 }
 
 void	VID_Shutdown (void)
@@ -99,8 +98,10 @@ void D_EndDirectRect (int x, int y, int width, int height)
 {
 }
 
+void VID_SetCaption (char *text)
+{
+}
 
-
-void VID_HandlePause (qboolean pause)
+void VID_HandlePause (qboolean paused)
 {
 }

@@ -55,6 +55,7 @@ cvar_t	*cl_nolerp;
 cvar_t	*cl_sbar;
 cvar_t	*cl_hudswap;
 
+cvar_t	*cl_freelook;
 cvar_t	*lookspring;
 cvar_t	*lookstrafe;
 cvar_t	*sensitivity;
@@ -101,6 +102,7 @@ CL_InitCvars(void)
 	cl_sbar = Cvar_Get ("cl_sbar",  "1", CVAR_ARCHIVE, "Use old status bar");
 	cl_hudswap = Cvar_Get ("cl_hudswap",  "0", CVAR_ARCHIVE, "HUD on left side?");
 
+	cl_freelook = Cvar_Get("freelook", "0", CVAR_ARCHIVE, "force +mlook");
 	lookspring = Cvar_Get("lookspring", "0", CVAR_ARCHIVE, "None");
 	lookstrafe = Cvar_Get("lookstrafe", "0", CVAR_ARCHIVE, "None");
 	sensitivity = Cvar_Get("sensitivity", "3", CVAR_ARCHIVE, "None");

@@ -29,18 +29,46 @@
 
 #define _BSD
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ggi/ggi.h>
 
+#include "bothdefs.h"   // needed by: common.h, net.h, client.h
 
+#include "quakedef.h"
+
+#include "bspfile.h"    // needed by: glquake.h
+#include "vid.h"
+#include "sys.h"
+#include "mathlib.h"    // needed by: protocol.h, render.h, client.h,
+                        //  modelgen.h, glmodel.h
+#include "wad.h"
+#include "draw.h"
+#include "cvar.h"
+#include "net.h"        // needed by: client.h
+#include "protocol.h"   // needed by: client.h
+#include "cmd.h"
+#include "keys.h"
+#include "sbar.h"
+#include "sound.h"
+#include "render.h"     // needed by: client.h, gl_model.h, glquake.h
+#include "client.h"     // need cls in this file
+#include "model.h"   // needed by: glquake.h
+#include "console.h"
+#include "qendian.h"
+#include "qargs.h"
+#include "compat.h"
 #include "d_local.h"
+#include "input.h"
+#include "cl_input.h"
+#include "view.h"
+#include "joystick.h"
 
 extern viddef_t        vid; // global video state
 unsigned short	d_8to16table[256];
@@ -78,17 +106,7 @@ static int	stride, drawstride;
 static int	pixelsize;
 static int	usedbuf, havedbuf;
 
-static long GGI_highhunkmark, GGI_buffersize;
-
-static int	vid_surfcachesize;
-static void	*vid_surfcache;
-
 int	VID_options_items = 1;
-
-void
-VID_InitCvars(void)
-{
-}
 
 static void
 do_scale8(int xsize, int ysize, uint8 *dest, uint8 *src)
@@ -206,44 +224,54 @@ do_copy32(int xsize, int ysize, uint32 *dest, uint8 *src)
 }
 
 
-// ========================================================================
-// Tragic death handler
-// ========================================================================
-
-void ResetFrameBuffer(void)
+void
+ResetFrameBuffer(void)
 {
-	if (d_pzbuffer)
-	{
-		D_FlushCaches ();
-		Hunk_FreeToHighMark (GGI_highhunkmark);
+	int 	tbuffersize, tcachesize;
+	void	*vid_surfcache;
+
+	// Calculate the sizes we want first
+	tbuffersize = vid.width * vid.height * sizeof (*d_pzbuffer);
+	tcachesize = D_SurfaceCacheForRes(vid.width, vid.height);
+
+	// Free the old z-buffer
+	if (d_pzbuffer) {
+		free (d_pzbuffer);
 		d_pzbuffer = NULL;
 	}
-	GGI_highhunkmark = Hunk_HighMark ();
+	
+	// Free the old surface cache
+	vid_surfcache = D_SurfaceCacheAddress ();
+	if (vid_surfcache) {
+		D_FlushCaches ();
+		free (vid_surfcache);
+		vid_surfcache = NULL;
+	}
 
-// alloc an extra line in case we want to wrap, and allocate the z-buffer
-	GGI_buffersize = vid.width * vid.height * sizeof (*d_pzbuffer);
-
-	vid_surfcachesize = D_SurfaceCacheForRes (vid.width, vid.height);
-
-	GGI_buffersize += vid_surfcachesize;
-
-	d_pzbuffer = Hunk_HighAllocName (GGI_buffersize, "video");
-	if (d_pzbuffer == NULL)
+	// Allocate the new z-buffer
+	d_pzbuffer = calloc (tbuffersize, 1);
+	if (!d_pzbuffer) {
 		Sys_Error ("Not enough memory for video mode\n");
+	}
 
-	vid_surfcache = (byte *) d_pzbuffer
-		+ vid.width * vid.height * sizeof (*d_pzbuffer);
+	// Allocate the new surface cache; free the z-buffer if we fail
+	vid_surfcache = calloc (tcachesize, 1);
+	if (!vid_surfcache) {
+		free (d_pzbuffer);
+		d_pzbuffer = NULL;
+		Sys_Error ("Not enough memory for video mode\n");
+	}
 
-	D_InitCaches(vid_surfcache, vid_surfcachesize);
+	D_InitCaches (vid_surfcache, tcachesize);
 }
-
 
 
 // Called at startup to set up translation tables, takes 256 8 bit RGB values
 // the palette data will go away after the call, so it must be copied off if
 // the video driver will need it again
 
-void	VID_Init(unsigned char *pal)
+void
+VID_Init (unsigned char *pal)
 {
 	int pnum;
 
@@ -434,14 +462,15 @@ void	VID_Init(unsigned char *pal)
 	vid.fullbright = 256 - LittleLong (*((int *)vid.colormap + 2048));
 }
 
-void VID_ShiftPalette(unsigned char *pal)
+void
+VID_ShiftPalette(unsigned char *pal)
 {
 	VID_SetPalette(pal);
 }
 
 
-
-void VID_SetPalette(unsigned char *pal)
+void
+VID_SetPalette (unsigned char *pal)
 {
 
 	int i;
@@ -461,7 +490,8 @@ void VID_SetPalette(unsigned char *pal)
 
 // Called at shutdown
 
-void	VID_Shutdown (void)
+void
+VID_Shutdown (void)
 {
 	Con_Printf("VID_Shutdown\n");
 
@@ -487,7 +517,8 @@ void	VID_Shutdown (void)
 
 // flushes the given rectangles from the view buffer to the screen
 
-void	VID_Update(vrect_t *rects)
+void
+VID_Update (vrect_t *rects)
 {
 	int height = 0;
 
@@ -890,19 +921,31 @@ void IN_SendKeyEvents(void)
 void
 IN_Init(void)
 {
-	_windowed_mouse = Cvar_Get("_windowed_mouse", "0", CVAR_ARCHIVE, "None");
+	JOY_Init ();
+
 	old_windowed_mouse = -1; /* Force update */
-	m_filter = Cvar_Get("m_filter", "0", CVAR_ARCHIVE, "None");
 	if (COM_CheckParm ("-nomouse")) return;
 
 	mouse_x = mouse_y = 0.0;
 	mouse_avail = 1;
 }
 
+void
+IN_Init_Cvars(void)
+{
+	JOY_Init_Cvars ();
+
+	_windowed_mouse = Cvar_Get("_windowed_mouse", "0", CVAR_ARCHIVE, "None");
+	m_filter = Cvar_Get("m_filter", "0", CVAR_ARCHIVE, "None");
+}
+
 
 void
 IN_Shutdown(void)
 {
+	JOY_Shutdown ();
+
+	Con_Printf("IN_Shutdown\n");
 	mouse_avail = 0;
 }
 
@@ -910,6 +953,8 @@ IN_Shutdown(void)
 void
 IN_Commands (void)
 {
+	JOY_Command ();
+
 	/* Only supported by LibGII 0.7 or later. */
 #ifdef GII_CMDCODE_PREFER_RELPTR
 	if (old_windowed_mouse != _windowed_mouse->int_val) {
@@ -920,7 +965,7 @@ IN_Commands (void)
 		ev.cmd.size = sizeof(gii_cmd_nodata_event);
 		ev.cmd.type = evCommand;
 		ev.cmd.target = GII_EV_TARGET_ALL;
-		ev.cmd.code = (int)_windowed_mouse->int_val ? GII_CMDCODE_PREFER_RELPTR
+		ev.cmd.code = _windowed_mouse->int_val ? GII_CMDCODE_PREFER_RELPTR
 			: GII_CMDCODE_PREFER_ABSPTR;
 
 		ggiEventSend(ggivis, &ev);
@@ -932,7 +977,10 @@ IN_Commands (void)
 void
 IN_Move(usercmd_t *cmd)
 {
-	if (!mouse_avail) return;
+	JOY_Move (cmd);
+	
+	if (!mouse_avail)
+		return;
 
 	if (m_filter->int_val) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
@@ -945,19 +993,16 @@ IN_Move(usercmd_t *cmd)
 	mouse_x *= sensitivity->value;
 	mouse_y *= sensitivity->value;
 
-	if ( (in_strafe.state & 1) || (lookstrafe->int_val && freelook ))
+	if ( (in_strafe.state & 1) || (lookstrafe->int_val && freelook))
 		cmd->sidemove += m_side->value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 	if (freelook)
 		V_StopPitchDrift ();
 
-	if ( freelook && !(in_strafe.state & 1)) {
+	if (freelook && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
-		if (cl.viewangles[PITCH] > 80)
-			cl.viewangles[PITCH] = 80;
-		if (cl.viewangles[PITCH] < -70)
-			cl.viewangles[PITCH] = -70;
+		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {
 		if ((in_strafe.state & 1) && noclip_anglehack)
 			cmd->upmove -= m_forward->value * mouse_y;
@@ -967,6 +1012,16 @@ IN_Move(usercmd_t *cmd)
 	mouse_x = mouse_y = 0.0;
 }
 
-void VID_HandlePause (qboolean pause)
+
+void VID_Init_Cvars(void)	{}
+void VID_LockBuffer(void)	{}
+void VID_UnlockBuffer(void) {}
+
+void VID_SetCaption (char *text)
+{
+}
+
+
+void VID_HandlePause (qboolean paused)
 {
 }
