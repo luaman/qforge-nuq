@@ -67,6 +67,7 @@
 #include "info.h"
 #include "server.h"
 #include "va.h"
+#include "qargs.h"
 
 extern qboolean		is_server;
 qboolean		standard_quake = true, abyss, rogue, hipnotic;
@@ -686,7 +687,7 @@ COM_LoadGameDirectory(char *dir)
 	for (i = count; i < bufsize; i++) {
 		pakfiles[i] = NULL;
 	}
-	
+
 	dir_ptr = opendir(dir);
 	if (!dir_ptr)
 		return;
@@ -898,6 +899,8 @@ COM_CreateGameDirectory (char *gamename)
 void
 COM_InitFilesystem ( void )
 {
+	int i;
+
 	fs_sharepath = Cvar_Get ("fs_sharepath", FS_SHAREPATH, CVAR_ROM,
 			"location of shared (read only) game directories");
 	fs_userpath = Cvar_Get ("fs_userpath", FS_USERPATH, CVAR_ROM,
@@ -910,6 +913,9 @@ COM_InitFilesystem ( void )
 	start up with basegame->string by default
 */
 	COM_CreateGameDirectory(fs_basegame->string);
+	if ((i = COM_CheckParm ("-game")) && i < com_argc-1) {
+		COM_CreateGameDirectory(com_argv[i+1]);
+	}
 	if (hipnotic) {
 		COM_CreateGameDirectory("hipnotic");
 	}
