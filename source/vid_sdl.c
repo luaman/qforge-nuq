@@ -141,7 +141,7 @@ void    VID_Init (unsigned char *palette)
 	if (!(screen = SDL_SetVideoMode(vid.width, vid.height, 8, flags)))
 		Sys_Error("VID: Couldn't set video mode: %s\n", SDL_GetError());
 	VID_SetPalette(palette);
-	VID_SetCaption("sdlquakeworld");
+	VID_SetCaption("SDLQuake");
 
 	// now know everything we need to know about the buffer
 	VGA_width = vid.conwidth = vid.width;
