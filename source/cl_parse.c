@@ -42,7 +42,6 @@
 #include "screen.h"
 #include "server.h"
 #include "qdefs.h"
-#include "glquake.h"
 #include "input.h"
 
 char *svc_strings[] =

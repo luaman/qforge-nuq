@@ -178,5 +178,6 @@ struct msurface_s;
 void R_RenderBrushPoly (struct msurface_s *fa);
 
 void R_TranslatePlayerSkin (int playernum);
+void R_AddFire (vec3_t, vec3_t, entity_t *ent);
 
 #endif // __render_h

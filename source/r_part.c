@@ -35,7 +35,6 @@
 #include "console.h"
 #include "server.h"
 #include "msg.h"
-#include "glquake.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
 										//  time
@@ -53,6 +52,7 @@ int			r_numparticles;
 
 vec3_t			r_pright, r_pup, r_ppn;
 
+extern	cvar_t	*gl_particles;
 
 /*
 ===============
