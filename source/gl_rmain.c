@@ -570,7 +570,7 @@ static void R_DrawAliasModel (entity_t *e)
 			VectorSubtract (currententity->origin,
 							cl_dlights[lnum].origin,
 							dist);
-			add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8) / (Length(dist) * Length(dist)); // FIXME Deek
+			add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8) / (DotProduct(dist, dist)); // FIXME Deek
 
 			if (add > 0)
 			{
