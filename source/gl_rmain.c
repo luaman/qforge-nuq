@@ -415,10 +415,9 @@ static void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 
 				// LordHavoc: cleanup after Endy
 				if (!lighthalf) {
-					glColor4f(2 * l, 2 * l, 2 * l, 1);
-				} else {
-					glColor4f(l, l, l, 1);
+					l *= 2;
 				}
+				glColor4f(l, l, l, 1);
 			}
 
 			glVertex3f (verts->v[0], verts->v[1], verts->v[2]);

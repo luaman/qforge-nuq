@@ -385,6 +385,47 @@ dlight_t *CL_AllocDlight (int key)
 	return dl;
 }
 
+/*
+===============
+CL_NewDlight
+===============
+*/
+void CL_NewDlight (int key, float x, float y, float z, float radius, float time,
+				   int type)
+{
+	dlight_t        *dl;
+
+	dl = CL_AllocDlight (key);
+	dl->origin[0] = x;
+	dl->origin[1] = y;
+	dl->origin[2] = z;
+	dl->radius = radius;
+	dl->die = cl.time + time;
+	switch (type)
+	{
+		default:
+		case 0:
+			dl->color[0] = 0.4;
+			dl->color[1] = 0.2;
+			dl->color[2] = 0.05;
+			break;
+		case 1: // blue
+			dl->color[0] = 0.05;
+			dl->color[1] = 0.05;
+			dl->color[2] = 0.5;
+			break;
+		case 2: // red
+			dl->color[0] = 0.5;
+			dl->color[1] = 0.05;
+			dl->color[2] = 0.05;
+			break;
+		case 3: // purple
+			dl->color[0] = 0.5;
+			dl->color[1] = 0.05;
+			dl->color[2] = 0.5;
+			break;
+	}
+}
 
 /*
 ===============
@@ -583,25 +624,23 @@ void CL_RelinkEntities (void)
 			dl->radius = 200 + (rand()&31);
 			dl->minlight = 32;
 			dl->die = cl.time + 0.1;
+			dl->color[0] = 0.2;
+			dl->color[1] = 0.1;
+			dl->color[2] = 0.05;
 		}
+		if ((ent->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
+			CL_NewDlight (i, ent->origin[0], ent->origin[1], ent->origin[2], 200 + (rand()&31), 0.1, 3);
+		if (ent->effects & EF_BLUE)
+			CL_NewDlight (i, ent->origin[0], ent->origin[1], ent->origin[2], 200 + (rand()&31), 0.1, 1);
+		if (ent->effects & EF_RED)
+			CL_NewDlight (i, ent->origin[0], ent->origin[1], ent->origin[2], 200 + (rand()&31), 0.1, 2);
 		if (ent->effects & EF_BRIGHTLIGHT)
-		{			
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin,  dl->origin);
-			dl->origin[2] += 16;
-			dl->radius = 400 + (rand()&31);
-			dl->die = cl.time + 0.001;
-		}
+			CL_NewDlight (i, ent->origin[0], ent->origin[1], ent->origin[2] + 16, 400 + (rand()&31), 0.001, 0);
 		if (ent->effects & EF_DIMLIGHT)
-		{			
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin,  dl->origin);
-			dl->radius = 200 + (rand()&31);
-			dl->die = cl.time + 0.001;
-		}
+			CL_NewDlight (i, ent->origin[0], ent->origin[1], ent->origin[2], 200 + (rand()&31), 0.001, 0);
 #ifdef QUAKE2
 		if (ent->effects & EF_DARKLIGHT)
-		{			
+		{
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200.0 + (rand()&31);
@@ -609,7 +648,7 @@ void CL_RelinkEntities (void)
 			dl->dark = true;
 		}
 		if (ent->effects & EF_LIGHT)
-		{			
+		{
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200;
