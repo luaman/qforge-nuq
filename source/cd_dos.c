@@ -1,5 +1,5 @@
 /*
-	cd_audio.c
+	cd_dos.c
 
 	@description@
 

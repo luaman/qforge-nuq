@@ -104,7 +104,7 @@ endif
 if CDTYPE_NULL
 libqfcd_a_SOURCES=	cd_null.c
 endif
-EXTRA_libqfcd_a_SOURCES= cd_audio.c cd_win.c cd_linux.c cd_null.c
+EXTRA_libqfcd_a_SOURCES= cd_dos.c cd_win.c cd_linux.c cd_null.c
 
 #
 # ... Joystick
