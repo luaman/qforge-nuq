@@ -34,6 +34,7 @@
 
 #include "mathlib.h"
 #include "sys.h"
+#include "model.h"
 
 vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;
