@@ -40,6 +40,10 @@
 #include <sys/wait.h>
 #include <linux/soundcard.h>
 #include <stdio.h>
+#include "qtypes.h"
+#include "console.h"
+#include "sound.h"
+#include "qargs.h"
 
 int audio_fd;
 int snd_inited;

@@ -49,6 +49,7 @@
 #include "console.h"
 #include "sys.h"
 #include "screen.h"
+#include "gib.h"
 
 /*
 
@@ -889,6 +890,8 @@ void Host_Init (quakeparms_t *parms)
 	Cbuf_Init ();
 	Cmd_Init ();
 
+	GIB_Init ();
+	
         // execute +set as early as possible
         Cmd_StuffCmds_f ();
         Cbuf_Execute_Sets ();

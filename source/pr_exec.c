@@ -387,6 +387,9 @@ void PR_ExecuteProgram (func_t fnum)
 	int		exitdepth;
 	eval_t	*ptr;
 
+	a = b = c  = 0;
+	st = 0;
+
 	if (!fnum || fnum >= progs->numfunctions)
 	{
 		if (pr_global_struct->self)
