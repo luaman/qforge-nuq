@@ -1,7 +1,7 @@
 /*
 	gl_mesh.c
 
-	@description@
+	gl_mesh.c: triangle model functions
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -27,14 +27,30 @@
 */
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
 #endif
-
 #include <string.h>
+#include <stdio.h>
 
+#include "qendian.h"
 #include "quakefs.h"
+#include "bspfile.h"    // needed by: glquake.h
+#include "vid.h"
+#include "sys.h"
+#include "mathlib.h"    // needed by: protocol.h, render.h, client.h,
+                        //  modelgen.h, glmodel.h
+#include "wad.h"
+#include "draw.h"
+#include "cvar.h"
+#include "net.h"        // needed by: client.h
+#include "protocol.h"   // needed by: client.h
+#include "cmd.h"
+#include "sbar.h"
+#include "render.h"     // needed by: client.h, model.h, glquake.h
+#include "client.h"     // need cls in this file
+#include "model.h"	// needed by: glquake.h
 #include "console.h"
-#include "model.h"
+#include "glquake.h"
 
 /*
 =================================================================
@@ -215,7 +231,7 @@ void BuildTris (void)
 	int		i, j, k;
 	int		startv;
 	float	s, t;
-	int		len, bestlen, besttype=-1;
+	int		len, bestlen, besttype = 0;
 	int		bestverts[1024];
 	int		besttris[1024];
 	int		type;
@@ -335,8 +351,16 @@ void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 		//
 		// save out the cached version
 		//
-		sprintf (fullpath, "%s/%s", com_gamedir, cache);
+		snprintf (fullpath, sizeof(fullpath), "%s/%s", com_gamedir, cache);
 		f = fopen (fullpath, "wb");
+		if (!f) {
+			char gldir[MAX_OSPATH];
+
+			snprintf (gldir, sizeof(gldir), "%s/glquake", com_gamedir);
+			Sys_mkdir (gldir);
+			f = fopen (fullpath, "wb");
+		}
+
 		if (f)
 		{
 			fwrite (&numcommands, 4, 1, f);
