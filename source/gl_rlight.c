@@ -33,6 +33,7 @@
 #include "client.h"
 #include "glquake.h"
 #include "view.h"
+#include "r_local.h"
 
 int	r_dlightframecount;
 
@@ -80,9 +81,10 @@ void AddLightBlend (float r, float g, float b, float a2)
 
 	a2 = a2/a;
 
-	v_blend[0] = v_blend[1]*(1-a2) + r*a2;
+	v_blend[0] = v_blend[0]*(1-a2) + r*a2;
 	v_blend[1] = v_blend[1]*(1-a2) + g*a2;
 	v_blend[2] = v_blend[2]*(1-a2) + b*a2;
+//Con_Printf("AddLightBlend(): %4.2f %4.2f %4.2f %4.6f\n", v_blend[0], v_blend[1], v_blend[2], v_blend[3]);
 }
 
 float bubble_sintable[33], bubble_costable[33];
@@ -95,7 +97,8 @@ void R_InitBubble() {
 	bub_sin = bubble_sintable;
 	bub_cos = bubble_costable;
 
-	for (i=32 ; i>=0 ; i--) {
+	for (i=32 ; i>=0 ; i--)
+	{
 		a = i/32.0 * M_PI*2;
 		*bub_sin++ = sin(a);
 		*bub_cos++ = cos(a);
@@ -105,10 +108,13 @@ void R_InitBubble() {
 void R_RenderDlight (dlight_t *light)
 {
 	int		i, j;
-	float	a;
+//	float	a;
 	vec3_t	v;
 	float	rad;
+	float	*bub_sin, *bub_cos;
 
+	bub_sin = bubble_sintable;
+	bub_cos = bubble_costable;
 	rad = light->radius * 0.35;
 
 	VectorSubtract (light->origin, r_origin, v);
@@ -119,17 +125,24 @@ void R_RenderDlight (dlight_t *light)
 	}
 
 	glBegin (GL_TRIANGLE_FAN);
-	glColor3f (0.2,0.1,0.0);
+//	glColor3f (0.2,0.1,0.0);
+//	glColor3f (0.2,0.1,0.05); // changed dimlight effect
+	if (lighthalf)
+		glColor3f(light->color[0]*0.5,light->color[1]*0.5,light->color[2]*0.5);
+	else
+		glColor3fv (light->color);
 	for (i=0 ; i<3 ; i++)
 		v[i] = light->origin[i] - vpn[i]*rad;
 	glVertex3fv (v);
 	glColor3f (0,0,0);
 	for (i=16 ; i>=0 ; i--)
 	{
-		a = i/16.0 * M_PI*2;
+//		a = i/16.0 * M_PI*2;
 		for (j=0 ; j<3 ; j++)
-			v[j] = light->origin[j] + vright[j]*cos(a)*rad
-				+ vup[j]*sin(a)*rad;
+			v[j] = light->origin[j] + (vright[j]*(*bub_cos) +
+				+ vup[j]*(*bub_sin)) * rad;
+		bub_sin+=2; 
+		bub_cos+=2;
 		glVertex3fv (v);
 	}
 	glEnd ();
@@ -153,7 +166,6 @@ void R_RenderDlights (void)
 	glDepthMask (0);
 	glDisable (GL_TEXTURE_2D);
 	glShadeModel (GL_SMOOTH);
-	glEnable (GL_BLEND);
 	glBlendFunc (GL_ONE, GL_ONE);
 
 	l = cl_dlights;
@@ -165,7 +177,6 @@ void R_RenderDlights (void)
 	}
 
 	glColor3f (1,1,1);
-	glDisable (GL_BLEND);
 	glEnable (GL_TEXTURE_2D);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask (1);
@@ -185,44 +196,69 @@ DYNAMIC LIGHTS
 R_MarkLights
 =============
 */
-void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
+// LordHavoc: heavily modified, to eliminate unnecessary texture uploads,
+//            and support bmodel lighting better
+void R_MarkLights (vec3_t lightorigin, dlight_t *light, int bit, mnode_t *node)
 {
 	mplane_t	*splitplane;
-	float		dist;
+	float		dist, l, maxdist;
 	msurface_t	*surf;
-	int			i;
+	int			i, j, s, t;
+	vec3_t		impact;
 	
 	if (node->contents < 0)
 		return;
 
 	splitplane = node->plane;
-	dist = DotProduct (light->origin, splitplane->normal) - splitplane->dist;
+	dist = DotProduct (lightorigin, splitplane->normal) - splitplane->dist;
 	
 	if (dist > light->radius)
 	{
-		R_MarkLights (light, bit, node->children[0]);
+		if (node->children[0]->contents >= 0) // save some time by not pushing another stack frame
+			R_MarkLights (lightorigin, light, bit, node->children[0]);
 		return;
 	}
 	if (dist < -light->radius)
 	{
-		R_MarkLights (light, bit, node->children[1]);
+		if (node->children[1]->contents >= 0) // save some time by not pushing another stack frame
+			R_MarkLights (lightorigin, light, bit, node->children[1]);
 		return;
 	}
-		
+
+	maxdist = light->radius*light->radius;
+
 // mark the polygons
 	surf = cl.worldmodel->surfaces + node->firstsurface;
 	for (i=0 ; i<node->numsurfaces ; i++, surf++)
 	{
-		if (surf->dlightframe != r_dlightframecount)
+		// LordHavoc: MAJOR dynamic light speedup here, eliminates marking of surfaces that are too far away from light, thus preventing unnecessary renders and uploads
+		for (j=0 ; j<3 ; j++)
+			impact[j] = lightorigin[j] - surf->plane->normal[j]*dist;
+
+		// clamp center of light to corner and check brightness
+		l = DotProduct (impact, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3] - surf->texturemins[0];
+		s = l+0.5;if (s < 0) s = 0;else if (s > surf->extents[0]) s = surf->extents[0];
+		s = l - s;
+		l = DotProduct (impact, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3] - surf->texturemins[1];
+		t = l+0.5;if (t < 0) t = 0;else if (t > surf->extents[1]) t = surf->extents[1];
+		t = l - t;
+		// compare to minimum light
+		if ((s*s+t*t+dist*dist) < maxdist)
 		{
-			surf->dlightbits = 0;
-			surf->dlightframe = r_dlightframecount;
+			if (surf->dlightframe != r_dlightframecount) // not dynamic until now
+			{
+				surf->dlightbits = bit;
+				surf->dlightframe = r_dlightframecount;
+			}
+			else // already dynamic
+				surf->dlightbits |= bit;
 		}
-		surf->dlightbits |= bit;
 	}
 
-	R_MarkLights (light, bit, node->children[0]);
-	R_MarkLights (light, bit, node->children[1]);
+	if (node->children[0]->contents >= 0) // save some time by not pushing another stack frame
+		R_MarkLights (lightorigin, light, bit, node->children[0]);
+	if (node->children[1]->contents >= 0) // save some time by not pushing another stack frame
+		R_MarkLights (lightorigin, light, bit, node->children[1]);
 }
 
 
@@ -231,10 +267,11 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 R_PushDlights
 =============
 */
-void R_PushDlights (void)
+void R_PushDlights (vec3_t entorigin)
 {
 	int		i;
 	dlight_t	*l;
+	vec3_t	lightorigin;
 
 	if (gl_flashblend->value)
 		return;
@@ -247,7 +284,8 @@ void R_PushDlights (void)
 	{
 		if (l->die < cl.time || !l->radius)
 			continue;
-		R_MarkLights ( l, 1<<i, cl.worldmodel->nodes );
+		VectorSubtract(l->origin, entorigin, lightorigin);
+		R_MarkLights (lightorigin, l, 1<<i, cl.worldmodel->nodes );
 	}
 }
 

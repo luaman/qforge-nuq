@@ -142,7 +142,7 @@ void V_RenderView (void)
 			V_CalcRefdef ();
 	}
 
-	R_PushDlights ();
+	R_PushDlights (vec3_origin);
 
 	if (lcd_x->value)
 	{
@@ -161,7 +161,7 @@ void V_RenderView (void)
 
 		vid.buffer += vid.rowbytes>>1;
 
-		R_PushDlights ();
+		R_PushDlights (vec3_origin);
 
 		r_refdef.viewangles[YAW] += lcd_yaw->value*2;
 		for (i=0 ; i<3 ; i++)

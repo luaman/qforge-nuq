@@ -809,6 +809,7 @@ void R_DrawBEntitiesOnList (void)
 			// instanced model
 				if (clmodel->firstmodelsurface != 0)
 				{
+					vec3_t lightorigin;
 					for (k=0 ; k<MAX_DLIGHTS ; k++)
 					{
 						if ((cl_dlights[k].die < cl.time) ||
@@ -817,7 +818,8 @@ void R_DrawBEntitiesOnList (void)
 							continue;
 						}
 
-						R_MarkLights (&cl_dlights[k], 1<<k,
+						VectorSubtract(cl_dlights[k].origin, currententity->origin, lightorigin);
+						R_MarkLights (lightorigin, &cl_dlights[k], 1<<k,
 							clmodel->nodes + clmodel->hulls[0].firstclipnode);
 					}
 				}
