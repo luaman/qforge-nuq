@@ -104,7 +104,7 @@ EXTRA_libqfcd_a_SOURCES= cd_audio.c cd_win.c cd_linux.c cd_null.c
 #
 # ... Networking
 #
-libqfnet_a_SOURCES=	mdfour.c net_bsd.c net_com.c net_dgrm.c net_loop.c \
+libqfnet_a_SOURCES=	mdfour.c net_bsd.c checksum.c net_dgrm.c net_loop.c \
 			net_main.c net_udp.c net_vcr.c
 
 EXTRA_libqfcd_a_SOURCES=net_dos.c net_bw.c net_ipx.c net_mp.c net_ser.c \
