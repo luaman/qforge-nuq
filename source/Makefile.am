@@ -212,7 +212,7 @@ ogl_SOURCES=	gl_draw.c gl_mesh.c gl_part.c gl_refrag.c gl_rlight.c \
 #
 # ... 3Dfx Voodoo 1 and 2 SVGAlib-based console GL
 #
-tdfx_SOURCES=	vid_3dfxsvga.c in_svgalib.c
+tdfx_SOURCES=	vid_3dfxsvga.c vid_common_gl.c in_svgalib.c
 
 nuq_3dfx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(tdfx_SOURCES)
 nuq_3dfx_LDADD=	$(client_LIBS) $(TDFXGL_LIBS) $(SVGA_LIBS) $(DL_LIBS)
