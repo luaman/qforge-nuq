@@ -18,6 +18,7 @@
 #include "gib_parse.h"
 #include "gib_vars.h"
 #include "gib_error.h"
+#include "gib_stack.h"
 
 static gib_inst_t *gibinstructions;
 
@@ -49,13 +50,9 @@ void GIB_Init_Instructions (void)
 {
 	GIB_AddInstruction("echo", GIB_Echo_f);
 	GIB_AddInstruction("call", GIB_Call_f);
-	GIB_AddInstruction("varprint", GIB_VarPrint_f);
 	GIB_AddInstruction("return", GIB_Return_f);
-	GIB_AddInstruction("varsub", GIB_VarSub_f);
 	GIB_AddInstruction("con", GIB_Con_f);
 	GIB_AddInstruction("listfetch", GIB_ListFetch_f);
-	GIB_AddInstruction("eval", GIB_Eval_f);
-	GIB_AddInstruction("backtick", GIB_BackTick_f);
 }
 
 
@@ -77,10 +74,10 @@ int GIB_Call_f (void)
 	sub = GIB_Get_ModSub_Sub (GIB_Argv(1));
 	if (!sub)
 		return GIB_E_NOSUB;
-	GIB_SUBARGC = GIB_Argc() - 1;
-	GIB_SUBARGV[0] = sub->name;
-	for (i = 1; i <= GIB_SUBARGC; i++)
-		GIB_SUBARGV[i] = GIB_Argv(i + 1);
+	gib_subargc = GIB_Argc() - 1;
+	gib_subargv[0] = sub->name;
+	for (i = 1; i <= gib_subargc; i++)
+		gib_subargv[i] = GIB_Argv(i + 1);
 	ret = GIB_Run_Sub (mod, sub);
 	if (gib_subret)
 	{
@@ -113,20 +110,6 @@ int GIB_Return_f (void)
 	gib_subret = malloc(strlen(GIB_Argv(1)) + 1);
 	strcpy(gib_subret, GIB_Argv(1));
 	return GIB_E_RETURN; // Signal to block executor to return immediately
-}
-
-int GIB_VarSub_f (void)
-{
-	char buffer[1024];
-	int ret;
-
-	if (GIB_Argc() != 1)
-		return GIB_E_NUMARGS;	
-
-	if ((ret = GIB_ExpandVars(GIB_Argv(1), buffer, 1024)))
-		return ret;
-	GIB_Var_Set ("retval", buffer);
-	return 0;
 }
 
 int GIB_ListFetch_f (void)
@@ -166,40 +149,6 @@ int GIB_Con_f (void)
 	
 	return 0;
 }
-
-int GIB_Eval_f (void)
-{
-	gib_var_t *var;
-	char *buffer;
-	int ret;
-
-	if (GIB_Argc() != 1)
-		return GIB_E_NUMARGS;
-	if (!(var = GIB_Var_FindLocal (GIB_Argv(1))))
-		return GIB_E_NOVAR;
-	buffer = malloc(strlen(var->value) + 1);
-	strcpy(buffer, var->value);
-	gib_argofs++; /* HACK HACK HACK - This is required or
-				GIB_Execute_Instruction will smash gib_argv */
-	ret = GIB_Execute_Block (buffer, 0);
-	gib_argofs--;
-	free (buffer);
-	return ret;
-}
-
-int GIB_BackTick_f (void)
-{
-	char buffer[1024];
-	int ret;
-
-	if (GIB_Argc() != 1)
-		return GIB_E_NUMARGS;
-	if ((ret = GIB_ExpandBackticks (GIB_Argv(1), buffer, 1024)))
-		return ret;
-	GIB_Var_Set ("retval", buffer);
-	return 0;
-}
-
 
 int GIB_ExpandVars (char *source, char *buffer, int buffersize)
 {
@@ -252,9 +201,7 @@ int GIB_ExpandBackticks (char *source, char *buffer, int buffersize)
 					tick[m++] = source[i];
 					
 			tick[m++] = 0;
-			gib_argofs++;
-			ret = GIB_Execute_Inst (tick);
-			gib_argofs--;
+			ret = GIB_Run_Inst (tick);
 			if (ret)
 			{
 				return ret;

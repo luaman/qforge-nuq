@@ -17,15 +17,14 @@
 #include "gib_modules.h"
 #include "gib_parse.h"
 #include "gib_vars.h"
-
-gib_var_t *gib_locals[GIB_MAXCALLS];
+#include "gib_stack.h"
 
 gib_var_t *GIB_Var_FindLocal (char *key)
 {
 	gib_var_t *var;
-	if (!(gib_locals[gib_subsp]))
+	if (!(GIB_LOCALS))
 		return 0;
-	for (var = gib_locals[gib_subsp]; strcmp(key, var->key); var = var->next)
+	for (var = GIB_LOCALS; strcmp(key, var->key); var = var->next)
 		if (!(var->next))
 			return 0;
 	return var;
@@ -33,9 +32,9 @@ gib_var_t *GIB_Var_FindLocal (char *key)
 gib_var_t *GIB_Var_FindGlobal (char *key)
 {
 	gib_var_t *var;
-	if (!(gib_currentmod[gib_subsp]->vars))
+	if (!(GIB_CURRENTMOD->vars))
 		return 0;
-	for (var = gib_currentmod[gib_subsp]->vars; strcmp(key, var->key); var = var->next)
+	for (var = GIB_CURRENTMOD->vars; strcmp(key, var->key); var = var->next)
 		if (!(var->next))
 			return 0;
 	return var;
@@ -54,8 +53,8 @@ void GIB_Var_Set (char *key, char *value)
 		var = malloc(sizeof(gib_var_t));
 		var->key = malloc(strlen(key) + 1);
 		strcpy(var->key, key);
-		var->next = gib_locals[gib_subsp];
-		gib_locals[gib_subsp] = var;
+		var->next = GIB_LOCALS;
+		GIB_LOCALS = var;
 	}
 	var->value = malloc(strlen(value) + 1);
 	strcpy(var->value, value);

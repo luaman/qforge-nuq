@@ -18,9 +18,6 @@
 #include "gib_vars.h"
 
 
-
-//static char *gib_args;
-
 // Standard cvars
 
 void GIB_Init (void)
@@ -45,13 +42,13 @@ void GIB_Gib_f (void)
 		Con_Printf("Subroutine not found!\n");
 	else
 	{
-	GIB_SUBARGC = Cmd_Argc() - 1;
-	GIB_SUBARGV[0] = sub->name;
-	for (i = 1; i <= GIB_SUBARGC; i++)
-		GIB_SUBARGV[i] = Cmd_Argv(i + 1);
+	gib_subargc = Cmd_Argc() - 1;
+	gib_subargv[0] = sub->name;
+	for (i = 1; i <= gib_subargc; i++)
+		gib_subargv[i] = Cmd_Argv(i + 1);
 	ret = GIB_Run_Sub(mod, sub);
 	if (ret != 0)
-		Con_Printf("Error in execution of %s!\nError code: %i\n\nLine at fault: %s\n", Cmd_Argv(1), ret, errorline);
+		Con_Printf("Error in execution of %s!\nError code: %i\n", Cmd_Argv(1), ret);
 	}
 }
 

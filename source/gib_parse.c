@@ -53,32 +53,29 @@ int GIB_Get_Inst(char *start)
 int GIB_Get_Arg (char *start)
 {
 	int i;
-	int len = 0;
+	int ret = -2;
 
-	for (i = 0; start[i] != ' ' && start[i] != 0; i++)
+	Con_Printf("Parsing at %s\n", start);
+
+	if (*start == '\'')
 	{
-                if (start[i] == '\'')
-                {
-                        if ((len = GIB_End_Quote(start + i)) < 0)
-                                return len;
-                        else
-                                i += len;
-                }
-                if (start[i] == '\"')
-                {
-                        if ((len = GIB_End_DQuote(start + i)) < 0)
-                                return len;
-                        else
-                                i += len;
-                }
-                if (start[i] == '{')
-                {
-                        if ((len = GIB_End_Bracket(start + i)) < 0)
-                                return len;
-                        else
-                                i += len;
-                }   
-        }
+		ret = GIB_End_Quote(start);
+	}
+	if (*start == '\"')
+	{
+		ret = GIB_End_DQuote(start);                          
+	}
+	if (*start == '{')
+	{
+		ret = GIB_End_Bracket(start);
+	}
+
+	if (ret == -1)
+		return -1;
+	if (ret >= 0)
+		return ret;
+
+	for (i = 1; (start[i] != ' ' && start[i] != 0 && start[i] != '\'' && start[i] != '\"' && start[i] != '{') || start[i - 1] == '\\'; i++);
 	return i;
 }		
 int GIB_End_Quote (char *start)

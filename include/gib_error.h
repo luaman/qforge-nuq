@@ -9,3 +9,4 @@
 #define GIB_E_BUFFER	7
 #define GIB_E_TYPE	8
 #define GIB_E_ULIMIT	9
+#define GIB_E_ILLINST	10

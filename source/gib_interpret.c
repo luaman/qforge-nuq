@@ -18,29 +18,19 @@
 #include "gib_parse.h"
 #include "gib_vars.h"
 #include "gib_error.h"
+#include "gib_stack.h"
 
-gib_module_t *gib_currentmod[GIB_MAXCALLS];
-gib_sub_t *gib_currentsub[GIB_MAXCALLS];
-int gib_subsp = 0;
-
-char *GIB_SUBARGV[GIB_MAXSUBARGS];
-int GIB_SUBARGC;
-
-int gib_argc[GIB_MAXCALLS];
-char *gib_argv[GIB_MAXCALLS][80];
-
-int gib_argofs = 0;
-
-char errorline[1024];
+char *gib_subargv[256];
+int gib_subargc;
 
 char *GIB_Argv(int i)
 {
-	return gib_argv[gib_subsp + gib_argofs][i];
+	return gib_instack[gib_insp - 1].argv[i];
 }
 
 int GIB_Argc(void)
 {
-	return gib_argc[gib_subsp + gib_argofs];
+	return gib_instack[gib_insp - 1].argc;
 }
 
 void GIB_Strip_Arg (char *arg)
@@ -64,29 +54,41 @@ int GIB_Execute_Block (char *block, int retflag)
 		code = malloc(len + 1);
 		strncpy(code, block + i, len);
 		code[len] = 0;
-		if ((ret = GIB_Execute_Inst(code)))
+		if ((ret = GIB_Interpret_Inst(code)))
 		{
-			if (retflag && ret == GIB_E_RETURN)
-				return 0;
-			else
-			{
-				strcpy(errorline, code);
-				free (code);
-				return ret;
-			}
+			free (code);
+			return ret;
 		}
-		free (code);
+		if ((ret = GIB_Execute_Inst()))
+		{
+			free (code);
+			if (ret == GIB_E_RETURN && retflag)
+				return 0;
+			return ret;
+		}
 		i += len + 1;
+		free (code);
 	}
+	if (len == -1)	
+		return GIB_E_PARSE;
 	return 0;
 }
 
-int GIB_Execute_Inst (char *inst)
+int GIB_Execute_Inst (void)
+{
+	int ret;
+	ret = gib_instack[gib_insp - 1].instruction->func ();
+	GIB_InStack_Pop();
+	return ret;
+}
+
+int GIB_Interpret_Inst (char *inst)
 {
 	char *buffer;
 	char *buffer2;
 	char *buffer3;
-	int i, n, len, ret;
+	int i, n, len, ret, gib_argc;
+	char *gib_argv[256];
 	gib_inst_t *ginst;
 
 
@@ -108,66 +110,89 @@ int GIB_Execute_Inst (char *inst)
 
 	buffer2 = malloc(2048);
 	buffer3 = malloc(2048);
-	GIB_ExpandVars (buffer, buffer2, 2048);
-	GIB_ExpandBackticks (buffer2, buffer3, 2048);
-	
-	gib_argc[gib_subsp + gib_argofs] = 0;
+	ret = GIB_ExpandVars (buffer, buffer2, 2048);
+	if (ret)
+		return ret;
+	ret = GIB_ExpandBackticks (buffer2, buffer3, 2048);
+	if (ret)
+		return ret;
+	gib_argc = 0;
 	for (i = 0; buffer3[i] != ' '; i++);
-	gib_argv[gib_subsp + gib_argofs][0] = malloc(i + 1);
-	strncpy(gib_argv[gib_subsp + gib_argofs][0], buffer3, i);
-	gib_argv[gib_subsp + gib_argofs][0][i] = 0;
+	gib_argv[0] = malloc(i + 1);
+	strncpy(gib_argv[0], buffer3, i);
+	gib_argv[0][i] = 0;
 	for (n = 0;;n++)
 	{
 		for (;isspace(buffer3[i]); i++);
 		if (buffer3[i] == 0)
 			break;
-		if ((len = GIB_Get_Arg(buffer3 + i)) < 0) // Parse error
+		if ((len = GIB_Get_Arg(buffer3 + i)) < 0)
 			return GIB_E_PARSE;
 		else
 		{
-			gib_argv[gib_subsp + gib_argofs][n + 1] = malloc(len + 1);
-			strncpy(gib_argv[gib_subsp + gib_argofs][n + 1], buffer3 + i, len);
-			gib_argv[gib_subsp + gib_argofs][n + 1][len] = 0;
-			GIB_ExpandEscapes (gib_argv[gib_subsp + gib_argofs][n + 1]);
+			gib_argv[n + 1] = malloc(len + 1);
+			strncpy(gib_argv[n + 1], buffer3 + i, len);
+			gib_argv[n + 1][len] = 0;
+			GIB_ExpandEscapes (gib_argv[n + 1]);
 			i += len;
 		}
 	}
-	gib_argc[gib_subsp + gib_argofs] = n;
+	gib_argc = n;
 	
 	free(buffer);
 	free(buffer2);
 	free(buffer3);
 	
 	for (i = 1; i <= n; i++)
-		GIB_Strip_Arg (gib_argv[gib_subsp + gib_argofs][i]);
-	if (!(ginst = GIB_Find_Instruction(gib_argv[gib_subsp + gib_argofs][0])))
-		return 1;	
-	ret = ginst->func ();
+		GIB_Strip_Arg (gib_argv[i]);
+	if (!(ginst = GIB_Find_Instruction(gib_argv[0])))
+		return GIB_E_ILLINST;
+	GIB_InStack_Push(ginst, gib_argc, gib_argv);
 
 	for (i = 0; i <= n; i++)
-		free(gib_argv[gib_subsp + gib_argofs][i]);
-	return ret;
+		free(gib_argv[i]);
+	return 0;
 }
 
 int GIB_Run_Sub (gib_module_t *mod, gib_sub_t *sub)
 {
 	int ret, i;
 	char buf[256];
-	if (++gib_subsp >= GIB_MAXCALLS)
-		return 3;
-	gib_currentmod[gib_subsp] = mod;
-	gib_currentsub[gib_subsp] = sub;
-	gib_locals[gib_subsp] = 0;
 
-	for (i = 0; i <= GIB_SUBARGC; i++)
+	GIB_SubStack_Push (mod, sub, 0);
+
+	for (i = 0; i <= gib_subargc; i++)
 	{
 		sprintf(buf, "arg%i", i);
-		GIB_Var_Set (buf, GIB_SUBARGV[i]);
+		GIB_Var_Set (buf, gib_subargv[i]);
 	}
 
-	ret = GIB_Execute_Block(sub->code, 1);
-	if (gib_locals[gib_subsp])
-		GIB_Var_FreeAll(gib_locals[gib_subsp]);
-	gib_subsp--;
+	sprintf(buf, "%i", gib_subargc);
+	GIB_Var_Set ("argc", buf);
+
+	ret = GIB_Execute_Sub ();
+	
+	if (GIB_LOCALS)
+		GIB_Var_FreeAll(GIB_LOCALS);
+
+	GIB_SubStack_Pop ();
 	return ret;
+}
+
+int GIB_Execute_Sub (void)
+{
+	return GIB_Execute_Block (GIB_CURRENTSUB->code, 1);
+}
+
+int GIB_Run_Inst (char *inst)
+{
+	int ret;
+	
+	ret = GIB_Interpret_Inst (inst);
+	if (ret)
+	{
+		GIB_InStack_Pop ();
+		return ret;
+	}
+	return GIB_Execute_Inst ();
 }
