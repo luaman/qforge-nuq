@@ -1,2 +1,4 @@
+Makefile
+Makefile.in
 build_rpm
 nuq.spec

@@ -974,6 +974,7 @@ AC_SUBST(TARGETS)
 
 dnl Output files
 AC_OUTPUT(
+	RPM/Makefile
 	RPM/nuq.spec
 	RPM/build_rpm
 	doc/Makefile
