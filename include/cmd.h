@@ -30,6 +30,7 @@
 #define __cmd_h
 
 #include "qtypes.h"
+#include "cvar.h"
 
 //===========================================================================
 
@@ -133,5 +134,7 @@ void	Cmd_Print (char *text);
 #define		MAX_COM_TOKEN   1024
 extern char		com_token[MAX_COM_TOKEN];
 char *COM_Parse (char *data);
+
+extern	struct cvar_s	*cl_warncmd;
 
 #endif __cmd_h

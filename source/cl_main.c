@@ -750,6 +750,7 @@ void CL_Init (void)
 //
 // register our commands
 //
+	cl_warncmd = Cvar_Get("cl_warncmd",  "0", CVAR_NONE, "None");
 	cl_name = Cvar_Get("_cl_name", "player", CVAR_ARCHIVE, "None");
 	cl_color = Cvar_Get("_cl_color", "0", CVAR_ARCHIVE, "None");
 	cl_upspeed = Cvar_Get("cl_upspeed", "200", CVAR_NONE, "None");
