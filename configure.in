@@ -908,6 +908,13 @@ fi
 AC_DEFINE_UNQUOTED(FS_USERPATH, "$userpath")
 
 dnl CFLAGS for release and devel versions
+
+AC_ARG_WITH(amd,
+        [  --with-amd              Optimize for AMD processors instead of Intel],
+        HAVE_AMD="yes",
+        HAVE_AMD="no"
+)
+
 AC_ARG_ENABLE(debug,
 	[  --enable-debug          compile without optimizations (for development)],
 	debug=$enable_debug
@@ -934,6 +941,9 @@ if test "x$debug" != xyes; then
 				MORE_CFLAGS=""
 				;;
 		esac
+		if test "x$HAVE_AMD" = "xyes"; then
+                                        MORE_CFLAGS="-march=k6 -malign-loops=2 -malign-jumps=2 -malign-functions=2"
+		fi
 		if test "x$MORE_CFLAGS" = x; then
 			AC_MSG_RESULT(no)
 		else
