@@ -54,7 +54,7 @@
 #include "sys.h"
 #include "console.h"
 
-extern int gethostname (char *, int);
+//extern int gethostname (char *, int);
 extern int close (int);
 
 static int net_acceptsocket = -1;		// socket for fielding new connections
