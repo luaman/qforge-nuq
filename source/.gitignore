@@ -1,0 +1,16 @@
+*.a
+*.d
+*.o
+*.obj
+Makefile
+Makefile.in
+uquake-ggi
+uquake-glx
+uquake-sdl
+uquake-svga
+uquake-x11
+uquake-3dfx
+uquake-sgl
+uquake.exe
+uquake-wgl.exe
+.deps
