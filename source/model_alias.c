@@ -63,8 +63,6 @@ mtriangle_t	triangles[MAXALIASTRIS];
 trivertx_t	*poseverts[MAXALIASFRAMES];
 int			posenum;
 
-byte		player_8bit_texels[320*200];
-
 void *Mod_LoadAliasFrame (void * pin, maliasframedesc_t *frame);
 void *Mod_LoadAliasGroup (void * pin, maliasframedesc_t *frame);
 

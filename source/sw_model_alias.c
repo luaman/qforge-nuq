@@ -61,8 +61,6 @@ extern	mtriangle_t	triangles[MAXALIASTRIS];
 extern	trivertx_t	*poseverts[MAXALIASFRAMES];
 extern	int			posenum;
 
-extern	byte		player_8bit_texels[320*200];
-
 void *Mod_LoadSkin (byte *skin, int skinsize, int *pskinindex, int snum, int gnum)
 {
 	byte	*pskin;

@@ -61,8 +61,6 @@ extern	mtriangle_t	triangles[MAXALIASTRIS];
 extern	trivertx_t	*poseverts[MAXALIASFRAMES];
 extern	int			posenum;
 
-extern	byte		player_8bit_texels[320*200];
-
 /*
 =================
 Mod_FloodFillSkin
@@ -147,6 +145,12 @@ void *Mod_LoadSkin (byte *skin, int skinsize, int snum, int gnum, qboolean group
 	int fbtexnum;
 
 	Mod_FloodFillSkin( skin, pheader->mdl.skinwidth, pheader->mdl.skinheight );
+	// save 8 bit texels for the player model to remap
+	if (!strcmp(loadmodel->name,"progs/player.mdl")) {
+		byte *texels = Hunk_AllocName(skinsize, loadname);
+		pheader->texels[snum] = texels - (byte *)pheader;
+		memcpy (texels, skin, skinsize);
+	}
 
 	if (group) {
 		snprintf(name, sizeof(name), "fb_%s_%i_%i", loadmodel->name,snum,gnum);
@@ -195,14 +199,6 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
 			skin+=4;
 			skin = Mod_LoadSkin (skin, skinsize, i, 0, false);
-
-			// save 8 bit texels for the player model to remap
-			if (!strcmp(loadmodel->name,"progs/player.mdl"))
-			{
-				if (skinsize > sizeof(player_8bit_texels))
-					Sys_Error ("Player skin too large");
-				memcpy (player_8bit_texels, skin, skinsize);
-			}
 
 			for (j=1; j < 4; j++) {
 				pheader->gl_texturenum[i][j] = 
