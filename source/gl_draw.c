@@ -1185,7 +1185,7 @@ void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboole
 	int			i, s;
 	qboolean	noalpha;
 	int			samples;
-    static	unsigned char scaled[1024*512];	// [512*256];
+    unsigned char *scaled;
 	int			scaled_width, scaled_height;
 
 	s = width*height;
@@ -1214,7 +1214,7 @@ void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboole
 	scaled_width = min(scaled_width, gl_max_size->int_val);
 	scaled_height = min(scaled_height, gl_max_size->int_val);
 
-	if (scaled_width * scaled_height > sizeof(scaled))
+	if (!(scaled = malloc (scaled_width * scaled_height)))
 		Sys_Error ("GL_LoadTexture: too big");
 
 	samples = 1; // alpha ? gl_alpha_format : gl_solid_format;
@@ -1277,6 +1277,7 @@ done: ;
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	}
+	free (scaled);
 }
 
 extern qboolean VID_Is8bit();
