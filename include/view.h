@@ -38,8 +38,6 @@ extern float v_blend[4];
 
 extern	cvar_t	*brightness;
 extern	cvar_t	*contrast;
-extern	cvar_t	*lcd_x;
-//extern	cvar_t	*v_gamma;
 extern	cvar_t	*crosshair;
 
 
@@ -57,7 +55,6 @@ qboolean V_CheckGamma (void);
 extern	cvar_t	*scr_ofsx;
 extern	cvar_t	*scr_ofsy;
 extern	cvar_t	*scr_ofsz;
-extern	cvar_t	*lcd_yaw;
 extern	cvar_t	*cl_crossx;
 extern	cvar_t	*cl_crossy;
 extern	cvar_t	*gl_cshiftpercent;
