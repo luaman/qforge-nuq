@@ -1,7 +1,7 @@
 /*
-	d_vars.c
+	sw_model_brush.c
 
-	@description@
+	model loading and caching
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -30,32 +30,41 @@
 # include "config.h"
 #endif
 
-#ifndef	USE_INTEL_ASM
+#include "r_local.h"
+#include "sys.h"
+#include "console.h"
+#include "qendian.h"
+#include "checksum.h"
 
-#include "qtypes.h"
+extern char loadname[];
+extern model_t *loadmodel;
+extern byte mod_novis[];
+extern byte *mod_base;
 
-// all global and static refresh variables are collected in a contiguous block
-// to avoid cache conflicts.
+const int mod_lightmap_bytes = 1;
 
-//-------------------------------------------------------
-// global refresh variables
-//-------------------------------------------------------
+void
+GL_SubdivideSurface (msurface_t *fa)
+{
+}
 
-// FIXME: make into one big structure, like cl or sv
-// FIXME: do separately for refresh engine and driver
+void
+Mod_LoadMMNearest(miptex_t *mt, texture_t      *tx)
+{
+}
 
-float	d_sdivzstepu, d_tdivzstepu, d_zistepu;
-float	d_sdivzstepv, d_tdivzstepv, d_zistepv;
-float	d_sdivzorigin, d_tdivzorigin, d_ziorigin;
-
-fixed16_t	sadjust, tadjust, bbextents, bbextentt;
-
-pixel_t			*cacheblock;
-int				cachewidth;
-pixel_t			*d_viewbuffer;
-short			*d_pzbuffer;
-unsigned int	d_zrowbytes;
-unsigned int	d_zwidth;
-
-#endif	// USE_INTEL_ASM
-
+/*
+=================
+Mod_LoadLighting
+=================
+*/
+void Mod_LoadLighting (lump_t *l)
+{
+	if (!l->filelen)
+	{
+		loadmodel->lightdata = NULL;
+		return;
+	}
+	loadmodel->lightdata = Hunk_AllocName ( l->filelen, loadname);	
+	memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
+}
