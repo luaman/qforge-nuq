@@ -34,6 +34,7 @@
 #include "cvar.h"
 #include "protocol.h"
 #include "qtypes.h"
+#include "client.h"
 
 // Joystick variables and structures
 cvar_t		*joy_device;		// Joystick device name
