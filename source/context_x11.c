@@ -164,12 +164,12 @@ x11_open_display( void )
 {
 	if ( !x_disp ) {
 		x_disp = XOpenDisplay( NULL );
-		x_screen = DefaultScreen (x_disp);
-		x_root = RootWindow (x_disp, x_screen);
-
 		if ( !x_disp ) {
 			Sys_Error("x11_open_display: Could not open display [%s]\n", XDisplayName( NULL ));
 		}
+
+		x_screen = DefaultScreen (x_disp);
+		x_root = RootWindow (x_disp, x_screen);
 
 		// catch signals
 		signal(SIGHUP, TragicDeath);

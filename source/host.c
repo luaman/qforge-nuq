@@ -940,6 +940,9 @@ void Host_Init (quakeparms_t *parms)
 		host_basepal = (byte *)COM_LoadHunkFile ("gfx/palette.lmp");
 		if (!host_basepal)
 			Sys_Error ("Couldn't load gfx/palette.lmp");
+		host_basepal[765] =
+			host_basepal[766] =
+			host_basepal[767] = 0; // LordHavoc: force the transparent color to black
 		host_colormap = (byte *)COM_LoadHunkFile ("gfx/colormap.lmp");
 		if (!host_colormap)
 			Sys_Error ("Couldn't load gfx/colormap.lmp");
