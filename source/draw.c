@@ -561,7 +561,7 @@ void Draw_ConsoleBackground (int lines)
 	conback = Draw_CachePic ("gfx/conback.lmp");
 
 // hack the version number directly into the pic
-	sprintf (ver, "%s, version %s", PROGRAM, VERSION);
+	snprintf (ver, sizeof(ver), "%s, version %s", PROGRAM, VERSION);
 	dest = conback->data + 320*186 + 320 - 11 - 8*strlen(ver);
 
 	for (x=0 ; x<strlen(ver) ; x++)

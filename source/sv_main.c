@@ -65,7 +65,7 @@ void SV_Init (void)
 	sv_nostep = Cvar_Get("sv_nostep", "0", CVAR_NONE, "None");
 
 	for (i=0 ; i<MAX_MODELS ; i++)
-		sprintf (localmodels[i], "*%i", i);
+		snprintf (localmodels[i], sizeof(localmodels[i]), "*%i", i);
 }
 
 /*
@@ -198,7 +198,7 @@ void SV_SendServerinfo (client_t *client)
 	char			message[2048];
 
 	MSG_WriteByte (&client->message, svc_print);
-	sprintf (message, "%c\nVersion %s server (%i CRC)", 2, QUAKE_VERSION, pr_crc);
+	snprintf (message, sizeof(message), "%c\nVersion %s server (%i CRC)", 2, QUAKE_VERSION, pr_crc);
 	MSG_WriteString (&client->message,message);
 
 	MSG_WriteByte (&client->message, svc_serverinfo);
@@ -210,7 +210,7 @@ void SV_SendServerinfo (client_t *client)
 	else
 		MSG_WriteByte (&client->message, GAME_COOP);
 
-	sprintf (message, pr_strings+sv.edicts->v.message);
+	snprintf (message, sizeof(message), pr_strings+sv.edicts->v.message);
 
 	MSG_WriteString (&client->message,message);
 
@@ -1132,7 +1132,7 @@ void SV_SpawnServer (char *server)
 	sv.time = 1.0;
 	
 	strcpy (sv.name, server);
-	sprintf (sv.modelname,"maps/%s.bsp", server);
+	snprintf (sv.modelname, sizeof(sv.modelname), "maps/%s.bsp", server);
 	sv.worldmodel = Mod_ForName (sv.modelname, false);
 	if (!sv.worldmodel)
 	{

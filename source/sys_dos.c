@@ -557,7 +557,7 @@ void Sys_Printf (char *fmt, ...)
 	char		text[1024];
 	
 	va_start (argptr,fmt);
-	vsprintf (text,fmt,argptr);
+	vsnprintf (text, sizeof(text), fmt,argptr);
 	va_end (argptr);
 
 	if (cls.state == ca_dedicated)
@@ -591,7 +591,7 @@ void Sys_Quit (void)
 		memcpy (screen, d, sizeof(screen));
 
 // write the version number directly to the end screen
-	sprintf (ver, " v%4.2f", VERSION);
+	snprintf (ver, sizeof(ver), " v%4.2f", VERSION);
 	for (i=0 ; i<6 ; i++)
 		screen[0*80*2 + 72*2 + i*2] = ver[i];
 
@@ -621,7 +621,7 @@ void Sys_Error (char *error, ...)
     char        string[1024];
     
     va_start (argptr,error);
-    vsprintf (string,error,argptr);
+    vsnprintf (string, sizeof(string), error,argptr);
     va_end (argptr);
 
 	Host_Shutdown();
