@@ -406,7 +406,7 @@ void Draw_Init (void)
 	int		i;
 
 	// LordHavoc: lighting mode
-	gl_lightmode = Cvar_Get("gl_lightmode", "1", CVAR_ARCHIVE,
+	gl_lightmode = Cvar_Get("gl_lightmode", "0", CVAR_ARCHIVE,
 			"Lighting mode (0 = GLQuake style, 1 = new style)");
 	brightness = Cvar_Get("brightness", "1", CVAR_ARCHIVE,
 			"Brightness");
