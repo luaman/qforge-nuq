@@ -1,7 +1,7 @@
 /*
-	r_part.c
+	gl_part.c
 
-	@description@
+	OpenGL particle rendering
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -58,9 +58,21 @@ void R_DrawParticles (void)
 	vec3_t			up, right;
 	float			scale;
 
+	unsigned char	*at;
+	unsigned char	theAlpha;
+	qboolean		alphaTestEnabled;
+	qboolean		blendEnabled;
+
 	glBindTexture (GL_TEXTURE_2D, particletexture);
-	glEnable (GL_BLEND);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	// LordHavoc: particles should not affect zbuffer
+	glDepthMask (0);
+
+	if (!(blendEnabled = glIsEnabled (GL_BLEND))) {
+		glEnable (GL_BLEND);
+	}
+	if ((alphaTestEnabled = glIsEnabled (GL_ALPHA_TEST))) {
+		glDisable (GL_ALPHA_TEST);
+	}
 	glBegin (GL_TRIANGLES);
 
 	VectorScale (vup, 1.5, up);
@@ -71,7 +83,7 @@ void R_DrawParticles (void)
 	time2 = frametime * 10; // 15;
 	time1 = frametime * 5;
 	grav = frametime * sv_gravity->value * 0.05;
-	dvel = 4*frametime;
+	dvel = frametime * 4;
 	
 	for ( ;; ) 
 	{
@@ -108,7 +120,15 @@ void R_DrawParticles (void)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
-		glColor3ubv ((byte *)&d_8to24table[(int)p->color]);
+		at = (byte *)&d_8to24table[(int)p->color];
+		if (p->type==pt_fire)
+			theAlpha = 255*(6-p->ramp)/6;
+		else
+			theAlpha = 255;
+		if (lighthalf)
+			glColor4ub((byte) ((int) at[0] >> 1), (byte) ((int) at[1] >> 1), (byte) ((int) at[2] >> 1), theAlpha);
+		else
+			glColor4ub(at[0], at[1], at[2], theAlpha);
 		glTexCoord2f (0,0);
 		glVertex3fv (p->org);
 		glTexCoord2f (1,0);
@@ -179,8 +199,13 @@ void R_DrawParticles (void)
 	}
 
 	glEnd ();
-	glDisable (GL_BLEND);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	if (alphaTestEnabled) {
+		glEnable (GL_ALPHA_TEST);
+	}
+	if (!blendEnabled) {
+		glDisable (GL_BLEND);
+	}
+	glDepthMask (1);
 }
 
 /*
