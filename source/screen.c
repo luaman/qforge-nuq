@@ -51,6 +51,8 @@ float		scr_con_current;
 float		scr_conlines;		// lines of console to display
 
 float		oldscreensize, oldfov;
+float		oldsbar;
+
 cvar_t	*scr_viewsize;
 cvar_t	*scr_fov;
 cvar_t	*scr_conspeed;
@@ -885,6 +887,12 @@ void SCR_UpdateScreen (void)
 	if (oldscreensize != scr_viewsize->value)
 	{
 		oldscreensize = scr_viewsize->value;
+		vid.recalc_refdef = true;
+	}
+
+	if (oldsbar != cl_sbar->value)
+	{
+		oldsbar = cl_sbar->value;
 		vid.recalc_refdef = true;
 	}
 	
