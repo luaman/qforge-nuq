@@ -34,18 +34,21 @@
 #include "client.h"
 #include "host.h"
 #include "console.h"
+#include "compat.h"
 
 byte		ramps[3][256];
 float		v_blend[4];		// rgba 0.0 - 1.0
 
 /*
-=============
-V_CalcBlend
-=============
+	V_CalcBlend
+
+	LordHavoc made this a real, (messy,) true alpha blend.  Cleaned it up
+	a bit, but otherwise this is his code.  --KB
 */
-void V_CalcBlend (void)
+void
+V_CalcBlend (void)
 {
-	float	r, g, b, a, a2;
+	float	r, g, b, a, a2, a3;
 	int		j;
 
 	r = 0;
@@ -53,32 +56,40 @@ void V_CalcBlend (void)
 	b = 0;
 	a = 0;
 
-	for (j=0 ; j<NUM_CSHIFTS ; j++)	
+	for (j=0 ; j<NUM_CSHIFTS ; j++)
 	{
 		if (!gl_cshiftpercent->value)
 			continue;
 
 		a2 = ((cl.cshifts[j].percent * gl_cshiftpercent->value) / 100.0) / 255.0;
 
-//		a2 = cl.cshifts[j].percent/255.0;
 		if (!a2)
 			continue;
-		a = a + a2*(1-a);
-//Con_Printf ("j:%i a:%f\n", j, a);
-		a2 = a2/a;
-		r = r*(1-a2) + cl.cshifts[j].destcolor[0]*a2;
-		g = g*(1-a2) + cl.cshifts[j].destcolor[1]*a2;
-		b = b*(1-a2) + cl.cshifts[j].destcolor[2]*a2;
+
+		a2 = min(a2, 1.0);
+		r += (cl.cshifts[j].destcolor[0]-r) * a2;
+		g += (cl.cshifts[j].destcolor[1]-g) * a2;
+		b += (cl.cshifts[j].destcolor[2]-b) * a2;
+		
+		a3 = (1.0 - a) * (1.0 - a2);
+		a = 1.0 - a3;
 	}
 
-	v_blend[0] = r/255.0;
-	v_blend[1] = g/255.0;
-	v_blend[2] = b/255.0;
-	v_blend[3] = a;
-	if (v_blend[3] > 1)
-		v_blend[3] = 1;
-	if (v_blend[3] < 0)
-		v_blend[3] = 0;
+	// LordHavoc: saturate color
+	if (a)
+	{
+		a2 = 1.0 / a;
+		r *= a2;
+		g *= a2;
+		b *= a2;
+		if (a > 1) // clamp alpha blend too
+			a = 1;
+	}
+
+	v_blend[0] = min(r, 255.0)/255.0;
+	v_blend[1] = min(g, 255.0)/255.0;
+	v_blend[2] = min(b, 255.0)/255.0;
+	v_blend[3] = bound (0.0, a, 1.0);
 }
 
 /*
