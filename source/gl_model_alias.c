@@ -187,8 +187,6 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 	int		groupskins;
 	daliasskininterval_t	*pinskinintervals;
 
-	skin = (byte *)pskintype;
-
 	if (numskins < 1 || numskins > MAX_SKINS)
 		Sys_Error ("Mod_LoadAliasModel: Invalid # of skins: %d\n", numskins);
 
@@ -197,7 +195,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 	for (i=0 ; i<numskins ; i++)
 	{
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
-			skin+=4;
+			skin = (byte *)(pskintype+1);
 			skin = Mod_LoadSkin (skin, skinsize, i, 0, false);
 
 			for (j=1; j < 4; j++) {
@@ -208,7 +206,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 			}
 		} else {
 			// animating skin group.  yuck.
-			Con_Printf("Animating Skin Group, if you get this message please notify warp@debian.org\n");
+			//Con_Printf("Animating Skin Group, if you get this message please notify warp@debian.org\n");
 			pskintype++;
 			pinskingroup = (daliasskingroup_t *)pskintype;
 			groupskins = LittleLong (pinskingroup->numskins);
@@ -229,9 +227,10 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 						pheader->gl_fb_texturenum[i][j - k]; 
 			}
 		}
+		pskintype = (daliasskintype_t*)skin;
 	}
 
-	return (void *)skin;
+	return pskintype;
 }
 
 /*
