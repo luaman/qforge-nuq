@@ -177,4 +177,6 @@ void R_DrawWaterSurfaces (void);
 struct msurface_s;
 void R_RenderBrushPoly (struct msurface_s *fa);
 
+void R_TranslatePlayerSkin (int playernum);
+
 #endif // __render_h
