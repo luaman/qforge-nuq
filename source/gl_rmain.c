@@ -354,7 +354,7 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 };
 
 vec3_t	shadevector;
-float	shadelight, ambientlight;
+float	shadelight;
 
 // precalculated dot products for quantized angles
 #define SHADEDOT_QUANT 16
@@ -551,46 +551,38 @@ static void R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	//
 
-	ambientlight = shadelight = R_LightPoint (currententity->origin);
+	shadelight = R_LightPoint (currententity->origin);
 
 	// allways give the gun some light
-	if (e == &cl.viewent && ambientlight < 24)
-		ambientlight = shadelight = 24;
+	if (e == &cl.viewent && shadelight < 24)
+		shadelight = 24;
 
 	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
 	{
 		if (cl_dlights[lnum].die >= cl.time)
 		{
-			VectorSubtract (currententity->origin,
-							cl_dlights[lnum].origin,
-							dist);
-			add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8) / (DotProduct(dist, dist)); // FIXME Deek
+			VectorSubtract (currententity->origin, cl_dlights[lnum].origin, dist);
+			add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8) / (DotProduct(dist, dist));
 
 			if (add > 0)
-			{
-				ambientlight += add;
-				//ZOID models should be affected by dlights as well
 				shadelight += add;
-			}
 		}
 	}
 
-	// clamp lighting so it doesn't overbright as much
-	if (ambientlight > 128)
-		ambientlight = 128;
-	if (ambientlight + shadelight > 192)
-		shadelight = 192 - ambientlight;
+	// clamp lighting
+	if (shadelight > 200)
+		shadelight = 200;
 
 	// ZOID: never allow players to go totally black
 	if (!strcmp(clmodel->name, "progs/player.mdl"))
 	{
-		if (ambientlight < 8)
-			ambientlight = shadelight = 8;
+		if (shadelight < 8)
+			shadelight = 8;
 	}
 	else if (!gl_fb_models->value && (!strcmp (clmodel->name, "progs/flame.mdl") || !strcmp (clmodel->name, "progs/flame2.mdl")))
 	{
 		// HACK HACK HACK -- no fullbright colors, so make torches full light
-		ambientlight = shadelight = 256;
+		shadelight = 200;
 	}
 
 	shadedots = r_avertexnormal_dots[((int)(e->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
@@ -867,7 +859,7 @@ static void R_SetupGL (void)
 	// set up viewpoint
 	//
 	glMatrixMode(GL_PROJECTION);
-    glLoadIdentity ();
+	glLoadIdentity ();
 	x = r_refdef.vrect.x * glwidth/vid.width;
 	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * glwidth/vid.width;
 	y = (vid.height-r_refdef.vrect.y) * glheight/vid.height;
