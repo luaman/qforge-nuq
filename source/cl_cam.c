@@ -101,7 +101,10 @@ void Chase_Update (void)
 		dist = 1;
 	r_refdef.viewangles[PITCH] = -atan(stop[2] / dist) / M_PI * 180;
 
+	TraceLine(r_refdef.vieworg, chase_dest, stop);
+	if (Length(stop) != 0)
+		VectorCopy(stop, chase_dest);
+
 	// move towards destination
 	VectorCopy (chase_dest, r_refdef.vieworg);
 }
-

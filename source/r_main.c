@@ -35,6 +35,7 @@
 #include "console.h"
 #include "view.h"
 #include "screen.h"
+#include "chase.h"
 
 //define	PASSAGES
 
@@ -578,7 +579,12 @@ void R_DrawEntitiesOnList (void)
 		currententity = cl_visedicts[i];
 
 		if (currententity == &cl_entities[cl.viewentity])
-			continue;	// don't draw the player
+		{
+			if (!chase_active->int_val)
+				continue;	// don't draw the player
+			else
+				currententity->angles[PITCH] *= 0.3;
+		}
 
 		switch (currententity->model->type)
 		{
@@ -650,6 +656,9 @@ void R_DrawViewModel (void)
 	dlight_t	*dl;
 	
 	if (!r_drawviewmodel->int_val || r_fov_greater_than_90)
+		return;
+
+	if (chase_active->int_val)
 		return;
 
 	if (cl.items & IT_INVISIBILITY)

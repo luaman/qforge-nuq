@@ -706,6 +706,9 @@ static void R_DrawEntitiesOnList (void)
 			continue;
 		currententity = cl_visedicts[i];
 
+		if (currententity == &cl_entities[cl.viewentity])
+			currententity->angles[PITCH] *= 0.3;
+
 		R_DrawAliasModel (currententity);
 	}
 
