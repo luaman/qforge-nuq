@@ -42,6 +42,7 @@
 #include "cmd.h"
 #include "host.h"
 #include "qargs.h"
+#include "joystick.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -115,6 +116,8 @@ int IN_Init(void)
 		IN_init_kb();
 	if (UseMouse)
 		IN_init_mouse();
+
+	joystick_init();
 
 	in_svgalib_inited = 1;
 	return 1;
