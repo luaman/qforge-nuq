@@ -100,7 +100,7 @@ cvar_t	*ambient_fade;
 cvar_t	*snd_noextraupdate;
 cvar_t	*snd_show;
 cvar_t	*snd_interp;
-cvar_t	*snd_stereo_phase_separation;
+cvar_t	*snd_phasesep;
 cvar_t	*_snd_mixahead;
 
 
@@ -208,7 +208,7 @@ void S_Init (void)
 	snd_noextraupdate = Cvar_Get("snd_noextraupdate", "0", CVAR_NONE, "None");
 	snd_show = Cvar_Get("snd_show", "0", CVAR_NONE, "None");
 	snd_interp = Cvar_Get("snd_interp", "1", CVAR_ARCHIVE, "control sample interpolation");
-	snd_stereo_phase_separation = Cvar_Get("snd_stereo_phase_separation", "0.0", CVAR_ARCHIVE, "max stereo phase separation in ms. 0.6 is for 20cm head");
+	snd_phasesep = Cvar_Get("snd_phasesep", "0.0", CVAR_ARCHIVE, "max stereo phase separation in ms. 0.6 is for 20cm head");
 	_snd_mixahead = Cvar_Get("_snd_mixahead", "0.1", CVAR_ARCHIVE, "None");
 
 	if (COM_CheckParm("-nosound"))
@@ -461,7 +461,7 @@ void SND_Spatialize(channel_t *ch)
 		lscale = 1.0 - dot;
 		//rscale = 1.0;
 		//lscale = 1.0;
-		phase = snd_stereo_phase_separation->value * 0.001 * shm->speed * dot;
+		phase = snd_phasesep->value * 0.001 * shm->speed * dot;
 	}
 
 // add in distance effect
