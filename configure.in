@@ -947,7 +947,7 @@ if test "x$HAVE_GGI" = xyes; then
 	CL_TARGETS="$CL_TARGETS GGI"
 fi
 if test "x$HAVE_SDL" = xyes; then
-#	TARGETS="$TARGETS $PACKAGE-sdl\$(EXEEXT)"
+	TARGETS="$TARGETS $PACKAGE-sdl\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS SDL"
 fi
 if test "x$HAVE_SGL" = xyes -a "x$HAVE_GLX" = xyes; then
