@@ -661,7 +661,7 @@ static void R_DrawAliasModel (entity_t *e)
 		R_SetupAliasFrame (currententity->frame, paliashdr, true);
 
 		glDisable (GL_BLEND);
-		gkBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	glShadeModel (GL_FLAT);
