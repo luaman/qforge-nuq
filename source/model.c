@@ -1215,7 +1215,7 @@ void Mod_TouchModel (char *name)
 
 	mod = Mod_FindName (name);
 
-	if (~mod->needload)
+	if (!mod->needload)
 	{
 		if (mod->type == mod_alias)
 			Cache_Check (&mod->cache);
