@@ -38,7 +38,6 @@
 #include "console.h"
 #include "qendian.h"
 #include "checksum.h"
-#include "glquake.h"
 
 byte	*mod_base;
 
@@ -50,6 +49,7 @@ extern const int mod_lightmap_bytes;
 
 void Mod_ProcessTexture (miptex_t *mt, texture_t *tx);
 void Mod_LoadLighting (lump_t *l);
+void GL_SubdivideSurface (msurface_t *fa);
 
 /*
 ===============

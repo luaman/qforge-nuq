@@ -38,12 +38,12 @@
 #include "console.h"
 #include "qendian.h"
 #include "checksum.h"
-#include "glquake.h"
 
 extern char loadname[];
 extern model_t *loadmodel;
 
 void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinindex);
+void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 
 /*
 ==============================================================================
