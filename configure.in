@@ -1055,9 +1055,11 @@ if test "x$HAVE_SVGA" = xyes -a "x$ENABLE_SVGA" = xyes; then
 	TARGETS="$TARGETS $PACKAGE-svga\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS SVGAlib"
 fi
-if test "x$HAVE_X" = xyes -a "x$ENABLE_X11" = xyes; then
-	TARGETS="$TARGETS $PACKAGE-x11\$(EXEEXT)"
-	CL_TARGETS="$CL_TARGETS X11"
+if test "x$HAVE_X" = xyes; then
+	if test "x$ENABLE_X11" = xyes; then
+		TARGETS="$TARGETS $PACKAGE-x11\$(EXEEXT)"
+		CL_TARGETS="$CL_TARGETS X11"
+	fi
 	if test "x$HAVE_GLX" = xyes -a "x$ENABLE_GLX" = xyes; then
 		TARGETS="$TARGETS $PACKAGE-glx\$(EXEEXT)"
 		CL_TARGETS="$CL_TARGETS GLX"
