@@ -1096,8 +1096,11 @@ GL_Upload32
 static void GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean alpha)
 {
 	int			samples;
-static	unsigned	scaled[1024*512];	// [512*256];
+	unsigned int *scaled;
 	int			scaled_width, scaled_height;
+
+	if (!width || !height)
+		return; // Null texture
 
 	for (scaled_width = 1 ; scaled_width < width ; scaled_width<<=1)
 		;
@@ -1110,7 +1113,7 @@ static	unsigned	scaled[1024*512];	// [512*256];
 	scaled_width = min(scaled_width, gl_max_size->int_val);
 	scaled_height = min(scaled_height, gl_max_size->int_val);
 
-	if (scaled_width * scaled_height > sizeof(scaled)/4)
+	if (!(scaled = malloc (scaled_width * scaled_height * sizeof (GLuint))))
 		Sys_Error ("GL_LoadTexture: too big");
 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
@@ -1173,6 +1176,8 @@ done: ;
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	}
+
+	free (scaled);
 }
 
 void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboolean alpha) 
