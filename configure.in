@@ -978,8 +978,6 @@ AC_OUTPUT(
 	RPM/nuq.spec
 	RPM/build_rpm
 	doc/Makefile
-	doc/texinfo/Makefile
-	doc/man/Makefile
 	include/Makefile
 	include/win32/version.h
 	source/Makefile
