@@ -1429,7 +1429,7 @@ void M_Keys_Draw (void)
 
 		if (keys[0] == -1)
 		{
-			M_Print (140, y, "???");
+			M_Print (140, y, "\?\?\?");
 		}
 		else
 		{
@@ -2512,7 +2512,7 @@ level_t	abysslevels[] = {
 	{"aopdm3",	"Mental Overlord"},
 	{"aopdm4",	"Mental Overlord II"},
 	{"aopdm5",	"Midnight Darkness"},
-	{"aopdm6",	"???"}
+	{"aopdm6",	"\?\?\?"}
 };
 
 typedef struct
