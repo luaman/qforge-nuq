@@ -41,7 +41,7 @@
 #include "client.h"
 #include "server.h"
 
-int			sb_updates;		// if >= vid.numpages, no update needed
+int 		sb_updates;		// if >= vid.numpages, no update needed
 
 #define STAT_MINUS		10	// num frame for '-' stats digit
 qpic_t		*sb_nums[2][11];
@@ -50,39 +50,42 @@ qpic_t		*sb_ibar;
 qpic_t		*sb_sbar;
 qpic_t		*sb_scorebar;
 
-qpic_t      *sb_weapons[7][8];   // 0 is active, 1 is owned, 2-5 are flashes
-qpic_t      *sb_ammo[4];
+qpic_t		*sb_weapons[7][8];   // 0 is active, 1 is owned, 2-5 are flashes
+qpic_t		*sb_ammo[4];
 qpic_t		*sb_sigil[4];
 qpic_t		*sb_armor[3];
 qpic_t		*sb_items[32];
 
-qpic_t	*sb_faces[7][2];		// 0 is gibbed, 1 is dead, 2-6 are alive
+qpic_t		*sb_faces[7][2];		// 0 is gibbed, 1 is dead, 2-6 are alive
 							// 0 is static, 1 is temporary animation
-qpic_t	*sb_face_invis;
-qpic_t	*sb_face_quad;
-qpic_t	*sb_face_invuln;
-qpic_t	*sb_face_invis_invuln;
+qpic_t		*sb_face_invis;
+qpic_t		*sb_face_quad;
+qpic_t		*sb_face_invuln;
+qpic_t		*sb_face_invis_invuln;
 
 qboolean	sb_showscores;
 
 int			sb_lines;			// scan lines to draw
 
-qpic_t      *rsb_invbar[2];
-qpic_t      *rsb_weapons[5];
-qpic_t      *rsb_items[2];
-qpic_t      *rsb_ammo[3];
-qpic_t      *rsb_teambord;		// PGM 01/19/97 - team color border
+qpic_t		*rsb_invbar[2];
+qpic_t		*rsb_weapons[5];
+qpic_t		*rsb_items[2];
+qpic_t		*rsb_ammo[3];
+qpic_t		*rsb_teambord;		// PGM 01/19/97 - team color border
 
 //MED 01/04/97 added two more weapons + 3 alternates for grenade launcher
-qpic_t      *hsb_weapons[7][5];   // 0 is active, 1 is owned, 2-5 are flashes
+qpic_t		*hsb_weapons[7][5];   // 0 is active, 1 is owned, 2-5 are flashes
 //MED 01/04/97 added array to simplify weapon parsing
-int         hipweapons[4] = {HIT_LASER_CANNON_BIT,HIT_MJOLNIR_BIT,4,HIT_PROXIMITY_GUN_BIT};
+int 		hipweapons[4] = {HIT_LASER_CANNON_BIT,HIT_MJOLNIR_BIT,4,HIT_PROXIMITY_GUN_BIT};
 //MED 01/04/97 added hipnotic items array
-qpic_t      *hsb_items[2];
+qpic_t		*hsb_items[2];
+
+qboolean	headsup;
+qboolean	sbar_centered;
 
 void Sbar_MiniDeathmatchOverlay (void);
 void Sbar_DeathmatchOverlay (void);
-void M_DrawPic (int x, int y, qpic_t *pic);
+void M_DrawPic (int, int, qpic_t *);
 
 /*
 ===============
@@ -273,7 +276,7 @@ Sbar_DrawPic
 */
 void Sbar_DrawPic (int x, int y, qpic_t *pic)
 {
-	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if (sbar_centered)
 		Draw_Pic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic);
 	else
 		Draw_Pic (x, y + (vid.height-SBAR_HEIGHT), pic);
@@ -288,7 +291,7 @@ JACK: Draws a portion of the picture in the status bar.
 
 void Sbar_DrawSubPic(int x, int y, qpic_t *pic, int srcx, int srcy, int width, int height) 
 {
-	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if (sbar_centered)
 		Draw_SubPic (x + ((vid.width - 320)>>1), y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width, height);
 	else
 		Draw_SubPic (x, y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width, height);
@@ -301,7 +304,7 @@ Sbar_DrawTransPic
 */
 void Sbar_DrawTransPic (int x, int y, qpic_t *pic)
 {
-	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if (sbar_centered)
 		Draw_TransPic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic);
 	else
 		Draw_TransPic (x, y + (vid.height-SBAR_HEIGHT), pic);
@@ -316,7 +319,7 @@ Draws one solid graphics character
 */
 void Sbar_DrawCharacter (int x, int y, int num)
 {
-	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if (sbar_centered)
 		Draw_Character8 (x + ((vid.width - 320)>>1) + 4 , y + vid.height-SBAR_HEIGHT, num);
 	else
 		Draw_Character8 (x + 4 , y + vid.height-SBAR_HEIGHT, num);
@@ -329,7 +332,7 @@ Sbar_DrawString
 */
 void Sbar_DrawString (int x, int y, char *str)
 {
-	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if (sbar_centered)
 		Draw_String8 (x + ((vid.width - 320)>>1), y+ vid.height-SBAR_HEIGHT, str);
 	else
 		Draw_String8 (x, y+ vid.height-SBAR_HEIGHT, str);
@@ -482,6 +485,9 @@ void Sbar_SoloScoreboard (void)
 	int		minutes, seconds, tens, units;
 	int		l;
 
+	if (!headsup)
+		Sbar_DrawPic (0, 0, sb_scorebar);
+
 	snprintf (str, sizeof (str), "Monsters:%3i /%3i", cl.stats[STAT_MONSTERS], cl.stats[STAT_TOTALMONSTERS]);
 	Sbar_DrawString (8, 4, str);
 
@@ -526,17 +532,8 @@ void Sbar_DrawInventory (void)
 	char		num[6];
 	float		time;
 	int			flashon;
-	qboolean	headsup;
-	qboolean    hudswap;
 
-	headsup = !(cl_sbar->int_val || scr_viewsize->value<100);
-	hudswap = cl_hudswap->int_val;
-
-	if (hipnotic)
-		headsup = false;
-		
 	if (rogue) {
-		headsup = false;
 		if ( cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
 			Sbar_DrawPic (0, -24, rsb_invbar[0]);
 		else
@@ -564,7 +561,7 @@ void Sbar_DrawInventory (void)
 			
 			if (headsup) {
 				if (i || vid.height > 200)
-					Sbar_DrawSubPic ((hudswap) ? 0 : (vid.width-24), -68 -(7 - i) * 16, sb_weapons[flashon][i], 0, 0, 24, 16);
+					Sbar_DrawSubPic ((cl_hudswap->int_val) ? 0 : (vid.width-24), -68 -(7 - i) * 16, sb_weapons[flashon][i], 0, 0, 24, 16);
 			} else {
 				Sbar_DrawPic (i*24, -16, sb_weapons[flashon][i]);
 			}
@@ -638,13 +635,13 @@ void Sbar_DrawInventory (void)
 	for (i = 0; i < 4; i++) {
 		snprintf (num, sizeof (num), "%3i", cl.stats[STAT_SHELLS + i] );
 		if (headsup) {
-			Sbar_DrawSubPic ((hudswap) ? 0 : (vid.width-42), -24 - (4-i)*11, sb_ibar, 3+(i*48), 0, 42, 11);
+			Sbar_DrawSubPic ((cl_hudswap->int_val) ? 0 : (vid.width-42), -24 - (4-i)*11, sb_ibar, 3+(i*48), 0, 42, 11);
 			if (num[0] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 3 : (vid.width-39), -24 - (4-i)*11, 18 + num[0] - '0');
+				Sbar_DrawCharacter ((cl_hudswap->int_val) ? 3 : (vid.width-39), -24 - (4-i)*11, 18 + num[0] - '0');
 			if (num[1] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 11 : (vid.width-31), -24 - (4-i)*11, 18 + num[1] - '0');
+				Sbar_DrawCharacter ((cl_hudswap->int_val) ? 11 : (vid.width-31), -24 - (4-i)*11, 18 + num[1] - '0');
 			if (num[2] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 19 : (vid.width-23), -24 - (4-i)*11, 18 + num[2] - '0');
+				Sbar_DrawCharacter ((cl_hudswap->int_val) ? 19 : (vid.width-23), -24 - (4-i)*11, 18 + num[2] - '0');
 		} else {
 			if (num[0] != ' ')
 				Sbar_DrawCharacter ((6 * i + 1) * 8 - 2, -24, 18 + num[0] - '0');
@@ -810,10 +807,10 @@ void Sbar_DrawFace (void)
 		top = Sbar_ColorForMap (top);
 		bottom = Sbar_ColorForMap (bottom);
 
-		if (cl.gametype == GAME_DEATHMATCH)
-			xofs = 113;
-		else
+		if (sbar_centered)
 			xofs = ((vid.width - 320) >> 1) + 113;
+		else
+			xofs = 113;
 
 		Sbar_DrawPic (112, 0, rsb_teambord);
 		Draw_Fill (xofs, vid.height - SBAR_HEIGHT + 3, 22, 9, top);
@@ -823,7 +820,7 @@ void Sbar_DrawFace (void)
 		f = s->frags;
 		snprintf (num, sizeof (num), "%3i", f);
 
-		if (top==8) {
+		if (top == 8) {
 			if (num[0] != ' ')
 				Sbar_DrawCharacter(109, 3, 18 + num[0] - '0');
 			if (num[1] != ' ')
@@ -882,7 +879,7 @@ Sbar_DrawNormal
 */
 void Sbar_DrawNormal (void)
 {
-	if (cl_sbar->int_val || scr_viewsize->value < 100)
+	if (!headsup)
 		Sbar_DrawPic (0, 0, sb_sbar);
 
 	if (hipnotic) {
@@ -958,10 +955,15 @@ Sbar_Draw
 */
 void Sbar_Draw (void)
 {
-	qboolean headsup;
-//	char st[512];
+	if (hipnotic || rogue) {
+		if (!cl_sbar->int_val) {
+			Cvar_SetValue(cl_sbar, 1);
+		}
+	}
 
-	headsup = !(cl_sbar->int_val || scr_viewsize->value<100);
+	headsup = !(cl_sbar->int_val || scr_viewsize->value < 100);
+	sbar_centered = (!headsup && !cl.gametype == GAME_DEATHMATCH);
+	
 	if ((sb_updates >= vid.numpages) && !headsup)
 		return;
 
@@ -988,9 +990,14 @@ void Sbar_Draw (void)
 		}
 	}
 
-	if (!headsup && sb_lines && vid.width > 320)
-		Draw_TileClear (320, vid.height - sb_lines, vid.width - 320, sb_lines);
-
+	if (!headsup && sbar_centered && sb_lines && vid.width > 320) {
+		Draw_TileClear (0, vid.height - sb_lines, (vid.width - 320) >> 1, sb_lines);
+		Draw_TileClear ((vid.width + 320) >> 1, vid.height - sb_lines, (vid.width - 320) >> 1, sb_lines);
+	} else {
+		if ((!headsup) && (!sbar_centered)) {
+			Draw_TileClear (320, vid.height - sb_lines, vid.width - 320, sb_lines);
+		}
+	}
 }
 
 //=============================================================================

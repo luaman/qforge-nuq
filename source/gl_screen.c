@@ -673,7 +673,7 @@ void SCR_ScreenShot_f (void)
 		if (Sys_FileTime(checkname) == -1)
 			break;	// file doesn't exist
 	} 
-	if (i==100) 
+	if (i==1000) 
 	{
 		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX file\n"); 
 		return;
@@ -901,24 +901,26 @@ void SCR_UpdateScreen (void)
 	scr_copytop = 0;
 	scr_copyeverything = 0;
 
-	if (scr_disabled_for_loading)
-	{
-		if (realtime - scr_disabled_time > 60)
-		{
+	if (scr_disabled_for_loading) {
+		if (realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
 			Con_Printf ("load failed.\n");
-		}
-		else
+		} else {
 			return;
+		}
 	}
 
 	if (!scr_initialized || !con_initialized)
 		return;                         // not initialized yet
 
+	if (oldsbar != cl_sbar->value) {
+		oldsbar = cl_sbar->value;
+		vid.recalc_refdef = true;
+	}
+
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	
-	if (r_speeds->int_val)
-	{
+	if (r_speeds->int_val) {
 		time1 = Sys_DoubleTime ();
 		c_brush_polys = 0;
 		c_alias_polys = 0;
@@ -927,8 +929,7 @@ void SCR_UpdateScreen (void)
 	//
 	// determine size of refresh window
 	//
-	if (oldfov != scr_fov->value)
-	{
+	if (oldfov != scr_fov->value) {
 		oldfov = scr_fov->value;
 		vid.recalc_refdef = true;
 	}
@@ -941,8 +942,7 @@ void SCR_UpdateScreen (void)
 //
 
 	// LordHavoc: set lighthalf based on gl_lightmode cvar
-	if (lighthalf != (gl_lightmode->int_val != 0))
-	{
+	if (lighthalf != (gl_lightmode->int_val != 0)) {
 		lighthalf = gl_lightmode->int_val != 0;
 		R_ForceLightUpdate();
 	}
@@ -958,44 +958,41 @@ void SCR_UpdateScreen (void)
 	//
 	SCR_TileClear ();
 
-	if (scr_drawdialog)
-	{
+	if (scr_drawdialog)	{
 		Sbar_Draw ();
 		Draw_FadeScreen ();
 		SCR_DrawNotifyString ();
 		scr_copyeverything = true;
-	}
-	else if (scr_drawloading)
-	{
-		SCR_DrawLoading ();
-		Sbar_Draw ();
-	}
-	else if (cl.intermission == 1 && key_dest == key_game)
-	{
-		Sbar_IntermissionOverlay ();
-	}
-	else if (cl.intermission == 2 && key_dest == key_game)
-	{
-		Sbar_FinaleOverlay ();
-		SCR_CheckDrawCenterString ();
-	}
-	else
-	{
-		if (crosshair->int_val)
-			Draw_Crosshair();
+	} else {
+		if (scr_drawloading) {
+			SCR_DrawLoading ();
+			Sbar_Draw ();
+		} else {
+			if (cl.intermission == 1 && key_dest == key_game) {
+				Sbar_IntermissionOverlay ();
+			} else {
+				if (cl.intermission == 2 && key_dest == key_game) {
+					Sbar_FinaleOverlay ();
+					SCR_CheckDrawCenterString ();
+				} else {
+					if (crosshair->int_val)
+						Draw_Crosshair();
 		
-		SCR_DrawRam ();
-		SCR_DrawFPS ();
-		SCR_DrawTurtle ();
-		SCR_DrawPause ();
-		SCR_CheckDrawCenterString ();
-		Sbar_Draw ();
-		SCR_DrawConsole ();     
-		M_Draw ();
+					SCR_DrawRam ();
+					SCR_DrawFPS ();
+					SCR_DrawTurtle ();
+					SCR_DrawPause ();
+					SCR_CheckDrawCenterString ();
+					Sbar_Draw ();
+					SCR_DrawConsole ();     
+					M_Draw ();
+				}
+			}
+		}
 	}
 
-// LordHavoc: adjustable brightness and contrast,
-//            also makes polyblend apply to whole screen
+	// LordHavoc: adjustable brightness and contrast,
+	//            also makes polyblend apply to whole screen
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	Cvar_SetValue (brightness, bound(1, brightness->value, 5));
@@ -1003,13 +1000,11 @@ void SCR_UpdateScreen (void)
 		f = brightness->value * 2;
 	else
 		f = brightness->value;
-	if (f > 1)
-	{
+	if (f > 1.0) {
 		glBlendFunc (GL_DST_COLOR, GL_ONE);
 		glBegin (GL_QUADS);
-		while (f > 1)
-		{
-			if (f >= 2)
+		while (f > 1.0) {
+			if (f >= 2.0)
 				glColor3f (1, 1, 1);
 			else
 				glColor3f (f-1, f-1, f-1);
