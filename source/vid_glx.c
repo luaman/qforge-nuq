@@ -155,8 +155,8 @@ VID_Shutdown(void)
 		return;
 
 	Con_Printf("VID_Shutdown\n");
-	XDestroyWindow(x_disp, x_win);
 	glXDestroyContext(x_disp, ctx);
+	XDestroyWindow(x_disp, x_win);
 
 	x11_restore_vidmode();
 #ifdef HAVE_DLOPEN
