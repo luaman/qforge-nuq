@@ -134,6 +134,18 @@ void COM_InitArgv (int argc, char **argv)
 	largv[com_argc] = argvdummy;
 	com_argv = largv;
 
+	if (COM_CheckParm ("-rogue"))
+	{
+		rogue = true;
+		standard_quake = false;
+	}
+ 
+	if (COM_CheckParm ("-hipnotic"))
+	{
+		hipnotic = true;
+		standard_quake = false;
+	}
+
 // 1999-10-29 +USE fix by Maddes  start
 	if (COM_CheckParm ("-nouse"))
 	{

@@ -903,6 +903,10 @@ COM_InitFilesystem ( void )
 	COM_CreatePath (va("%s/%s/dummy", fs_userpath->string,
 				fs_basegame->string));
 	COM_AddGameDirectory(fs_basegame->string);
+	if (hipnotic)
+		COM_AddGameDirectory ("hipnotic");
+	if (rogue)
+		COM_AddGameDirectory ("rogue");
 
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;
