@@ -1,4 +1,4 @@
-%define name	quakeforge
+%define name	nuq
 %define version @VERSION@
 %define release 1
 %define builddir $RPM_BUILD_DIR/%{name}-%{version}
@@ -20,7 +20,7 @@ Summary:	3D game engine based on id Software's Quake engine
 %description
 3D game engine based on id Software's Quake engine
 @configure_input@
-Please edit quakeforge.spec.in to add several more lines of description
+Please edit nuq.spec.in to add several more lines of description
 here if appropriate, and to delete these instructions.
 
 %prep
