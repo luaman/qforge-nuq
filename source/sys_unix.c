@@ -41,6 +41,7 @@
 #include <sys/mman.h>
 #include <signal.h>
 #include <string.h>
+#include <time.h>
 
 #include "sys.h"
 #include "qargs.h"
