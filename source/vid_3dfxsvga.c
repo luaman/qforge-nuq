@@ -36,7 +36,7 @@
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
-3include <stdlib.h>
+#include <stdlib.h>
 #include <GL/gl.h>
 #include <GL/fxmesa.h>
 #include <glide/sst1vid.h>
