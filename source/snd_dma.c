@@ -101,6 +101,7 @@ cvar_t	*snd_noextraupdate;
 cvar_t	*snd_show;
 cvar_t	*snd_interp;
 cvar_t	*snd_phasesep;
+cvar_t	*snd_volumesep;
 cvar_t	*_snd_mixahead;
 
 
@@ -209,6 +210,7 @@ void S_Init (void)
 	snd_show = Cvar_Get("snd_show", "0", CVAR_NONE, "None");
 	snd_interp = Cvar_Get("snd_interp", "1", CVAR_ARCHIVE, "control sample interpolation");
 	snd_phasesep = Cvar_Get("snd_phasesep", "0.0", CVAR_ARCHIVE, "max stereo phase separation in ms. 0.6 is for 20cm head");
+	snd_volumesep = Cvar_Get("snd_volumesep", "1.0", CVAR_ARCHIVE, "max stereo volume separation in ms. 1.0 is max");
 	_snd_mixahead = Cvar_Get("_snd_mixahead", "0.1", CVAR_ARCHIVE, "None");
 
 	if (COM_CheckParm("-nosound"))
@@ -457,10 +459,8 @@ void SND_Spatialize(channel_t *ch)
 	}
 	else
 	{
-		rscale = 1.0 + dot;
-		lscale = 1.0 - dot;
-		//rscale = 1.0;
-		//lscale = 1.0;
+		rscale = 1.0 + dot * snd_volumesep->value;
+		lscale = 1.0 - dot * snd_volumesep->value;
 		phase = snd_phasesep->value * 0.001 * shm->speed * dot;
 	}
 
