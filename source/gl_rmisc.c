@@ -340,8 +340,8 @@ void R_TranslatePlayerSkin (int playernum)
 		return; // only translate skins on alias models
  
 	paliashdr = (aliashdr_t *)Mod_Extradata (model);
-	s = paliashdr->skinwidth * paliashdr->skinheight;
-	if (currententity->skinnum < 0 || currententity->skinnum >= paliashdr->numskins) {
+	s = paliashdr->mdl.skinwidth * paliashdr->mdl.skinheight;
+	if (currententity->skinnum < 0 || currententity->skinnum >= paliashdr->mdl.numskins) {
 		Con_Printf("(%d): Invalid player skin #%d\n", playernum, currententity->skinnum);
 		original = (byte *)paliashdr + paliashdr->texels[0];
 	} else
@@ -349,8 +349,8 @@ void R_TranslatePlayerSkin (int playernum)
 	if (s & 3)
 		Sys_Error ("R_TranslateSkin: s&3");
  
-	inwidth = paliashdr->skinwidth;
-	inheight = paliashdr->skinheight;
+	inwidth = paliashdr->mdl.skinwidth;
+	inheight = paliashdr->mdl.skinheight;
  
 	// because this happens during gameplay, do it fast
 	// instead of sending it through gl_upload 8

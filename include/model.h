@@ -318,21 +318,12 @@ typedef struct mtriangle_s {
 
 #define	MAX_SKINS	32
 typedef struct {
-	int			ident;
-	int			version;
-	vec3_t		scale;
-	vec3_t		scale_origin;
-	float		boundingradius;
-	vec3_t		eyeposition;
-	int			numskins;
-	int			skinwidth;
-	int			skinheight;
-	int			numverts;
-	int			numtris;
-	int			numframes;
-	synctype_t	synctype;
-	int			flags;
-	float		size;
+	int			model;
+	int			stverts;
+	int			skindesc;
+	int			triangles;
+
+	mdl_t		mdl;
 
 	int			numposes;
 	int			poseverts;
@@ -340,11 +331,8 @@ typedef struct {
 	int			commands;	// gl command list with embedded s/t
 	int			gl_texturenum[MAX_SKINS][4];
 	int			gl_fb_texturenum[MAX_SKINS][4];
-	int			model;
-	int			stverts;
-	int			skindesc;
-	int			triangles;
 	int			texels[MAX_SKINS];  // only for player skins
+
 	maliasframedesc_t	frames[1];
 } aliashdr_t;
 

@@ -49,7 +49,7 @@ common_ASM=	sys_ia32.S worlda.S $(math_ASM)
 #endif
 
 common_SOURCES= crc.c cvar.c cmd.c mathlib.c wad.c world.c \
-		model.c model_brush.c model_sprite.c \
+		model.c model_alias.c model_brush.c model_sprite.c \
 		msg.c r_part.c sizebuf.c qendian.c qargs.c quakefs.c \
 		va.c quakeio.c link.c com.c \
 		zone.c $(common_ASM)
