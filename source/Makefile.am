@@ -39,14 +39,14 @@ EXTRA_PROGRAMS= uquake-ggi uquake-mgl uquake-sdl uquake-svga uquake-x11 \
 
 noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
-if ASM_ARCH
+#if ASM_ARCH
 math_ASM= 	math.S cl_math.S
 soft_ASM=	d_draw.S d_draw16.S d_parta.S d_polysa.S d_scana.S d_spr8.S \
 		d_varsa.S r_aclipa.S r_aliasa.S r_drawa.S r_edgea.S r_varsa.S \
 		surf16.s surf8.s
 sound_ASM=	snd_mixa.S
 common_ASM=	sys_ia32.S worlda.S $(math_ASM)
-endif
+#endif
 
 common_SOURCES= crc.c common.c cvar.c cmd.c mathlib.c wad.c world.c \
 		zone.c $(common_ASM)
@@ -111,7 +111,8 @@ EXTRA_libqfcd_a_SOURCES=net_dos.c net_bw.c net_ipx.c net_mp.c net_ser.c \
 client_LIBS=	-L. -lqfsys -lqfsnd -lqfcd -lqfnet $(SOUND_LIBS) $(NET_LIBS)
 
 client_SOURCES= cl_cam.c cl_demo.c cl_input.c cl_main.c cl_parse.c \
-		cl_tent.c console.c keys.c menu.c sbar.c view.c
+		cl_tent.c console.c keys.c menu.c sbar.c view.c \
+		nonintel.c
 
 server_SOURCES= host.c host_cmd.c \
 		pr_cmds.c pr_edict.c pr_exec.c \
