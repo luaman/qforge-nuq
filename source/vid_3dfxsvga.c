@@ -30,7 +30,6 @@
 */
 
 #include "qtypes.h"
-#include "quakedef.h"
 #include "glquake.h"
 #include "sys.h"
 #include "console.h"
@@ -39,10 +38,13 @@
 #include "qendian.h"
 #include "qargs.h"
 //#include "lib_replace.h"
+#include "host.h"
+#include "quakefs.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <string.h>
 
 #ifdef HAVE_DLFCN_H
 # include <dlfcn.h>
@@ -635,16 +637,6 @@ void VID_InitCvars ()
 {
 	gl_triplebuffer = Cvar_Get ("gl_triplebuffer","1",CVAR_ARCHIVE,"None");
 }
-
-void
-VID_LockBuffer ( void )
-{       
-}       
-
-void
-VID_UnlockBuffer ( void )
-{       
-}       
 
 void VID_SetCaption (char *text)
 {

@@ -966,7 +966,7 @@ if test "x$HAVE_X" = xyes; then
 	fi
 fi
 if test "x$HAVE_TDFXGL" = xyes; then
-#	TARGETS="$TARGETS $PACKAGE-3dfx\$(EXEEXT)"
+	TARGETS="$TARGETS $PACKAGE-3dfx\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS 3Dfx"
 fi
 AC_SUBST(TARGETS)
