@@ -30,7 +30,12 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include <string.h>
+
+#include "msg.h"
+#include "host.h"
+#include "console.h"
+#include "client.h"
 
 /*
 ===============================================================================
@@ -164,7 +169,7 @@ void IN_UseUp (void) {KeyUp(&in_use);}
 void IN_JumpDown (void) {KeyDown(&in_jump);}
 void IN_JumpUp (void) {KeyUp(&in_jump);}
 
-void IN_Impulse (void) {in_impulse=Q_atoi(Cmd_Argv(1));}
+void IN_Impulse (void) {in_impulse=atoi(Cmd_Argv(1));}
 
 /*
 ===============
@@ -299,7 +304,7 @@ void CL_BaseMove (usercmd_t *cmd)
 			
 	CL_AdjustAngles ();
 	
-	Q_memset (cmd, 0, sizeof(*cmd));
+	memset (cmd, 0, sizeof(*cmd));
 	
 	if (in_strafe.state & 1)
 	{

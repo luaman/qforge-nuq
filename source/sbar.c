@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 
 int			sb_updates;		// if >= vid.numpages, no update needed

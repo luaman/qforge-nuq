@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 #define NUM_SAFE_ARGVS  7
 

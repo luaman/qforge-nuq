@@ -26,6 +26,10 @@
 	$Id$
 */
 
+#ifndef __keys_h
+#define __keys_h
+
+#include "qtypes.h"
 
 //
 // these are the key numbers that should be passed to Key_Event
@@ -140,3 +144,4 @@ void Key_WriteBindings (FILE *f);
 void Key_SetBinding (int keynum, char *binding);
 void Key_ClearStates (void);
 
+#endif // __keys_h

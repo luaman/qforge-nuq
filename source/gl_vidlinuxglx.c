@@ -40,7 +40,6 @@
 
 #include <dlfcn.h>
 
-#include "quakedef.h"
 
 #include <GL/glx.h>
 

@@ -45,7 +45,6 @@
 #include "vgakeyboard.h"
 #include "vgamouse.h"
 
-#include "quakedef.h"
 #include "GL/fxmesa.h"
 
 #define WARP_WIDTH              320

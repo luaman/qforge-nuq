@@ -31,9 +31,9 @@
 #endif
 
 #include <math.h>
-#include "quakedef.h"
 
-void Sys_Error (char *error, ...);
+#include "mathlib.h"
+#include "sys.h"
 
 vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;

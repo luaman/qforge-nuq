@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "d_local.h"
 #include "r_local.h"
 

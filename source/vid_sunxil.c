@@ -47,7 +47,6 @@
 #include <X11/keysym.h>
 #include <xil/xil.h>
 
-#include "quakedef.h"
 #include "d_local.h"
 
 #define MIN_WIDTH 320

@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 entity_t	r_worldentity;
 

@@ -130,4 +130,8 @@ void	Cmd_Print (char *text);
 // used by command functions to send output to either the graphics console or
 // passed as a print message to the client
 
+#define		MAX_COM_TOKEN   1024
+extern char		com_token[MAX_COM_TOKEN];
+char *COM_Parse (char *data);
+
 #endif __cmd_h

@@ -39,7 +39,6 @@
 #include <string.h>
 #include <ggi/ggi.h>
 
-#include "quakedef.h"
 
 #include "d_local.h"
 

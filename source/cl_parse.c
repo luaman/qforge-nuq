@@ -30,7 +30,17 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include <string.h>
+
+#include "client.h"
+#include "host.h"
+#include "msg.h"
+#include "console.h"
+#include "cdaudio.h"
+#include "sys.h"
+#include "sbar.h"
+#include "screen.h"
+#include "server.h"
 
 char *svc_strings[] =
 {
@@ -833,8 +843,8 @@ void CL_ParseServerMessage (void)
 			i = MSG_ReadByte ();
 			if (i >= MAX_LIGHTSTYLES)
 				Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
-			Q_strcpy (cl_lightstyle[i].map,  MSG_ReadString());
-			cl_lightstyle[i].length = Q_strlen(cl_lightstyle[i].map);
+			strcpy (cl_lightstyle[i].map,  MSG_ReadString());
+			cl_lightstyle[i].length = strlen(cl_lightstyle[i].map);
 			break;
 			
 		case svc_sound:

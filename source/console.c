@@ -37,7 +37,6 @@
 #include <unistd.h>
 #endif
 #include <fcntl.h>
-#include "quakedef.h"
 
 int 		con_linewidth;
 

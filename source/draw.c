@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 typedef struct {
 	vrect_t	rect;

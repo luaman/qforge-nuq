@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 #define GL_COLOR_INDEX8_EXT     0x80E5
 

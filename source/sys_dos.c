@@ -48,7 +48,6 @@
 #include <sys/nearptr.h>
 #include <conio.h>
 
-#include "quakedef.h"
 #include "dosisms.h"
 
 #define MINIMUM_WIN_MEMORY			0x800000

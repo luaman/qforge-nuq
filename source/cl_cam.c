@@ -30,7 +30,9 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include "mathlib.h"
+#include "client.h"
+#include "world.h"
 
 qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, trace_t *trace);
 

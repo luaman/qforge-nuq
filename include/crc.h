@@ -26,7 +26,13 @@
 	$Id$
 */
 
+#ifndef __crc_h
+#define __crc_h
+
+#include "qtypes.h"
 
 void CRC_Init(unsigned short *crcvalue);
 void CRC_ProcessByte(unsigned short *crcvalue, byte data);
 unsigned short CRC_Value(unsigned short crcvalue);
+
+#endif // __crc_h

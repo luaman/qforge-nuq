@@ -32,7 +32,6 @@
 
 #include <windows.h>
 #include "conproc.h"
-#include "quakedef.h"
 
 HANDLE	heventDone;
 HANDLE	hfileBuffer;

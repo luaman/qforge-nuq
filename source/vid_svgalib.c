@@ -44,7 +44,6 @@
 #include "vgakeyboard.h"
 #include "vgamouse.h"
 
-#include "quakedef.h"
 #include "d_local.h"
 
 #define stringify(m) { #m, m }

@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "errno.h"
 #include <sys/types.h>
 #include <sys/time.h>

@@ -39,7 +39,7 @@
 #include "console.h"
 #include "client.h"
 #include "qargs.h"
-#include "quakedef.h"
+#include "host.h"
 
 #ifdef _WIN32
 #include "winquake.h"

@@ -30,9 +30,10 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include "net.h"
 #include "net_vcr.h"
-
+#include "sys.h"
+#include "server.h"
 extern int vcrFile;
 
 // This is the playback portion of the VCR.  It reads the file produced

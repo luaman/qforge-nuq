@@ -30,7 +30,11 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include "world.h"
+#include "model.h"
+#include "server.h"
+#include "sys.h"
+#include "console.h"
 
 /*
 

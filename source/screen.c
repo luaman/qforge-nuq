@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "r_local.h"
 
 // only the refresh window will be updated unless these variables are flagged 

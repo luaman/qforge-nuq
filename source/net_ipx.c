@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include <dpmi.h>
 
-#include "quakedef.h"
 #include "dosisms.h"
 #include "net_ipx.h"
 

@@ -30,9 +30,19 @@
 # include "config.h"
 #endif
 
+#include <string.h>
+
+#include "sys.h"
+#include "keys.h"
+#include "client.h"
+#include "server.h"
 #include "qendian.h"
 #include "msg.h"
 #include "qargs.h"
+#include "screen.h"
+#include "console.h"
+#include "net.h"
+#include "qdefs.h"
 
 // This is enables a simple IP banning mechanism
 #define BAN_TEST
@@ -67,7 +77,6 @@ unsigned long inet_addr(const char *cp);
 #endif
 #endif	// BAN_TEST
 
-#include "quakedef.h"
 #include "net_dgrm.h"
 
 // these two macros are to make the code more readable

@@ -30,7 +30,17 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include "msg.h"
+#include "cvar.h"
+#include "client.h"
+#include "chase.h"
+#include "input.h"
+#include "host.h"
+#include "va.h"
+#include "host.h"
+#include "server.h"
+#include "console.h"
+#include "screen.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.

@@ -48,7 +48,6 @@
 #include <sys/mman.h>
 #include <errno.h>
 
-#include "quakedef.h"
 
 qboolean	isDedicated;
 

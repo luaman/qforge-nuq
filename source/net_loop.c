@@ -30,8 +30,12 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include "net.h"
 #include "net_loop.h"
+#include "client.h"
+#include "console.h"
+#include "sys.h"
+#include "server.h"
 
 qboolean	localconnectpending = false;
 qsocket_t	*loop_client = NULL;

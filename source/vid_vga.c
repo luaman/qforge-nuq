@@ -32,7 +32,6 @@
 
 #include <dos.h>
 
-#include "quakedef.h"
 #include "d_local.h"
 #include "dosisms.h"
 #include "vid_dos.h"

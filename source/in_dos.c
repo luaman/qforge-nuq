@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "dosisms.h"
 
 #define AUX_FLAG_FREELOOK	0x00000001

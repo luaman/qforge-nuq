@@ -30,7 +30,15 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include <string.h>
+
+#include "qendian.h"
+#include "va.h"
+#include "host.h"
+#include "msg.h"
+#include "client.h"
+#include "sys.h"
+#include "console.h"
 
 void CL_FinishTimeDemo (void);
 

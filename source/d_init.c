@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "d_local.h"
 
 #define NUM_MIPS	4

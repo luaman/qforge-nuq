@@ -40,13 +40,14 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <signal.h>
+#include <string.h>
 
 #include "sys.h"
 #include "qargs.h"
 #include "cvar.h"
 #include "server.h"
+#include "host.h"
 
-#include "quakedef.h"
 
 
 qboolean			isDedicated;

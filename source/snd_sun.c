@@ -41,7 +41,6 @@
 #include <stdio.h>
 #include <sys/audioio.h>
 #include <errno.h>
-#include "quakedef.h"
 
 int audio_fd;
 int snd_inited;

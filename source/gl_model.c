@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 model_t	*loadmodel;
 char	loadname[32];	// for hunk tags

@@ -31,7 +31,6 @@
 #endif
 
 #include <dpmi.h>
-#include "quakedef.h"
 #include "mpdosock.h"
 
 short flat_selector;

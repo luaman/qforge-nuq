@@ -26,6 +26,11 @@
 	$Id$
 */
 
+#ifndef __world_h
+#define __world_h
+
+#include "qtypes.h"
+#include "progs.h"
 
 typedef struct
 {
@@ -84,3 +89,5 @@ trace_t SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, e
 // shouldn't be considered solid objects
 
 // passedict is explicitly excluded from clipping checks (normally NULL)
+
+#endif // __world_h

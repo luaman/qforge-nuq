@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "cmd.h"
+#include "host.h"
 #include "client.h"
 #include "msg.h"
 #include "quakefs.h"

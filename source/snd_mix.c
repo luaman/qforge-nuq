@@ -30,7 +30,7 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include "sound.h"
 
 #ifdef _WIN32
 #include "winquake.h"

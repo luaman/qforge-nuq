@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "crc.h"
 
 // this is a 16 bit, non-reflected CRC using the polynomial 0x1021

@@ -30,8 +30,7 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
-
+#include "net.h"
 #include "net_loop.h"
 #include "net_dgrm.h"
 

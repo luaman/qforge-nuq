@@ -33,7 +33,6 @@
 #include <dos.h>
 #include <conio.h>
 
-#include "quakedef.h"
 #include "vregset.h"
 
 //#define outportb	loutportb

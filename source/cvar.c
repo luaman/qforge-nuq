@@ -33,11 +33,9 @@
 # include <config.h>
 #endif
 
-//#include "commdef.h"
-#include "quakedef.h"
 #include "cvar.h"
 #include "console.h"
-//#include "qargs.h"
+#include "server.h"
 #include "cmd.h"
 
 #include <stdio.h>

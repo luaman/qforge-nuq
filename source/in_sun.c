@@ -44,7 +44,6 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 
-#include "quakedef.h"
 
 
 //

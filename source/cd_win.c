@@ -31,7 +31,6 @@
 #endif
 
 #include <windows.h>
-#include "quakedef.h"
 
 extern	HWND	mainwindow;
 

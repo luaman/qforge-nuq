@@ -31,7 +31,6 @@
 #endif
 
 #include <dpmi.h>
-#include "quakedef.h"
 #include "dosisms.h"
 
 #define ADDRESS_MODE_HSG		0

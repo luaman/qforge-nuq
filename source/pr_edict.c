@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;

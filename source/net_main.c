@@ -30,10 +30,15 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
+#include <string.h>
+
+#include "net.h"
 #include "net_vcr.h"
 #include "qargs.h"
 #include "sizebuf.h"
+#include "console.h"
+#include "sys.h"
+#include "server.h"
 
 qsocket_t	*net_activeSockets = NULL;
 qsocket_t	*net_freeSockets = NULL;

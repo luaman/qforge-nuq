@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "r_local.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one

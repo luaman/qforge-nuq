@@ -1,10 +1,9 @@
 /*
-	commdef.h
+	host.h
 
-	Definitions common to client and server.
+	@description@
 
 	Copyright (C) 1996-1997  Id Software, Inc.
-	Copyright (C) 2000  Marcus Sundberg <mackan@stacken.kth.se>
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -27,20 +26,11 @@
 	$Id$
 */
 
-#ifndef _COMMDEF_H
-#define _COMMDEF_H
+#ifndef __host_h
+#define __host_h
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
+#include "qtypes.h"
 #include "cvar.h"
-#include "gcc_attr.h"
-
-/* The host system specifies the base of the directory tree, the
-   command line parms passed to the program, and the amount of memory
-   available for the program to use.
-*/
 
 typedef struct
 {
@@ -52,18 +42,32 @@ typedef struct
 	int		memsize;
 } quakeparms_t;
 
-/* Host */
 extern	quakeparms_t host_parms;
 
-extern	cvar_t		*sys_nostdout;
-extern	cvar_t		*developer;
+extern	cvar_t	*sys_ticrate;
+extern	cvar_t	*sys_nostdout;
+extern	cvar_t	*developer;
 
-extern	qboolean	host_initialized;	/* True if into command execution. */
-//extern	double		host_frametime;
-extern	double		realtime;			/* Not bounded in any way, changed at
-										   start of every frame, never reset */
+extern	cvar_t	*pausable;
 
-char	*va(char *format, ...) __attribute__((format(printf,1,2)));
-// does a varargs printf into a temp buffer
+extern	qboolean	host_initialized;		// true if into command execution
+extern	double		host_frametime;
+extern	byte		*host_basepal;
+extern	byte		*host_colormap;
+extern	int			host_framecount;	// incremented every frame, never reset
+extern	double		realtime;			// not bounded in any way, changed at
+										// start of every frame, never reset
 
-#endif // _COMMDEF_H
+void Host_ClearMemory (void);
+void Host_ServerFrame (void);
+void Host_InitCommands (void);
+void Host_Init (quakeparms_t *parms);
+void Host_Shutdown(void);
+void Host_Error (char *error, ...);
+void Host_EndGame (char *message, ...);
+void Host_Frame (float time);
+void Host_Quit_f (void);
+void Host_ClientCommands (char *fmt, ...);
+void Host_ShutdownServer (qboolean crash);
+
+#endif // __host_h

@@ -31,7 +31,6 @@
 #endif
 
 #include <dinput.h>
-#include "quakedef.h"
 #include "winquake.h"
 #include "dosisms.h"
 

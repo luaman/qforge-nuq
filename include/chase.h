@@ -1,11 +1,9 @@
 /*
-	qdefs.h
+	chase.h
 
-	(description)
+	@description@
 
 	Copyright (C) 1996-1997  Id Software, Inc.
-	Copyright (C) 1999,2000  contributors of the QuakeForge project
-	Please see the file "AUTHORS" for a list of contributors
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -28,25 +26,13 @@
 	$Id$
 */
 
-#ifndef _QDEFS_H
-#define _QDEFS_H
+#ifndef __chase_h
+#define __chase_h
 
-#include <stdio.h>
-#include <sys/types.h>
+extern	cvar_t	*chase_active;
 
-#define MAX_QPATH		64
-#define MAX_CL_STATS	32
-#define NUM_CSHIFTS		4
-#define MAX_MODELS		256
-#define MAX_SOUNDS		256
-#define	MAX_SCOREBOARD		16
-#define	MAX_SCOREBOARDNAME	32
-#define MAX_STYLESTRING	64
-#define	MAX_EDICTS		600			// FIXME: ouch! ouch! ouch!
-#define MAX_LIGHTSTYLES	64
-#define	MAX_DATAGRAM	1024		// max length of unreliable message
+void Chase_Init (void);
+void Chase_Reset (void);
+void Chase_Update (void);
 
-#define	MAX_MSGLEN		8000		// max length of a reliable message
-#define clc_stringcmd	4
-
-#endif // _QDEFS_H
+#endif __chase_h

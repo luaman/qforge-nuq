@@ -45,7 +45,6 @@
 #include <X11/keysym.h>
 #include <X11/extensions/XShm.h>
 
-#include "quakedef.h"
 #include "d_local.h"
 
 cvar_t	*m_filter;

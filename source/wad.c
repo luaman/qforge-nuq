@@ -30,8 +30,10 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
-
+#include "qendian.h"
+#include "wad.h"
+#include "sys.h"
+#include "quakefs.h"
 int			wad_numlumps;
 lumpinfo_t	*wad_lumps;
 byte		*wad_base;

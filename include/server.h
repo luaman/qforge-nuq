@@ -32,7 +32,6 @@
 #include <setjmp.h>
 
 #include "gcc_attr.h"
-#include "commdef.h"
 #include "net.h"
 #include "cvar.h"
 #include "protocol.h"

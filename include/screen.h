@@ -26,6 +26,11 @@
 	$Id$
 */
 
+#ifndef __screen_h
+#define __screen_h
+
+#include "qtypes.h"
+#include "cvar.h"
 
 void SCR_Init (void);
 void SCR_InitCvars (void);
@@ -64,3 +69,5 @@ extern	int			scr_copyeverything;
 extern qboolean		block_drawing;
 
 void SCR_UpdateWholeScreen (void);
+
+#endif // __screen_h

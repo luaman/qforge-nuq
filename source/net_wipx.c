@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 #include "winquake.h"
 #include <wsipx.h>
 #include "net_wipx.h"

@@ -30,7 +30,6 @@
 # include "config.h"
 #endif
 
-#include "quakedef.h"
 
 extern int desired_speed;
 extern int desired_bits;
