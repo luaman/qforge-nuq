@@ -115,6 +115,8 @@ cvar_t	*gl_nocolors;
 cvar_t	*gl_keeptjunctions;
 cvar_t	*gl_reporttjunctions;
 cvar_t	*gl_doubleeyes;
+cvar_t	*gl_particles;
+cvar_t	*gl_fires;
 
 /*
 =================
@@ -990,27 +992,6 @@ void R_Clear (void)
 		gldepthmin = 0;
 		gldepthmax = 0.5;
 		glDepthFunc (GL_LEQUAL);
-	}
-	else if (gl_ztrick->value)
-	{
-		static int trickframe;
-
-		if (gl_clear->value)
-			glClear (GL_COLOR_BUFFER_BIT);
-
-		trickframe++;
-		if (trickframe & 1)
-		{
-			gldepthmin = 0;
-			gldepthmax = 0.49999;
-			glDepthFunc (GL_LEQUAL);
-		}
-		else
-		{
-			gldepthmin = 1;
-			gldepthmax = 0.5;
-			glDepthFunc (GL_GEQUAL);
-		}
 	}
 	else
 	{

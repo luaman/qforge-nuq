@@ -29,6 +29,7 @@
 #ifndef __view_h
 #define __view_h
 
+#include "qtypes.h"
 #include "cvar.h"
 
 extern	byte		gammatable[256];	// palette is sent through this
@@ -45,5 +46,20 @@ void V_RenderView (void);
 float V_CalcRoll (vec3_t angles, vec3_t velocity);
 void V_UpdatePalette (void);
 void V_CalcBlend (void);
+
+void V_CalcIntermissionRefdef (void);
+void V_CalcRefdef (void);
+void V_CalcPowerupCshift (void);
+qboolean V_CheckGamma (void);
+
+extern	cvar_t	*scr_ofsx;
+extern	cvar_t	*scr_ofsy;
+extern	cvar_t	*scr_ofsz;
+extern	cvar_t	*lcd_yaw;
+extern	cvar_t	*cl_crossx;
+extern	cvar_t	*cl_crossy;
+extern	cvar_t	*gl_cshiftpercent;
+
+extern	vec3_t	forward, right, up;
 
 #endif // __cvar_h

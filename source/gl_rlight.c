@@ -85,6 +85,23 @@ void AddLightBlend (float r, float g, float b, float a2)
 	v_blend[2] = v_blend[2]*(1-a2) + b*a2;
 }
 
+float bubble_sintable[33], bubble_costable[33];
+
+void R_InitBubble() {
+	float a;
+	int i;
+	float *bub_sin, *bub_cos;
+
+	bub_sin = bubble_sintable;
+	bub_cos = bubble_costable;
+
+	for (i=32 ; i>=0 ; i--) {
+		a = i/32.0 * M_PI*2;
+		*bub_sin++ = sin(a);
+		*bub_cos++ = cos(a);
+	}
+}
+
 void R_RenderDlight (dlight_t *light)
 {
 	int		i, j;

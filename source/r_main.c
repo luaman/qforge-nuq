@@ -129,6 +129,7 @@ float	se_time1, se_time2, de_time1, de_time2, dv_time1, dv_time2;
 
 void R_MarkLeaves (void);
 
+cvar_t	*gl_particles;
 cvar_t	*r_draworder;
 cvar_t	*r_speeds;
 cvar_t	*r_timegraph;
@@ -203,6 +204,9 @@ void R_Init (void)
 	
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);	
 	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);	
+
+	gl_particles = Cvar_Get ("gl_particles", "1", CVAR_ARCHIVE|CVAR_ROM,
+				"whether or not to draw particles");
 
 	r_draworder = Cvar_Get("r_draworder", "0", CVAR_NONE, "None");
 	r_speeds = Cvar_Get("r_speeds", "0", CVAR_NONE, "None");

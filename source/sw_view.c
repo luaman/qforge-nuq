@@ -31,69 +31,23 @@
 #endif
 
 #include "view.h"
-#include "client.h"
-#include "host.h"
+#include "vid.h"
 #include "console.h"
-
-byte		ramps[3][256];
-float		v_blend[4];		// rgba 0.0 - 1.0
-
-/*
-=============
-V_CalcBlend
-=============
-*/
-void V_CalcBlend (void)
-{
-	float	r, g, b, a, a2;
-	int		j;
-
-	r = 0;
-	g = 0;
-	b = 0;
-	a = 0;
-
-	for (j=0 ; j<NUM_CSHIFTS ; j++)	
-	{
-		if (!gl_cshiftpercent->value)
-			continue;
-
-		a2 = ((cl.cshifts[j].percent * gl_cshiftpercent->value) / 100.0) / 255.0;
-
-//		a2 = cl.cshifts[j].percent/255.0;
-		if (!a2)
-			continue;
-		a = a + a2*(1-a);
-//Con_Printf ("j:%i a:%f\n", j, a);
-		a2 = a2/a;
-		r = r*(1-a2) + cl.cshifts[j].destcolor[0]*a2;
-		g = g*(1-a2) + cl.cshifts[j].destcolor[1]*a2;
-		b = b*(1-a2) + cl.cshifts[j].destcolor[2]*a2;
-	}
-
-	v_blend[0] = r/255.0;
-	v_blend[1] = g/255.0;
-	v_blend[2] = b/255.0;
-	v_blend[3] = a;
-	if (v_blend[3] > 1)
-		v_blend[3] = 1;
-	if (v_blend[3] < 0)
-		v_blend[3] = 0;
-}
+#include "host.h"
+#include "client.h"
+#include "draw.h"
 
 /*
-=============
-V_UpdatePalette
-=============
+	V_UpdatePalette
 */
-void V_UpdatePalette (void)
+void
+V_UpdatePalette (void)
 {
 	int		i, j;
 	qboolean	new;
 	byte	*basepal, *newpal;
 	byte	pal[768];
-	float	r,g,b,a;
-	int		ir, ig, ib;
+	int		r,g,b;
 	qboolean force;
 
 	V_CalcPowerupCshift ();
@@ -128,58 +82,32 @@ void V_UpdatePalette (void)
 	force = V_CheckGamma ();
 	if (!new && !force)
 		return;
-
-	V_CalcBlend ();
-
-	a = v_blend[3];
-	r = 255*v_blend[0]*a;
-	g = 255*v_blend[1]*a;
-	b = 255*v_blend[2]*a;
-
-	a = 1-a;
-	for (i=0 ; i<256 ; i++)
-	{
-		ir = i*a + r;
-		ig = i*a + g;
-		ib = i*a + b;
-		if (ir > 255)
-			ir = 255;
-		if (ig > 255)
-			ig = 255;
-		if (ib > 255)
-			ib = 255;
-
-		ramps[0][i] = gammatable[ir];
-		ramps[1][i] = gammatable[ig];
-		ramps[2][i] = gammatable[ib];
-	}
-
+			
 	basepal = host_basepal;
 	newpal = pal;
 	
 	for (i=0 ; i<256 ; i++)
 	{
-		ir = basepal[0];
-		ig = basepal[1];
-		ib = basepal[2];
+		r = basepal[0];
+		g = basepal[1];
+		b = basepal[2];
 		basepal += 3;
+	
+		for (j=0 ; j<NUM_CSHIFTS ; j++)	
+		{
+			r += (cl.cshifts[j].percent*(cl.cshifts[j].destcolor[0]-r))>>8;
+			g += (cl.cshifts[j].percent*(cl.cshifts[j].destcolor[1]-g))>>8;
+			b += (cl.cshifts[j].percent*(cl.cshifts[j].destcolor[2]-b))>>8;
+		}
 		
-		newpal[0] = ramps[0][ir];
-		newpal[1] = ramps[1][ig];
-		newpal[2] = ramps[2][ib];
+		newpal[0] = gammatable[r];
+		newpal[1] = gammatable[g];
+		newpal[2] = gammatable[b];
 		newpal += 3;
 	}
 
 	VID_ShiftPalette (pal);	
 }
-
-/* 
-============================================================================== 
- 
-						VIEW RENDERING 
- 
-============================================================================== 
-*/ 
 
 /*
 ==================
@@ -251,4 +179,8 @@ void V_RenderView (void)
 	{
 		R_RenderView ();
 	}
+
+	if (crosshair->value)
+		Draw_Character (scr_vrect.x + scr_vrect.width/2 + cl_crossx->value, 
+			scr_vrect.y + scr_vrect.height/2 + cl_crossy->value, '+');
 }

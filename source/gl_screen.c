@@ -114,6 +114,8 @@ cvar_t	*gl_triplebuffer;
 
 qboolean	scr_initialized;		// ready to draw
 
+qboolean	lighthalf;
+
 qpic_t		*scr_ram;
 qpic_t		*scr_net;
 qpic_t		*scr_turtle;
@@ -136,6 +138,11 @@ float		scr_disabled_time;
 qboolean	block_drawing;
 
 void SCR_ScreenShot_f (void);
+
+void
+SCR_InitCvars(void)
+{
+}
 
 /*
 ===============================================================================

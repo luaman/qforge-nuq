@@ -310,6 +310,9 @@ extern int		r_clipflags;
 extern int		r_dlightframecount;
 extern qboolean	r_fov_greater_than_90;
 
+extern particle_t *active_particles, *free_particles;
+extern int ramp1[],ramp2[],ramp3[];
+
 void R_StoreEfrags (efrag_t **ppefrag);
 void R_TimeRefresh_f (void);
 void R_TimeGraph (void);

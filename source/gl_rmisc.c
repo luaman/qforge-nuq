@@ -213,6 +213,12 @@ void R_Init (void)
 	gl_playermip = Cvar_Get("gl_playermip", "0", CVAR_NONE, "None");
 	gl_nocolors = Cvar_Get("gl_nocolors", "0", CVAR_NONE, "None");
 
+	gl_fires = Cvar_Get ("gl_fires", "0", CVAR_ARCHIVE,
+			"Toggles lavaball and rocket fireballs");
+
+	gl_particles = Cvar_Get ("gl_particles", "1", CVAR_ARCHIVE,
+			"whether or not to draw particles");
+
 	gl_keeptjunctions = Cvar_Get("gl_keeptjunctions", "0", CVAR_NONE, "None");
 	gl_reporttjunctions = Cvar_Get("gl_reporttjunctions", "0", CVAR_NONE, "None");
 

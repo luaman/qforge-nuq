@@ -49,7 +49,7 @@ common_ASM=	sys_ia32.S worlda.S $(math_ASM)
 #endif
 
 common_SOURCES= crc.c cvar.c cmd.c mathlib.c wad.c world.c \
-		msg.c sizebuf.c qendian.c qargs.c quakefs.c \
+		msg.c r_part.c sizebuf.c qendian.c qargs.c quakefs.c \
 		va.c quakeio.c link.c com.c \
 		zone.c $(common_ASM)
 
@@ -113,7 +113,7 @@ EXTRA_libqfcd_a_SOURCES=net_dos.c net_bw.c net_ipx.c net_mp.c net_ser.c \
 client_LIBS=	-L. -lqfsys -lqfsnd -lqfcd -lqfnet $(SOUND_LIBS) $(NET_LIBS)
 
 client_SOURCES= cl_cam.c cl_demo.c cl_input.c cl_main.c cl_parse.c \
-		cl_tent.c console.c keys.c menu.c sbar.c view.c \
+		cl_tent.c console.c keys.c menu.c sbar.c r_view.c \
 		nonintel.c
 
 server_SOURCES= host.c host_cmd.c \
@@ -131,8 +131,8 @@ combined_SOURCES= $(common_SOURCES) $(client_SOURCES) $(server_SOURCES)
 soft_SOURCES=	d_edge.c d_fill.c d_init.c d_modech.c d_part.c d_polyse.c \
 		d_scan.c d_sky.c d_sprite.c d_surf.c d_vars.c d_zpoint.c \
 		draw.c r_aclip.c r_alias.c r_bsp.c r_draw.c r_edge.c r_efrag.c \
-		r_light.c r_main.c r_misc.c r_part.c r_sky.c r_sprite.c \
-		r_surf.c r_vars.c screen.c model.c $(soft_ASM)
+		r_light.c r_main.c r_misc.c sw_part.c r_sky.c r_sprite.c \
+		r_surf.c r_vars.c screen.c model.c sw_view.c $(soft_ASM)
 
 #
 # ... GGI
