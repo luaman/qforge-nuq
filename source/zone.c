@@ -373,9 +373,9 @@ void Hunk_Print (qboolean all)
 	// run consistancy checks
 	//
 		if (h->sentinal != HUNK_SENTINAL)
-			Sys_Error ("Hunk_Check: trahsed sentinal");
+			Sys_Error ("Hunk_Print: trahsed sentinal");
 		if (h->size < 16 || h->size + (byte *)h - hunk_base > hunk_size)
-			Sys_Error ("Hunk_Check: bad size");
+			Sys_Error ("Hunk_Print: bad size");
 			
 		next = (hunk_t *)((byte *)h+h->size);
 		count++;
@@ -423,12 +423,12 @@ void *Hunk_AllocName (int size, char *name)
 #endif
 
 	if (size < 0)
-		Sys_Error ("Hunk_Alloc: bad size: %i", size);
+		Sys_Error ("Hunk_AllocName: bad size: %i", size);
 		
 	size = sizeof(hunk_t) + ((size+15)&~15);
 	
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
-		Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
+		Sys_Error ("Hunk_AllocName: failed on %i bytes",size);
 	
 	h = (hunk_t *)(hunk_base + hunk_low_used);
 	hunk_low_used += size;
