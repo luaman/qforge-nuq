@@ -143,4 +143,5 @@ char *COM_Parse (char *data);
 
 extern	struct cvar_s	*cl_warncmd;
 
-#endif __cmd_h
+#endif //__cmd_h
+
