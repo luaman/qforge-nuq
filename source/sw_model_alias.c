@@ -162,4 +162,132 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 
 void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 {
+	int i, j;
+	stvert_t *pstverts;
+	mtriangle_t *ptri;
+	int numv = hdr->mdl.numverts;
+	int numt = hdr->mdl.numtris;
+
+	pstverts = (stvert_t *)Hunk_AllocName(numv * sizeof(stvert_t),loadname);
+	ptri = (mtriangle_t *)Hunk_AllocName(numt * sizeof(mtriangle_t),loadname);
+
+	hdr->stverts = (byte *)pstverts - (byte *)hdr;
+	hdr->triangles = (byte *)ptri - (byte *)hdr;
+
+	for (i=0; i<numv; i++) {
+		pstverts[i].onseam = stverts[i].onseam;
+		pstverts[i].s = stverts[i].s << 16;
+		pstverts[i].t = stverts[i].t << 16;
+	}
+
+	for (i=0; i<numt; i++) {
+		ptri[i].facesfront = triangles[i].facesfront;
+		for (j=0; j<3; j++) {
+			ptri[i].vertindex[j] = triangles[i].vertindex[j];
+		}
+	}
+}
+
+/*
+=================
+Mod_LoadAliasFrame
+=================
+*/
+void * Mod_LoadAliasFrame (void * pin, maliasframedesc_t *frame)
+{
+	trivertx_t		*pframe, *pinframe;
+	int				i, j;
+	daliasframe_t	*pdaliasframe;
+
+	pdaliasframe = (daliasframe_t *)pin;
+
+	strcpy (frame->name, pdaliasframe->name);
+
+	for (i=0 ; i<3 ; i++)
+	{
+	// these are byte values, so we don't have to worry about
+	// endianness
+		frame->bboxmin.v[i] = pdaliasframe->bboxmin.v[i];
+		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i];
+	}
+
+	pinframe = (trivertx_t *)(pdaliasframe + 1);
+	pframe = Hunk_AllocName (pheader->mdl.numverts * sizeof(*pframe), loadname);
+
+	frame->frame = (byte *)pframe - (byte *)pheader;
+
+	for (j=0 ; j<pheader->mdl.numverts ; j++)
+	{
+		int		k;
+
+	// these are all byte values, so no need to deal with endianness
+		pframe[j].lightnormalindex = pinframe[j].lightnormalindex;
+
+		for (k=0 ; k<3 ; k++)
+		{
+			pframe[j].v[k] = pinframe[j].v[k];
+		}
+	}
+
+	pinframe += pheader->mdl.numverts;
+
+	return (void *)pinframe;
+}
+
+/*
+=================
+Mod_LoadAliasGroup
+=================
+*/
+void * Mod_LoadAliasGroup (void * pin, maliasframedesc_t *frame)
+{
+	daliasgroup_t		*pingroup;
+	maliasgroup_t		*paliasgroup;
+	int					i, numframes;
+	daliasinterval_t	*pin_intervals;
+	float				*poutintervals;
+	void				*ptemp;
+
+	pingroup = (daliasgroup_t *)pin;
+
+	numframes = LittleLong (pingroup->numframes);
+
+	paliasgroup = Hunk_AllocName (sizeof (maliasgroup_t) +
+			(numframes - 1) * sizeof (paliasgroup->frames[0]), loadname);
+
+	paliasgroup->numframes = numframes;
+
+	for (i=0 ; i<3 ; i++)
+	{
+	// these are byte values, so we don't have to worry about endianness
+		frame->bboxmin.v[i] = pingroup->bboxmin.v[i];
+		frame->bboxmax.v[i] = pingroup->bboxmax.v[i];
+	}
+
+	frame->frame = (byte *)paliasgroup - (byte *)pheader;
+
+	pin_intervals = (daliasinterval_t *)(pingroup + 1);
+
+	poutintervals = Hunk_AllocName (numframes * sizeof (float), loadname);
+
+	paliasgroup->intervals = (byte *)poutintervals - (byte *)pheader;
+
+	for (i=0 ; i<numframes ; i++)
+	{
+		*poutintervals = LittleFloat (pin_intervals->interval);
+		if (*poutintervals <= 0.0)
+			Sys_Error ("Mod_LoadAliasGroup: interval<=0");
+
+		poutintervals++;
+		pin_intervals++;
+	}
+
+	ptemp = (void *)pin_intervals;
+
+	for (i=0 ; i<numframes ; i++)
+	{
+		ptemp = Mod_LoadAliasFrame (ptemp, (maliasframedesc_t*)&paliasgroup->frames[i]);
+	}
+
+	return ptemp;
 }
