@@ -684,7 +684,6 @@ VID_Shutdown(void)
 	Sys_Printf("VID_Shutdown\n");
 	if (x_disp) {
 		x11_restore_vidmode();
-		XAutoRepeatOn(x_disp);
 		x11_close_display();
 		x_disp = 0;
 	}
