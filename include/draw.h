@@ -50,5 +50,6 @@ void Draw_String8 (int x, int y, char *str);
 void Draw_Crosshair(void);
 qpic_t *Draw_PicFromWad (char *name);
 qpic_t *Draw_CachePic (char *path);
+void Draw_Crosshair(void);
 
 #endif // __draw_h

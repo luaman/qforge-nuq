@@ -182,8 +182,7 @@ void V_RenderView (void)
 	}
 
 	if (crosshair->int_val)
-		Draw_Character8 (scr_vrect.x + scr_vrect.width/2 + cl_crossx->int_val, 
-			scr_vrect.y + scr_vrect.height/2 + cl_crossy->int_val, '+');
+		Draw_Crosshair();
 }
 
 void

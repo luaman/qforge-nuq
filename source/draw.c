@@ -953,3 +953,39 @@ void Draw_EndDisc (void)
 	D_EndDirectRect (vid.width - 24, 0, 24, 24);
 }
 
+void Draw_Crosshair(void)
+{
+	int x, y;
+	extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
+	extern vrect_t          scr_vrect;
+	byte c = (byte)crosshaircolor->value;
+
+
+	if (crosshair->value == 2) {
+		byte *dest;
+
+		x = scr_vrect.x + scr_vrect.width/2 + cl_crossx->value;
+		y = scr_vrect.y + scr_vrect.height/2 + cl_crossy->value;
+
+		dest = vid.conbuffer + y*vid.conrowbytes + x;
+
+		dest[-3] = dest[-1] = dest[1] = dest[3] = c;
+		dest[-3*vid.conrowbytes] = dest[-1*vid.conrowbytes] = dest[1*vid.conrowbytes] = dest[3*vid.conrowbytes] = c;
+		// FIXME:  Find a better way to do this...
+#if 0
+		Draw_Pixel(x - 1, y, c);
+		Draw_Pixel(x - 3, y, c);
+		Draw_Pixel(x + 1, y, c);
+		Draw_Pixel(x + 3, y, c);
+		Draw_Pixel(x, y - 1, c);
+		Draw_Pixel(x, y - 3, c);
+		Draw_Pixel(x, y + 1, c);
+		Draw_Pixel(x, y + 3, c);
+#endif
+	} else if (crosshair->value) {
+		Draw_Character8 (
+			scr_vrect.x + scr_vrect.width/2-4 + cl_crossx->value,
+			scr_vrect.y + scr_vrect.height/2-4 + cl_crossy->value,
+			'+');
+	}
+}
