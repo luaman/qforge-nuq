@@ -80,7 +80,7 @@ typedef struct glRect_s {
 } glRect_t;
 
 glpoly_t	*lightmap_polys[MAX_LIGHTMAPS];
-glpoly_t	*fullbright_polys[MAX_MAP_TEXTURES*2+1];
+glpoly_t	*fullbright_polys[MAX_GLTEXTURES];
 qboolean	lightmap_modified[MAX_LIGHTMAPS];
 glRect_t	lightmap_rectchange[MAX_LIGHTMAPS];
 
@@ -549,12 +549,12 @@ R_RenderFullbrights (void)
 	glpoly_t *p;
 	float *v;
 
-	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable (GL_BLEND);
 	glColor3f(1,1,1);
 
-	for (i=1; i<MAX_MAP_TEXTURES*2+1; i++) {
+	for (i=1; i<MAX_GLTEXTURES; i++) {
 		if (!fullbright_polys[i])
 			continue;
 		glBindTexture (GL_TEXTURE_2D, i);
