@@ -48,7 +48,7 @@ sound_ASM=	snd_mixa.S
 common_ASM=	sys_ia32.S worlda.S $(math_ASM)
 #endif
 
-common_SOURCES= crc.c cvar.c cmd.c mathlib.c wad.c world.c \
+common_SOURCES= crc.c cvar.c cmd.c mathlib.c wad.c world.c model.c \
 		msg.c r_part.c sizebuf.c qendian.c qargs.c quakefs.c \
 		va.c quakeio.c link.c com.c \
 		zone.c $(common_ASM)
@@ -133,7 +133,8 @@ soft_SOURCES=	d_edge.c d_fill.c d_init.c d_modech.c d_part.c d_polyse.c \
 		d_scan.c d_sky.c d_sprite.c d_surf.c d_vars.c d_zpoint.c \
 		draw.c r_aclip.c r_alias.c r_bsp.c r_draw.c r_edge.c r_efrag.c \
 		r_light.c r_main.c r_misc.c sw_part.c r_sky.c r_sprite.c \
-		r_surf.c r_vars.c screen.c model.c sw_view.c $(soft_ASM)
+		r_surf.c r_vars.c screen.c sw_model_alias.c sw_model_brush.c \
+		sw_model_sprite.c sw_view.c $(soft_ASM)
 
 #
 # ... GGI
@@ -188,7 +189,7 @@ nuq_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 ogl_SOURCES=	gl_draw.c gl_mesh.c gl_part.c gl_refrag.c gl_rlight.c \
 		gl_rmain.c gl_rmisc.c gl_rsurf.c gl_screen.c gl_view.c \
-		gl_warp.c gl_model.c
+		gl_warp.c gl_model_alias.c gl_model_brush.c gl_model_sprite.c 
 
 #
 # ... 3Dfx Voodoo 1 and 2 SVGAlib-based console GL

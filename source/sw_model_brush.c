@@ -36,6 +36,10 @@
 #include "qendian.h"
 #include "checksum.h"
 
+extern char loadname[];
+model_t *loadmodel;
+extern byte mod_novis[];
+
 /*
 ===============
 Mod_PointInLeaf

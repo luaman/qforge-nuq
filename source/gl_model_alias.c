@@ -33,6 +33,16 @@
 # include "config.h"
 #endif
 
+#include "r_local.h"
+#include "sys.h"
+#include "console.h"
+#include "qendian.h"
+#include "checksum.h"
+#include "glquake.h"
+
+extern char loadname[];
+extern model_t *loadmodel;
+
 /*
 ==============================================================================
 

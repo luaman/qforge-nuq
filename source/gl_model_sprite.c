@@ -40,6 +40,9 @@
 #include "checksum.h"
 #include "glquake.h"
 
+extern char loadname[];
+extern model_t *loadmodel;
+
 /*
 =================
 Mod_LoadSpriteFrame

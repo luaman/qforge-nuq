@@ -40,6 +40,18 @@
 #include "checksum.h"
 #include "glquake.h"
 
+extern char loadname[];
+extern model_t *loadmodel;
+extern byte mod_novis[];
+
+void
+Mod_LoadMMNearest(miptex_t *mt, texture_t	*tx)
+{
+	texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
+	tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, 1);
+	texture_mode = GL_LINEAR;
+}
+
 /*
 ===============
 Mod_PointInLeaf
@@ -1063,12 +1075,4 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 			mod = loadmodel;
 		}
 	}
-}
-
-void
-Mod_LoadMMNearest(miptex_t *mt, texture_t	*tx)
-{
-	texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
-	tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, 1);
-	texture_mode = GL_LINEAR;
 }

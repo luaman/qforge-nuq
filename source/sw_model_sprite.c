@@ -36,6 +36,8 @@
 #include "qendian.h"
 #include "checksum.h"
 
+extern char loadname[];
+
 /*
 =================
 Mod_LoadSpriteFrame
