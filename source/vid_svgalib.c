@@ -506,10 +506,6 @@ VID_Init(unsigned char *palette)
 
 	if (svgalib_inited) return;
 
-#if 0
-	Cmd_AddCommand ("gamma", VID_Gamma_f);
-#endif
-
 	if (UseDisplay) {
 		err = vga_init();
 		if (err)
@@ -703,11 +699,6 @@ void VID_InitCvars ()
 
 void VID_SetCaption (char *text)
 {
-}
-
-void outb(unsigned char value, unsigned short port)
-{
-	__asm__ __volatile__ ("outb %b0,%w1" : : "a" (value) , "Nd" (port));
 }
 
 void VID_HandlePause (qboolean pause)
