@@ -61,6 +61,8 @@ Memory is cleared / released when a server or client begins, not when they end.
 
 */
 
+extern int fps_count;
+
 qboolean	msg_suppress_1 = 0;
 
 quakeparms_t host_parms;
@@ -155,7 +157,7 @@ void Host_Error (char *error, ...)
 	if (inerror)
 		Sys_Error ("Host_Error: recursively entered");
 	inerror = true;
-	
+
 	SCR_EndLoadingPlaque ();		// reenable screen updates
 
 	va_start (argptr,error);
@@ -752,6 +754,7 @@ void _Host_Frame (float time)
 	}
 	
 	host_framecount++;
+	fps_count++;
 }
 
 void Host_Frame (float time)

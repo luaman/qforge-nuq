@@ -30,19 +30,38 @@
 # include "config.h"
 #endif
 
-#include "glquake.h"
-#include "menu.h"
-#include "view.h"
+#include <math.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include "compat.h"
 #include "input.h"
-#include "cvar.h"
-#include "console.h"
-#include "draw.h"
-#include "screen.h"
-#include "host.h"
+#include "qendian.h"
+#include "bspfile.h"    // needed by: glquake.h
+#include "vid.h"
 #include "sys.h"
-#include "client.h"
+#include "mathlib.h"    // needed by: protocol.h, render.h, client.h,
+                        //  modelgen.h, glmodel.h
+#include "wad.h"
+#include "draw.h"
+#include "cvar.h"
+#include "net.h"        // needed by: client.h
+#include "protocol.h"   // needed by: client.h
 #include "keys.h"
+#include "menu.h"
+#include "cmd.h"
 #include "sbar.h"
+#include "sound.h"
+#include "screen.h"
+#include "render.h"     // needed by: client.h, gl_model.h, glquake.h
+#include "client.h"     // need cls in this file
+#include "model.h"   // needed by: glquake.h
+#include "console.h"
+#include "glquake.h"
+#include "view.h"
+#include "client.h"
 
 /*
 
@@ -91,58 +110,55 @@ console is:
 
 */
 
-
-int			glx, gly, glwidth, glheight;
+extern	byte		*host_basepal;
+extern	double		host_frametime;
+extern	double		realtime;
+int                     glx, gly, glwidth, glheight;
 
 // only the refresh window will be updated unless these variables are flagged 
-int			scr_copytop;
-int			scr_copyeverything;
+int                     scr_copytop;
+int                     scr_copyeverything;
 
-float		scr_con_current;
-float		scr_conlines;		// lines of console to display
+float           scr_con_current;
+float           scr_conlines;           // lines of console to display
 
-float		oldscreensize, oldfov;
-cvar_t	*scr_viewsize;
-cvar_t	*scr_fov;
-cvar_t	*scr_conspeed;
-cvar_t	*scr_centertime;
-cvar_t	*scr_showram;
-cvar_t	*scr_showturtle;
-cvar_t	*scr_showpause;
-cvar_t	*scr_printspeed;
-cvar_t	*gl_triplebuffer;
+float           oldscreensize, oldfov;
+cvar_t          *scr_viewsize;
+cvar_t          *scr_fov; // 10 - 170
+cvar_t          *scr_conspeed;
+cvar_t          *scr_centertime;
+cvar_t          *scr_showram;
+cvar_t          *scr_showturtle;
+cvar_t          *scr_showpause;
+cvar_t          *scr_printspeed;
+cvar_t			*scr_allowsnap;
+cvar_t			*gl_triplebuffer;
+extern  		cvar_t  *crosshair;
 
-qboolean	scr_initialized;		// ready to draw
+qboolean        scr_initialized;                // ready to draw
 
-qboolean	lighthalf;
+qpic_t          *scr_ram;
+qpic_t          *scr_net;
+qpic_t          *scr_turtle;
 
-qpic_t		*scr_ram;
-qpic_t		*scr_net;
-qpic_t		*scr_turtle;
+int                     scr_fullupdate;
 
-int			scr_fullupdate;
+int                     clearconsole;
+int                     clearnotify;
 
-int			clearconsole;
-int			clearnotify;
+extern			 int                     sb_lines;
 
-int			sb_lines;
+viddef_t        vid;                            // global video state
 
-viddef_t	vid;				// global video state
+vrect_t         scr_vrect;
 
-vrect_t		scr_vrect;
+qboolean        scr_disabled_for_loading;
+qboolean        scr_drawloading;
+float           scr_disabled_time;
 
-qboolean	scr_disabled_for_loading;
-qboolean	scr_drawloading;
-float		scr_disabled_time;
-
-qboolean	block_drawing;
+qboolean        block_drawing;
 
 void SCR_ScreenShot_f (void);
-
-void
-SCR_InitCvars(void)
-{
-}
 
 /*
 ===============================================================================
@@ -152,12 +168,12 @@ CENTER PRINTING
 ===============================================================================
 */
 
-char		scr_centerstring[1024];
-float		scr_centertime_start;	// for slow victory printing
-float		scr_centertime_off;
-int			scr_center_lines;
-int			scr_erase_lines;
-int			scr_erase_center;
+char            scr_centerstring[1024];
+float           scr_centertime_start;   // for slow victory printing
+float           scr_centertime_off;
+int                     scr_center_lines;
+int                     scr_erase_lines;
+int                     scr_erase_center;
 
 /*
 ==============
@@ -264,7 +280,7 @@ float CalcFov (float fov_x, float width, float height)
 
         x = width/tan(fov_x/360*M_PI);
 
-        a = atan (height/x);
+        a = (x == 0) ? 90 : atan(height/x); // 0 shouldn't happen
 
         a = a*360/M_PI;
 
@@ -393,9 +409,8 @@ void SCR_SizeDown_f (void)
 SCR_Init
 ==================
 */
-void SCR_Init (void)
+void SCR_InitCvars (void)
 {
-
 	scr_fov = Cvar_Get("fov", "90", CVAR_NONE, "10 - 170");
 	scr_viewsize = Cvar_Get("viewsize", "100", CVAR_ARCHIVE, "None");
 	scr_conspeed = Cvar_Get("scr_conspeed", "300", CVAR_NONE, "None");
@@ -404,8 +419,13 @@ void SCR_Init (void)
 	scr_showpause = Cvar_Get("showpause", "1", CVAR_NONE, "None");
 	scr_centertime = Cvar_Get("scr_centertime", "2", CVAR_NONE, "None");
 	scr_printspeed = Cvar_Get("scr_printspeed", "8", CVAR_NONE, "None");
-	gl_triplebuffer = Cvar_Get("gl_triplebuffer", "1", CVAR_ARCHIVE, "None");
+	scr_allowsnap = Cvar_Get("scr_allowsnap",  "1", CVAR_NONE, "None");
+	gl_triplebuffer = Cvar_Get("gl_triplebuffer",  "1", CVAR_ARCHIVE, "None");
+}
 
+void
+SCR_Init (void)
+{
 //
 // register our commands
 //
@@ -465,18 +485,36 @@ void SCR_DrawTurtle (void)
 
 /*
 ==============
-SCR_DrawNet
+SCR_DrawFPS
 ==============
 */
-void SCR_DrawNet (void)
+
+void SCR_DrawFPS (void)
 {
-	if (realtime - cl.last_received_message < 0.3)
-		return;
-	if (cls.demoplayback)
+	extern cvar_t *show_fps;
+	static double lastframetime;
+	double t;
+	extern int fps_count;
+	static int lastfps;
+	int x, y;
+	char st[80];
+
+	if (!show_fps->value)
 		return;
 
-	Draw_Pic (scr_vrect.x+64, scr_vrect.y, scr_net);
+	t = Sys_DoubleTime();
+	if ((t - lastframetime) >= 1.0) {
+		lastfps = fps_count;
+		fps_count = 0;
+		lastframetime = t;
+	}
+
+	sprintf(st, "%3d FPS", lastfps);
+	x = vid.width - strlen(st) * 8 - 8;
+	y = vid.height - sb_lines - 8;
+	Draw_String8 (x, y, st);
 }
+
 
 /*
 ==============
@@ -833,6 +871,11 @@ void SCR_TileClear (void)
 	}
 }
 
+float oldsbar = 0;
+extern void R_ForceLightUpdate();
+qboolean lighthalf;
+extern cvar_t *gl_lightmode, *brightness, *contrast;
+
 /*
 ==================
 SCR_UpdateScreen
@@ -846,10 +889,13 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen (void)
 {
+	double	time1 = 0, time2;
+	float	f;
+
 	if (block_drawing)
 		return;
 
-	vid.numpages = 2 + gl_triplebuffer->value;
+	vid.numpages = 2 + (int) gl_triplebuffer->value;
 
 	scr_copytop = 0;
 	scr_copyeverything = 0;
@@ -866,11 +912,17 @@ void SCR_UpdateScreen (void)
 	}
 
 	if (!scr_initialized || !con_initialized)
-		return;				// not initialized yet
-
+		return;                         // not initialized yet
 
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	
+	if (r_speeds->value)
+	{
+		time1 = Sys_DoubleTime ();
+		c_brush_polys = 0;
+		c_alias_polys = 0;
+	}
+
 	//
 	// determine size of refresh window
 	//
@@ -880,20 +932,22 @@ void SCR_UpdateScreen (void)
 		vid.recalc_refdef = true;
 	}
 
-	if (oldscreensize != scr_viewsize->value)
-	{
-		oldscreensize = scr_viewsize->value;
-		vid.recalc_refdef = true;
-	}
-
 	if (vid.recalc_refdef)
 		SCR_CalcRefdef ();
 
 //
 // do 3D refresh drawing, and then update the screen
 //
+
+	// LordHavoc: set lighthalf based on gl_lightmode cvar
+	if (lighthalf != (gl_lightmode->value != 0))
+	{
+		lighthalf = gl_lightmode->value != 0;
+		R_ForceLightUpdate();
+	}
+
 	SCR_SetUpToDrawConsole ();
-	
+
 	V_RenderView ();
 
 	GL_Set2D ();
@@ -927,20 +981,82 @@ void SCR_UpdateScreen (void)
 	else
 	{
 		if (crosshair->value)
-			Draw_Character8 (scr_vrect.x + scr_vrect.width/2, scr_vrect.y + scr_vrect.height/2, '+');
+			Draw_Crosshair();
 		
 		SCR_DrawRam ();
-		SCR_DrawNet ();
+		SCR_DrawFPS ();
 		SCR_DrawTurtle ();
 		SCR_DrawPause ();
 		SCR_CheckDrawCenterString ();
 		Sbar_Draw ();
-		SCR_DrawConsole ();	
+		SCR_DrawConsole ();     
 		M_Draw ();
 	}
 
+// LordHavoc: adjustable brightness and contrast,
+//            also makes polyblend apply to whole screen
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	brightness->value = bound(1, brightness->value, 5);
+	if (lighthalf) // LordHavoc: render was done at half brightness
+		f = brightness->value * 2;
+	else
+		f = brightness->value;
+	if (f > 1)
+	{
+		glBlendFunc (GL_DST_COLOR, GL_ONE);
+		glBegin (GL_QUADS);
+		while (f > 1)
+		{
+			if (f >= 2)
+				glColor3f (1, 1, 1);
+			else
+				glColor3f (f-1, f-1, f-1);
+			glVertex2f (0,0);
+			glVertex2f (vid.width, 0);
+			glVertex2f (vid.width, vid.height);
+			glVertex2f (0, vid.height);
+			f *= 0.5;
+		}
+		glEnd ();
+	}
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	contrast->value = bound(0.2, contrast->value, 1.0);
+	if ((gl_polyblend->value && v_blend[3]) || contrast->value < 1)
+	{
+		glBegin (GL_QUADS);
+		if (contrast->value < 1)
+		{
+			glColor4f (1, 1, 1, 1-contrast->value);
+			glVertex2f (0,0);
+			glVertex2f (vid.width, 0);
+			glVertex2f (vid.width, vid.height);
+			glVertex2f (0, vid.height);
+		}
+		if (gl_polyblend->value && v_blend[3])
+		{
+			glColor4fv (v_blend);
+			glVertex2f (0,0);
+			glVertex2f (vid.width, 0);
+			glVertex2f (vid.width, vid.height);
+			glVertex2f (0, vid.height);
+		}
+		glEnd ();
+	}
+
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
 	V_UpdatePalette ();
 
+	if (r_speeds->value)
+	{
+//		glFinish ();
+		time2 = Sys_DoubleTime ();
+		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n", (int)((time2-time1)*1000), c_brush_polys, c_alias_polys); 
+	}
+
+	glFinish ();
 	GL_EndRendering ();
 }
 

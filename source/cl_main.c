@@ -61,6 +61,9 @@ cvar_t	*m_yaw;
 cvar_t	*m_forward;
 cvar_t	*m_side;
 
+cvar_t	*show_fps;
+
+int	fps_count;
 
 client_static_t	cls;
 client_state_t	cl;
@@ -77,6 +80,7 @@ entity_t		*cl_visedicts[MAX_VISEDICTS];
 void
 CL_InitCvars(void)
 {
+	show_fps = Cvar_Get("show_fps", "0", CVAR_NONE, "None");
 }
 
 /*

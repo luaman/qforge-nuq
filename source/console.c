@@ -108,7 +108,6 @@ void Con_ToggleConsole_f (void)
 	else
 		key_dest = key_console;
 	
-	SCR_EndLoadingPlaque ();
 	memset (con_times, 0, sizeof(con_times));
 }
 
