@@ -217,7 +217,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 
 			for (j=0 ; j<groupskins ; j++)
 			{
-				skin = Mod_LoadSkin (skin, skinsize, i, j, true);
+				skin = Mod_LoadSkin (skin, skinsize, i, j&3, true);
 			}
 			k = j;
 			for (/* */; j < 4; j++) {

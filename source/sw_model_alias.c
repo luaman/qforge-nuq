@@ -63,9 +63,9 @@ extern	int			posenum;
 
 void *Mod_LoadSkin (byte *skin, int skinsize, int *pskinindex, int snum, int gnum)
 {
-	byte	*pskin;
-	ushort	*pusskin;
-	int		i;
+	byte			*pskin;
+	unsigned short	*pusskin;
+	int				i;
 
 	pskin = Hunk_AllocName (skinsize * r_pixbytes, loadname);
 	*pskinindex = (byte *)pskin - (byte *)pheader;
@@ -75,7 +75,7 @@ void *Mod_LoadSkin (byte *skin, int skinsize, int *pskinindex, int snum, int gnu
 		memcpy (pskin, skin, skinsize);
 		break;
 	case 2:
-		pusskin = (ushort*)skin;
+		pusskin = (unsigned short*)skin;
 		for (i=0; i<skinsize; i++)
 			pusskin[i] = d_8to16table[skin[i]];
 		break;
@@ -104,8 +104,6 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 	maliasskingroup_t		*paliasskingroup;
 	float					*poutskinintervals;
 
-	skin = (byte *)pskintype;
-
 	if (numskins < 1 || numskins > MAX_SKINS)
 		Sys_Error ("Mod_LoadAliasModel: Invalid # of skins: %d\n", numskins);
 
@@ -117,7 +115,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 	for (snum=0 ; snum<numskins ; snum++)
 	{
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
-			skin+=4;
+			skin = (byte*)(pskintype+1);
 			skin = Mod_LoadSkin (skin, skinsize, &pskindesc[snum].skin, snum, 0);
 		} else {
 			pskintype++;
@@ -150,7 +148,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype, int *pskinind
 				skin = Mod_LoadSkin (skin, skinsize, &paliasskingroup->skindescs[snum].skin, snum, gnum);
 			}
 		}
-		pskintype = (void*)skin;
+		pskintype = (daliasskintype_t*)skin;
 	}
 
 	return pskintype;
