@@ -536,3 +536,7 @@ r_refdef.viewangles[2]=    0;
 	D_SetupFrame ();
 }
 
+void R_TranslatePlayerSkin (int playernum)
+{
+	// stub
+}
