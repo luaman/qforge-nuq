@@ -213,7 +213,7 @@ COM_FileOpenRead (char *path, QFile **hndl)
 {
 	QFile	*f;
 
-	f = Qopen(path, "rb");
+	f = Qopen(path, "rbz");
 	if (!f)
 	{
 		*hndl = NULL;
@@ -403,7 +403,7 @@ COM_OpenRead (const char *path, int offs, int len)
 #ifdef WIN32
 	setmode(fd,O_BINARY);
 #endif
-        return Qdopen(fd,"rb");
+        return Qdopen(fd,"rbz");
 	return 0;
 }
 
