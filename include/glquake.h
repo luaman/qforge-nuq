@@ -41,7 +41,6 @@
 #endif
 
 #include <GL/gl.h>
-#include <GL/glu.h>
 
 #include "qtypes.h"
 #include "model.h"
