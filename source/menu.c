@@ -2495,6 +2495,26 @@ level_t		roguelevels[] =
 	{"ctf1",    "Division of Change"}
 };
 
+level_t	abysslevels[] = {
+	{"start",	"Enter the Abyss"},
+	{"aop1m1",	"Gates of Abyss"},
+	{"aop1m2",	"Core Reactor"},
+	{"aop1m3",	"The Power Station"},
+	{"aop1m4",	"Temple of Moon"},
+	{"aop1m5",	"The Dark Palace"},
+	{"aop1m6",	"The Forgotten One"},
+	{"aop2m1",	"Heresy"},
+	{"aop2m2",	"Carnage Castle"},
+	{"aop2m3",	"Central Complex"},
+	{"aopend",	"Legonds of Quake"},
+	{"aopdm1",	"The Absolution"},
+	{"aopdm2",	"Runic Raging"},
+	{"aopdm3",	"Mental Overlord"},
+	{"aopdm4",	"Mental Overlord II"},
+	{"aopdm5",	"Midnight Darkness"},
+	{"aopdm6",	"???"}
+};
+
 typedef struct
 {
 	char	*description;
@@ -2532,6 +2552,14 @@ episode_t	rogueepisodes[] =
 	{"Hell's Fortress", 1, 7},
 	{"Corridors of Time", 8, 8},
 	{"Deathmatch Arena", 16, 1}
+};
+
+episode_t	abyssepisodes[] = {
+	{"Introduction", 0, 1},
+	{"Episode 1", 1, 6},
+	{"Episode 2", 7, 3},
+	{"Finale", 10, 1},
+	{"Deathmatch Arena", 11, 6}
 };
 
 int	startepisode;
@@ -2582,27 +2610,23 @@ void M_GameOptions_Draw (void)
 	{
 		char *msg;
 
-		switch(teamplay->int_val)
-		{
-			case 1: msg = "No Friendly Fire"; break;
-			case 2: msg = "Friendly Fire"; break;
-			case 3: msg = "Tag"; break;
-			case 4: msg = "Capture the Flag"; break;
-			case 5: msg = "One Flag CTF"; break;
-			case 6: msg = "Three Team CTF"; break;
-			default: msg = "Off"; break;
+		switch(teamplay->int_val) {
+		case 1: msg = "No Friendly Fire"; break;
+		case 2: msg = "Friendly Fire"; break;
+		case 3: msg = "Tag"; break;
+		case 4: msg = "Capture the Flag"; break;
+		case 5: msg = "One Flag CTF"; break;
+		case 6: msg = "Three Team CTF"; break;
+		default: msg = "Off"; break;
 		}
 		M_Print (160, 72, msg);
-	}
-	else
-	{
+	} else {
 		char *msg;
 
-		switch(teamplay->int_val)
-		{
-			case 1: msg = "No Friendly Fire"; break;
-			case 2: msg = "Friendly Fire"; break;
-			default: msg = "Off"; break;
+		switch(teamplay->int_val) {
+		case 1: msg = "No Friendly Fire"; break;
+		case 2: msg = "Friendly Fire"; break;
+		default: msg = "Off"; break;
 		}
 		M_Print (160, 72, msg);
 	}
@@ -2630,41 +2654,39 @@ void M_GameOptions_Draw (void)
 		M_Print (160, 96, va("%i minutes", timelimit->int_val));
 
 	M_Print (0, 112, "         Episode");
-   //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
-      M_Print (160, 112, hipnoticepisodes[startepisode].description);
-   //PGM 01/07/97 added rogue episodes
-   else if (rogue)
-      M_Print (160, 112, rogueepisodes[startepisode].description);
-   else
-      M_Print (160, 112, episodes[startepisode].description);
+	//MED 01/06/97 added hipnotic episodes
+	if (hipnotic)
+		M_Print (160, 112, hipnoticepisodes[startepisode].description);
+	//PGM 01/07/97 added rogue episodes
+	else if (rogue)
+		M_Print (160, 112, rogueepisodes[startepisode].description);
+	else if (abyss)
+		M_Print (160, 112, abyssepisodes[startepisode].description);
+	else
+		M_Print (160, 112, episodes[startepisode].description);
 
 	M_Print (0, 120, "           Level");
-   //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
-   {
-      M_Print (160, 120, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
-   }
-   //PGM 01/07/97 added rogue episodes
-   else if (rogue)
-   {
-      M_Print (160, 120, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
-   }
-   else
-   {
-      M_Print (160, 120, levels[episodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, levels[episodes[startepisode].firstLevel + startlevel].name);
-   }
+	if (hipnotic) {
+		//MED 01/06/97 added hipnotic episodes
+		M_Print (160, 120, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
+		M_Print (160, 128, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
+	} else if (rogue) {
+		//PGM 01/07/97 added rogue episodes
+		M_Print (160, 120, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
+		M_Print (160, 128, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
+	} else if (abyss) {
+		M_Print (160, 120, abysslevels[abyssepisodes[startepisode].firstLevel + startlevel].description);
+		M_Print (160, 128, abysslevels[abyssepisodes[startepisode].firstLevel + startlevel].name);
+	} else {
+		M_Print (160, 120, levels[episodes[startepisode].firstLevel + startlevel].description);
+		M_Print (160, 128, levels[episodes[startepisode].firstLevel + startlevel].name);
+	}
 
 // line cursor
 	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 12+((int)(realtime*4)&1));
 
-	if (m_serverInfoMessage)
-	{
-		if ((realtime - m_serverInfoMessageTime) < 5.0)
-		{
+	if (m_serverInfoMessage) {
+		if ((realtime - m_serverInfoMessageTime) < 5.0) {
 			x = (320-26*8)/2;
 			M_DrawTextBox (x, 138, 24, 4);
 			x += 8;
@@ -2672,9 +2694,7 @@ void M_GameOptions_Draw (void)
 			M_Print (x, 154, " requires using command ");
 			M_Print (x, 162, "line parameters; please ");
 			M_Print (x, 170, "   see techinfo.txt.    ");
-		}
-		else
-		{
+		} else {
 			m_serverInfoMessage = false;
 		}
 	}
@@ -2749,6 +2769,8 @@ void M_NetStart_Change (int dir)
 	//PGM 03/02/97 added 1 for dmatch episode
 		else if (rogue)
 			count = 4;
+		else if (abyss)
+			count = 5;
 		else if (registered->int_val)
 			count = 7;
 		else
@@ -2771,6 +2793,8 @@ void M_NetStart_Change (int dir)
 	//PGM 01/06/97 added hipnotic episodes
 		else if (rogue)
 			count = rogueepisodes[startepisode].levels;
+		else if (abyss)
+			count = abyssepisodes[startepisode].levels;
 		else
 			count = episodes[startepisode].levels;
 
@@ -2833,6 +2857,8 @@ void M_GameOptions_Key (int key)
 				Cbuf_AddText ( va ("map %s\n", hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name) );
 			else if (rogue)
 				Cbuf_AddText ( va ("map %s\n", roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name) );
+			else if (abyss)
+				Cbuf_AddText ( va ("map %s\n", abysslevels[abyssepisodes[startepisode].firstLevel + startlevel].name) );
 			else
 				Cbuf_AddText ( va ("map %s\n", levels[episodes[startepisode].firstLevel + startlevel].name) );
 
