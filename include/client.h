@@ -26,6 +26,20 @@
 	$Id$
 */
 
+#ifndef __client_h
+#define __client_h
+
+#include <stdio.h>
+
+#include "info.h"
+#include "mathlib.h"
+#include "protocol.h"
+#include "net.h"
+#include "model.h"
+#include "sound.h"
+#include "render.h"
+#include "cvar.h"
+#include "quakefs.h"
 
 typedef struct
 {
@@ -382,3 +396,5 @@ void V_SetContentsColor (int contents);
 //
 void CL_InitTEnts (void);
 void CL_SignonReply (void);
+
+#endif // __client_h

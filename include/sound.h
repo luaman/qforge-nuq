@@ -27,8 +27,12 @@
 */
 
 
-#ifndef __SOUND__
-#define __SOUND__
+#ifndef __sound_h
+#define __sound_h
+
+#include "mathlib.h"
+#include "cvar.h"
+#include "zone.h"
 
 #define DEFAULT_SOUND_PACKET_VOLUME 255
 #define DEFAULT_SOUND_PACKET_ATTENUATION 1.0
@@ -183,4 +187,4 @@ void SNDDMA_Submit(void);
 void S_AmbientOff (void);
 void S_AmbientOn (void);
 
-#endif
+#endif // __sound_h

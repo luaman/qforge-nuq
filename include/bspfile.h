@@ -26,7 +26,10 @@
 	$Id$
 */
 
+#ifndef __bspfile_h
+#define __bspfile_h
 
+#include "qtypes.h"
 
 // upper design bounds
 
@@ -299,7 +302,7 @@ void	PrintBSPFileSizes (void);
 
 //===============
 
-
+/*
 typedef struct epair_s
 {
 	struct epair_s	*next;
@@ -329,5 +332,7 @@ vec_t	FloatForKey (entity_t *ent, char *key);
 void 	GetVectorForKey (entity_t *ent, char *key, vec3_t vec);
 
 epair_t *ParseEpair (void);
-
+*/
 #endif
+
+#endif // __bspfile_h

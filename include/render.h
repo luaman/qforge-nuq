@@ -26,6 +26,12 @@
 	$Id$
 */
 
+#ifndef __render_h
+#define __render_h
+
+#include "mathlib.h"
+#include "cvar.h"
+#include "vid.h"
 
 #define	MAXCLIPPLANES	11
 
@@ -163,3 +169,4 @@ void D_DeleteSurfaceCache (void);
 void D_InitCaches (void *buffer, int size);
 void R_SetVrect (vrect_t *pvrect, vrect_t *pvrectin, int lineadj);
 
+#endif // __render_h

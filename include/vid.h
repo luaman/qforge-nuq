@@ -26,12 +26,11 @@
 	$Id$
 */
 
+#ifndef __vid_h
+#define __vid_h
 
 #define VID_CBITS	6
 #define VID_GRADES	(1 << VID_CBITS)
-
-// a pixel can be one, two, or four bytes
-typedef byte pixel_t;
 
 typedef struct vrect_s
 {
@@ -92,3 +91,4 @@ int VID_SetMode (int modenum, unsigned char *palette);
 void VID_HandlePause (qboolean pause);
 // called only on Win32, when pause happens, so the mouse can be released
 
+#endif // __vid_h

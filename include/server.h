@@ -26,6 +26,22 @@
 	$Id$
 */
 
+#ifndef __server_h
+#define __server_h
+
+#include <setjmp.h>
+
+#include "gcc_attr.h"
+#include "commdef.h"
+#include "net.h"
+#include "cvar.h"
+#include "protocol.h"
+#include "model.h"
+#include "progs.h"
+#include "sizebuf.h"
+#include "info.h"
+#include "quakeio.h"
+#include "client.h"
 
 typedef struct
 {
@@ -277,3 +293,5 @@ void SV_SpawnServer (char *server, char *startspot);
 #else
 void SV_SpawnServer (char *server);
 #endif
+
+#endif // __server_h

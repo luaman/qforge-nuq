@@ -204,24 +204,12 @@ void	VID_UnlockBuffer (void);
 // Use for multiplayer testing only - VERY dangerous!!!
 // #define IDGODS
 
-#include "common.h"
+//#include "common.h"
 #include "bspfile.h"
 #include "vid.h"
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
-
-typedef struct
-{
-	vec3_t	origin;
-	vec3_t	angles;
-	int		modelindex;
-	int		frame;
-	int		colormap;
-	int		skin;
-	int		effects;
-} entity_state_t;
-
 
 #include "wad.h"
 #include "draw.h"
@@ -256,27 +244,6 @@ typedef struct
 #ifdef GLQUAKE
 #include "glquake.h"
 #endif
-
-//=============================================================================
-
-// the host system specifies the base of the directory tree, the
-// command line parms passed to the program, and the amount of memory
-// available for the program to use
-
-typedef struct
-{
-	char	*basedir;
-	char	*cachedir;		// for development over ISDN lines
-	int		argc;
-	char	**argv;
-	void	*membase;
-	int		memsize;
-} quakeparms_t;
-
-
-//=============================================================================
-
-
 
 extern qboolean noclip_anglehack;
 

@@ -27,11 +27,15 @@
 */
 
 
-#ifndef __MODEL__
-#define __MODEL__
+#ifndef __model_h
+#define __model_h
 
-#include "modelgen.h"
+#include "qtypes.h"
+#include "render.h"
+#include "bspfile.h"
 #include "spritegn.h"
+#include "modelgen.h"
+#include "zone.h"
 
 /*
 
@@ -388,4 +392,4 @@ void	Mod_TouchModel (char *name);
 mleaf_t *Mod_PointInLeaf (float *p, model_t *model);
 byte	*Mod_LeafPVS (mleaf_t *leaf, model_t *model);
 
-#endif	// __MODEL__
+#endif	// __model_h

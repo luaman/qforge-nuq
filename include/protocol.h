@@ -26,6 +26,8 @@
 	$Id$
 */
 
+#ifndef __protocol_h
+#define __protocol_h
 
 #define	PROTOCOL_VERSION	15
 
@@ -173,3 +175,16 @@
 #define TE_IMPLOSION		14
 #define TE_RAILTRAIL		15
 #endif
+
+typedef struct entity_state_s
+{
+	vec3_t	origin;
+	vec3_t	angles;
+	int		modelindex;
+	int		frame;
+	int		colormap;
+	int		skin;
+	int		effects;
+} entity_state_t;
+
+#endif // __protocol_h

@@ -26,6 +26,10 @@
 	$Id$
 */
 
+#ifndef __net_udp_h
+#define __net_udp_h
+
+#include "qtypes.h"
 
 int  UDP_Init (void);
 void UDP_Shutdown (void);
@@ -45,3 +49,5 @@ int  UDP_GetAddrFromName (char *name, struct qsockaddr *addr);
 int  UDP_AddrCompare (struct qsockaddr *addr1, struct qsockaddr *addr2);
 int  UDP_GetSocketPort (struct qsockaddr *addr);
 int  UDP_SetSocketPort (struct qsockaddr *addr, int port);
+
+#endif // __net_udp_h

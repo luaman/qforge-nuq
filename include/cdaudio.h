@@ -1,7 +1,7 @@
 /*
 	cdaudio.h
 
-	@description@
+	Redbook CD Audio function prototypes
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -26,6 +26,9 @@
 	$Id$
 */
 
+#ifndef __cdaudio_h
+#define __cdaudio_h
+
 
 int CDAudio_Init(void);
 void CDAudio_Play(byte track, qboolean looping);
@@ -35,4 +38,4 @@ void CDAudio_Resume(void);
 void CDAudio_Shutdown(void);
 void CDAudio_Update(void);
 
-extern	cvar_t	*bgmvolume;
+#endif // __cdaudio_h

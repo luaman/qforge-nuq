@@ -31,10 +31,9 @@
 # include <config.h>
 #endif
 
-#include <quakedef.h>
-//#include <qtypes.h>
+#include <qtypes.h>
 #include <sound.h>
-//#include <qargs.h>
+#include <qargs.h>
 #include <console.h>
 
 #include <stdio.h>

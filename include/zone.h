@@ -26,6 +26,9 @@
 	$Id$
 */
 
+#ifndef __zone_h
+#define __zone_h
+
 /*
  memory allocation
 
@@ -136,5 +139,4 @@ void *Cache_Alloc (cache_user_t *c, int size, char *name);
 
 void Cache_Report (void);
 
-
-
+#endif // __zone_h

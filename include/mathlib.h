@@ -26,14 +26,11 @@
 	$Id$
 */
 
+#ifndef __mathlib_h
+#define __mathlib_h
 
-typedef float vec_t;
-typedef vec_t vec3_t[3];
-typedef vec_t vec5_t[5];
-
-typedef	int	fixed4_t;
-typedef	int	fixed8_t;
-typedef	int	fixed16_t;
+#include <math.h>
+#include "qtypes.h"
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
@@ -95,3 +92,5 @@ float	anglemod(float a);
 	)										\
 	:										\
 		BoxOnPlaneSide( (emins), (emaxs), (p)))
+
+#endif // __mathlib_h

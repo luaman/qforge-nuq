@@ -31,26 +31,23 @@
 # include "config.h"
 #endif
 
-#include <unistd.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdarg.h>
 #include <stdio.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <ctype.h>
-#include <sys/wait.h>
-#include <sys/mman.h>
+#include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <signal.h>
+
+#include "sys.h"
+#include "qargs.h"
+#include "cvar.h"
+#include "server.h"
 
 #include "quakedef.h"
+
 
 qboolean			isDedicated;
 
@@ -437,7 +434,7 @@ int main (int c, char **v)
 
 	j = COM_CheckParm("-mem");
 	if (j)
-		parms.memsize = (int) (Q_atof(com_argv[j+1]) * 1024 * 1024);
+		parms.memsize = (int) (atof(com_argv[j+1]) * 1024 * 1024);
 	parms.membase = malloc (parms.memsize);
 
 	parms.basedir = basedir;

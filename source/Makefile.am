@@ -48,7 +48,7 @@ sound_ASM=	snd_mixa.S
 common_ASM=	sys_ia32.S worlda.S $(math_ASM)
 #endif
 
-common_SOURCES= crc.c common.c cvar.c cmd.c mathlib.c wad.c world.c \
+common_SOURCES= crc.c cvar.c cmd.c mathlib.c wad.c world.c \
 		zone.c $(common_ASM)
 
 #

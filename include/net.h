@@ -26,6 +26,12 @@
 	$Id$
 */
 
+#ifndef __net_h
+#define __net_h
+
+#include "gcc_attr.h"
+#include "sizebuf.h"
+#include "cvar.h"
 
 struct qsockaddr
 {
@@ -352,3 +358,5 @@ extern cvar_t	*config_modem_clear;
 extern cvar_t	*config_modem_init;
 extern cvar_t	*config_modem_hangup;
 extern cvar_t	*hostname;
+
+#endif // __net_h
