@@ -28,10 +28,12 @@
 	$Id$
 */
 
-#ifndef DGA_CHECK_H
-#define DGA_CHECK_H
+#ifndef __dga_check_h
+#define __dga_check_h
 
 #include <X11/Xlib.h>
+
+#include "cvar.h"
 
 extern cvar_t	*vid_dga_mouseaccel;
 
@@ -50,4 +52,4 @@ int VID_CheckDGA(Display *dpy, int *maj_ver, int *min_ver, int *hasvideo);
 */
 int VID_CheckVMode(Display *dpy, int *maj_ver, int *min_ver);
 
-#endif /* DGA_CHECK_H */
+#endif /* __dga_check_h */

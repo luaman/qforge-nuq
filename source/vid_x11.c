@@ -47,6 +47,13 @@
 #include <X11/extensions/XShm.h>
 
 #include "d_local.h"
+#include "sys.h"
+#include "host.h"
+#include "qargs.h"
+#include "qendian.h"
+#include "console.h"
+#include "keys.h"
+#include "client.h"
 
 cvar_t	*_windowed_mouse;
 cvar_t	*m_filter;
@@ -505,22 +512,22 @@ void	VID_Init (unsigned char *palette)
 	{
 		if (pnum >= com_argc-2)
 			Sys_Error("VID: -winsize <width> <height>\n");
-		vid.width = Q_atoi(com_argv[pnum+1]);
-		vid.height = Q_atoi(com_argv[pnum+2]);
+		vid.width = atoi(com_argv[pnum+1]);
+		vid.height = atoi(com_argv[pnum+2]);
 		if (!vid.width || !vid.height)
 			Sys_Error("VID: Bad window width/height\n");
 	}
 	if ((pnum=COM_CheckParm("-width"))) {
 		if (pnum >= com_argc-1)
 			Sys_Error("VID: -width <width>\n");
-		vid.width = Q_atoi(com_argv[pnum+1]);
+		vid.width = atoi(com_argv[pnum+1]);
 		if (!vid.width)
 			Sys_Error("VID: Bad window width\n");
 	}
 	if ((pnum=COM_CheckParm("-height"))) {
 		if (pnum >= com_argc-1)
 			Sys_Error("VID: -height <height>\n");
-		vid.height = Q_atoi(com_argv[pnum+1]);
+		vid.height = atoi(com_argv[pnum+1]);
 		if (!vid.height)
 			Sys_Error("VID: Bad window height\n");
 	}
@@ -532,7 +539,7 @@ void	VID_Init (unsigned char *palette)
 	{
 		if (pnum >= com_argc-1)
 			Sys_Error("VID: -visualid <id#>\n");
-		template.visualid = Q_atoi(com_argv[pnum+1]);
+		template.visualid = atoi(com_argv[pnum+1]);
 		template_mask = VisualIDMask;
 	}
 
