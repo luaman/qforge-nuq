@@ -139,56 +139,24 @@ void Mod_FloodFillSkin( byte *skin, int skinwidth, int skinheight )
 	}
 }
 
+int Mod_Fullbright(byte *skin, int width, int height, char *name);
+
 void *Mod_LoadSkin (byte *skin, int skinsize, int snum, int gnum, qboolean group)
 {
-	int j;
 	char name[32];
+	int fbtexnum;
 
 	Mod_FloodFillSkin( skin, pheader->mdl.skinwidth, pheader->mdl.skinheight );
 
-	// This block is GL fullbright support for objects...
-	{
-		int		pixels;
-		byte	*ptexel;
-
-		// Check for fullbright pixels..
-		pixels = pheader->mdl.skinwidth * pheader->mdl.skinheight;
-		ptexel = (byte *)(skin + 1);
-
-		for (j=0 ; j<pixels ; j++) {
-			if (ptexel[j] >= 256-32) {
-				loadmodel->hasfullbrights = true;
-				break;
-			}
-		}
-
-		if (loadmodel->hasfullbrights) {
-			byte	*ptexels;
-
-			//ptexels = Hunk_Alloc(s);
-			ptexels = malloc(pixels);
-
-			if (group) {
-				snprintf(name, sizeof(name), "fb_%s_%i_%i", loadmodel->name,snum,gnum);
-			} else {
-				snprintf(name, sizeof(name), "fb_%s_%i", loadmodel->name,snum);
-			}
-			Con_DPrintf("FB Model ID: '%s'\n", name);
-			for (j=0 ; j<pixels ; j++) {
-				if (ptexel[j] >= 256-32) {
-					ptexels[j] = ptexel[j];
-				} else {
-					ptexels[j] = 255;
-				}
-			}
-			pheader->gl_fb_texturenum[snum][gnum] =
-				GL_LoadTexture (name, pheader->mdl.skinwidth,
-						pheader->mdl.skinheight, ptexels, true, true, 1);
-
-			free(ptexels);
-		}
+	if (group) {
+		snprintf(name, sizeof(name), "fb_%s_%i_%i", loadmodel->name,snum,gnum);
+	} else {
+		snprintf(name, sizeof(name), "fb_%s_%i", loadmodel->name,snum);
 	}
-
+	fbtexnum = Mod_Fullbright(skin+1, pheader->mdl.skinwidth, pheader->mdl.skinheight, name);
+	if ((loadmodel->hasfullbrights=(fbtexnum!=-1))) {
+		pheader->gl_fb_texturenum[snum][gnum] = fbtexnum;
+	}
 	if (group) {
 		snprintf(name, sizeof(name), "%s_%i_%i", loadmodel->name,snum,gnum);
 	} else {

@@ -48,7 +48,7 @@ extern byte mod_novis[];
 
 extern const int mod_lightmap_bytes;
 
-void Mod_LoadMMNearest(miptex_t *mt, texture_t	*tx);
+void Mod_ProcessTexture (miptex_t *mt, texture_t *tx);
 void Mod_LoadLighting (lump_t *l);
 
 /*
@@ -196,7 +196,7 @@ void Mod_LoadTextures (lump_t *l)
 			R_InitSky (tx);
 		else
 		{
-			Mod_LoadMMNearest(mt, tx);
+			Mod_ProcessTexture(mt, tx);
 		}
 	}
 

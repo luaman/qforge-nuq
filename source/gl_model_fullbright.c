@@ -1,5 +1,5 @@
 /*
-	sw_model_brush.c
+	gl_model_fullbright.c
 
 	model loading and caching
 
@@ -26,6 +26,9 @@
 	$Id$
 */
 
+// models are the only shared resource between a client and server running
+// on the same machine.
+
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -35,36 +38,42 @@
 #include "console.h"
 #include "qendian.h"
 #include "checksum.h"
+#include "glquake.h"
 
-extern char loadname[];
-extern model_t *loadmodel;
-extern byte mod_novis[];
-extern byte *mod_base;
-
-const int mod_lightmap_bytes = 1;
-
-void
-GL_SubdivideSurface (msurface_t *fa)
+int Mod_Fullbright (byte *skin, int width, int height, char *name)
 {
-}
+	int		j;
+	int		pixels;
+	qboolean hasfullbrights = false;
+	int		texnum;
 
-void
-Mod_ProcessTexture (miptex_t *mt, texture_t *tx)
-{
-}
+	// Check for fullbright pixels..
+	pixels = width * height;
 
-/*
-=================
-Mod_LoadLighting
-=================
-*/
-void Mod_LoadLighting (lump_t *l)
-{
-	if (!l->filelen)
-	{
-		loadmodel->lightdata = NULL;
-		return;
+	for (j=0 ; j<pixels ; j++) {
+		if (skin[j] >= 256-32) {
+			hasfullbrights = true;
+			break;
+		}
 	}
-	loadmodel->lightdata = Hunk_AllocName ( l->filelen, loadname);	
-	memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
+
+	if (hasfullbrights) {
+		byte	*ptexels;
+
+		//ptexels = Hunk_Alloc(s);
+		ptexels = malloc(pixels);
+
+		Con_DPrintf("FB Model ID: '%s'\n", name);
+		for (j=0 ; j<pixels ; j++) {
+			if (skin[j] >= 256-32) {
+				ptexels[j] = skin[j];
+			} else {
+				ptexels[j] = 255;
+			}
+		}
+		texnum = GL_LoadTexture (name, width, height, ptexels, true, true, 1);
+		free(ptexels);
+		return texnum;
+	}
+	return -1;
 }
