@@ -31,6 +31,7 @@
 #endif
 
 #include "sound.h"
+#include "compat.h"
 
 #ifdef _WIN32
 #include "winquake.h"
@@ -392,37 +393,77 @@ void SND_PaintChannelFrom8 (channel_t *ch, sfxcache_t *sc, int count)
 
 void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 {
-	int data;
-	int left, right;
 	int leftvol, rightvol;
 	signed short *sfx;
-	int	i;
-	int left_phase, right_phase;
+	int	i = 0;
+	unsigned int left_phase, right_phase;	// never allowed < 0 anyway
+	int oldphase = ch->oldphase * 2;
+	int phase = ch->phase * 2;
 
+	int dir = (phase - oldphase) > 0 ? 1 : -1;
+	int ldir;
+	int rdir;
+	
 	leftvol = ch->leftvol;
 	rightvol = ch->rightvol;
-	if (ch->phase >= 0) {
-		left_phase = ch->phase;
-		right_phase = 0;
-		if (ch->phase > max_overpaint)
-			max_overpaint = ch->phase;
-	} else {
-		left_phase = 0;
-		right_phase = -ch->phase;
-		if (-ch->phase > max_overpaint)
-			max_overpaint = -ch->phase;
-	}
+
+	max_overpaint = max (abs (ch->phase),
+						 max (abs (ch->oldphase), max_overpaint));
+
 	sfx = (signed short *)sc->data + ch->pos;
+	ch->pos += count;
 
-	for (i=0 ; i<count ; i++)
-	{
-		data = sfx[i];
-		left = (data * leftvol) >> 8;
-		right = (data * rightvol) >> 8;
-		paintbuffer[i+left_phase].left += left;
-		paintbuffer[i+right_phase].right += right;
+	if (oldphase >= 0) {
+		ldir = dir;
+		rdir = 0;
+		left_phase = oldphase;
+		right_phase = 0;
+	} else {
+		ldir = 0;
+		rdir = dir;
+		left_phase = 0;
+		right_phase = -oldphase;
 	}
 
-	ch->pos += count;
+#define PAINT_CHANNELS	do {												\
+							int data = sfx[i];								\
+							int left = (data * leftvol) >> 8;				\
+							int right = (data * rightvol) >> 8;				\
+							paintbuffer[i + left_phase / 2].left += left;	\
+							paintbuffer[i + right_phase / 2].right += right;\
+						} while (0)
+
+	if (oldphase != phase) {
+		int c;
+
+		if ((oldphase ^ phase) & ~((~0u)>>1)) {
+			// phase change crosses 0
+			int t;
+			c = min (count, abs(oldphase));
+			count -= c;
+			for ( ; c; c--, i++) {
+				PAINT_CHANNELS;
+				left_phase += ldir;
+				right_phase += rdir;
+			}
+			t = ldir;
+			ldir = rdir & 1;
+			rdir = t & 1;
+			oldphase = 0;
+		}
+		// oldphase and phase [now] on same size of 0
+		c = min (count, abs (phase - oldphase));
+		count -= c;
+		for ( ; c; c--, i++) {
+			PAINT_CHANNELS;
+			left_phase += ldir;
+			right_phase += rdir;
+		}
+	}
+
+	for (; count ; count--, i++) {
+		PAINT_CHANNELS;
+	}
+#undef PAINT_CHANNELS
 }
 

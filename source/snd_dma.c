@@ -781,6 +781,7 @@ void S_Update(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	{
 		if (!ch->sfx)
 			continue;
+		ch->oldphase = ch->phase;	// prepare to lerp from prev to next phase
 		SND_Spatialize(ch);         // respatialize channel
 		if (!ch->leftvol && !ch->rightvol)
 			continue;
