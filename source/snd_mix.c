@@ -416,58 +416,62 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 	}
 
 	if (ch->oldphase != ch->phase) {
-		unsigned int	olp, orp, nlp, nrp;
-		unsigned int	cl, cr, c;
+		unsigned int	old_phase_left, old_phase_right;
+		unsigned int	new_phase_left, new_phase_right;
+		unsigned int	count_left, count_right, c;
 
 		if (ch->oldphase >= 0) {
-			olp = ch->oldphase;
-			orp = 0;
+			old_phase_left = ch->oldphase;
+			old_phase_right = 0;
 		} else {
-			olp = 0;
-			orp = -ch->oldphase;
+			old_phase_left = 0;
+			old_phase_right = -ch->oldphase;
 		}
-		nlp = left_phase;
-		nrp = right_phase;
-		if (nlp > olp)
-			cl = 2 * (nlp - olp);
+		new_phase_left = left_phase;
+		new_phase_right = right_phase;
+		if (new_phase_left > old_phase_left)
+			count_left = 2 * (new_phase_left - old_phase_left);
 		else
-			cl = olp - nlp;
-		if (nrp > orp)
-			cr = 2 * (nrp - orp);
+			count_left = old_phase_left - new_phase_left;
+		if (new_phase_right > old_phase_right)
+			count_right = 2 * (new_phase_right - old_phase_right);
 		else
-			cr = orp - nrp;
-		c = min (count, max (cr, cl));
+			count_right = old_phase_right - new_phase_right;
+		c = min (count, max (count_right, count_left));
 		count -= c;
 		while (c) {
 			int data = sfx[i];
 			int left = (data * leftvol) >> 8;
 			int right = (data * rightvol) >> 8;
-			if (nlp < olp) {
-				if (!(cl & 1)) {
-					paintbuffer[i + olp].left += left;
-					olp--;
+
+			if (new_phase_left < old_phase_left) {
+				if (!(count_left & 1)) {
+					paintbuffer[i + old_phase_left].left += left;
+					old_phase_left--;
 				}
-				cl--;
-			} else if (nlp > olp) {
-				paintbuffer[i + olp].left += left;
-				olp++;
-				paintbuffer[i + olp].left += left;
+				count_left--;
+			} else if (new_phase_left > old_phase_left) {
+				paintbuffer[i + old_phase_left].left += left;
+				old_phase_left++;
+				paintbuffer[i + old_phase_left].left += left;
 			} else {
-				paintbuffer[i + olp].left += left;
+				paintbuffer[i + old_phase_left].left += left;
 			}
-			if (nrp < orp) {
-				if (!(cr & 1)) {
-					paintbuffer[i + orp].right += right;
-					orp--;
+
+			if (new_phase_right < old_phase_right) {
+				if (!(count_right & 1)) {
+					paintbuffer[i + old_phase_right].right += right;
+					old_phase_right--;
 				}
-				cr--;
-			} else if (nrp > orp) {
-				paintbuffer[i + orp].right += right;
-				orp++;
-				paintbuffer[i + orp].right += right;
+				count_right--;
+			} else if (new_phase_right > old_phase_right) {
+				paintbuffer[i + old_phase_right].right += right;
+				old_phase_right++;
+				paintbuffer[i + old_phase_right].right += right;
 			} else {
-				paintbuffer[i + orp].right += right;
+				paintbuffer[i + old_phase_right].right += right;
 			}
+
 			c--;
 			i++;
 		}
