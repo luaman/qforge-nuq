@@ -54,6 +54,7 @@
 #include "model.h"	// needed by: glquake.h
 #include "console.h"
 #include "glquake.h"
+#include "view.h"
 
 static int GL_LoadPicTexture (qpic_t *pic);
 
@@ -71,8 +72,6 @@ cvar_t		*gl_conalpha;
 cvar_t		*gl_conspin;
 cvar_t		*cl_verstring;
 cvar_t		*gl_lightmode; // LordHavoc: lighting mode
-cvar_t		*brightness; // LordHavoc: brightness multiplier
-cvar_t		*contrast; // LordHavoc: contrast scaler
 
 byte		*draw_chars;				// 8*8 graphic characters
 qpic_t		*draw_disc;
@@ -413,10 +412,6 @@ void Draw_Init (void)
 	// LordHavoc: lighting mode
 	gl_lightmode = Cvar_Get("gl_lightmode", "0", CVAR_ARCHIVE,
 			"Lighting mode (0 = GLQuake style, 1 = new style)");
-	brightness = Cvar_Get("brightness", "1", CVAR_ARCHIVE,
-			"Brightness");
-	contrast = Cvar_Get("contrast", "1", CVAR_ARCHIVE,
-			"contrast");
 	gl_nobind = Cvar_Get("gl_nobind",  "0", CVAR_NONE,
 			"whether or not to inhibit texture binding");
 	gl_max_size = Cvar_Get("gl_max_size",  "1024", CVAR_NONE,

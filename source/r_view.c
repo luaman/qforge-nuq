@@ -82,10 +82,14 @@ cvar_t	*cl_crossy;
 
 cvar_t	*gl_cshiftpercent;
 
+cvar_t	*brightness;
+cvar_t	*contrast;
+
 float	v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
 extern	int			in_forward, in_forward2, in_back;
 
+void BuildGammaTable (float, float);
 
 /*
 ===============
@@ -244,28 +248,6 @@ cvar_t	*v_gamma;
 
 byte		gammatable[256];	// palette is sent through this
 
-void BuildGammaTable (float g)
-{
-	int		i, inf;
-	
-	if (g == 1.0)
-	{
-		for (i=0 ; i<256 ; i++)
-			gammatable[i] = i;
-		return;
-	}
-	
-	for (i=0 ; i<256 ; i++)
-	{
-		inf = 255 * pow ( (i+0.5)/255.5 , g ) + 0.5;
-		if (inf < 0)
-			inf = 0;
-		if (inf > 255)
-			inf = 255;
-		gammatable[i] = inf;
-	}
-}
-
 /*
 =================
 V_CheckGamma
@@ -273,18 +255,19 @@ V_CheckGamma
 */
 qboolean V_CheckGamma (void)
 {
-	static float oldgammavalue;
+	static float oldbrightness;
+	static float oldcontrast;
 	
-	if (v_gamma->value == oldgammavalue)
+	if ((brightness->value == oldbrightness) && contrast->value == oldcontrast)
 		return false;
-	oldgammavalue = v_gamma->value;
+	oldbrightness = brightness->value;
+	oldcontrast = contrast->value;
 	
-	BuildGammaTable (v_gamma->value);
+	BuildGammaTable (brightness->value, contrast->value);
 	vid.recalc_refdef = 1;				// force a surface cache flush
 	
 	return true;
 }
-
 
 
 /*
@@ -810,8 +793,9 @@ void V_Init (void)
 	v_kickroll = Cvar_Get("v_kickroll", "0.6", CVAR_NONE, "None");
 	v_kickpitch = Cvar_Get("v_kickpitch", "0.6", CVAR_NONE, "None");
 	
-	BuildGammaTable (1.0);	// no gamma yet
-	v_gamma = Cvar_Get("gamma", "1", CVAR_ARCHIVE, "None");
+	BuildGammaTable (1.0, 1.0);	// no gamma yet
+	brightness = Cvar_Get("brightness",  "1", CVAR_ARCHIVE, "None");
+	contrast = Cvar_Get("contrast",  "1", CVAR_ARCHIVE, "None");
 }
 
 

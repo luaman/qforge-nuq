@@ -875,7 +875,7 @@ void SCR_TileClear (void)
 float oldsbar = 0;
 extern void R_ForceLightUpdate();
 qboolean lighthalf;
-extern cvar_t *gl_lightmode, *brightness, *contrast;
+extern cvar_t *gl_lightmode;
 
 /*
 ==================

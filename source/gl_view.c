@@ -252,3 +252,20 @@ void V_RenderView (void)
 		R_RenderView ();
 	}
 }
+
+/*
+	BuildGammaTable
+
+	In software mode, this function gets the palette ready for changing...in
+	in GL, it does very little as you can see.
+*/
+
+void
+BuildGammaTable (float b, float c)
+{
+	int		i;
+
+	for (i = 0; i < 256; i++)
+		gammatable[i] = i;
+	return;
+}

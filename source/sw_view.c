@@ -30,6 +30,7 @@
 # include "config.h"
 #endif
 
+#include "compat.h"
 #include "view.h"
 #include "vid.h"
 #include "console.h"
@@ -184,3 +185,32 @@ void V_RenderView (void)
 		Draw_Character8 (scr_vrect.x + scr_vrect.width/2 + cl_crossx->value, 
 			scr_vrect.y + scr_vrect.height/2 + cl_crossy->value, '+');
 }
+
+void
+BuildGammaTable (float b, float c)
+{
+	int		i, j;
+	int 	inf = 0;
+	
+	if ((b == 1.0) && (c == 1.0)) {
+		for (i = 0; i < 256; i++)
+			gammatable[i] = i;
+		return;
+	}
+	
+	for (i=0 ; i<256 ; i++) {
+		if (!(i == 128)) {
+			if (i < 128) {
+				j = i + (int) ((128 - i) * (1 - c));
+			} else {
+				j = i + (int) ((i - 128) * (1 - c));
+			}
+		} else {
+			j = i;
+		}
+		inf = (j * b);	// gamma is brightness now, and positive
+		inf = bound(0, inf, 255);
+		gammatable[i] = inf;
+	}
+}
+
