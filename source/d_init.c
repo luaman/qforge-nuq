@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // d_init.c: rasterization driver initialization
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "d_local.h"
 
@@ -145,7 +149,7 @@ void D_SetupFrame (void)
 	for (i=0 ; i<(NUM_MIPS-1) ; i++)
 		d_scalemip[i] = basemip[i] * d_mipscale.value;
 
-#if	USE_INTEL_ASM
+#ifdef	USE_INTEL_ASM
 				if (d_subdiv16.value)
 					d_drawspans = D_DrawSpans16;
 				else

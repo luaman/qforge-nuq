@@ -23,6 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # include <config.h>
 #endif
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -162,7 +166,7 @@ void R_BeginEdgeFrame (void)
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ==============
@@ -205,10 +209,6 @@ addedge:
 	} while ((edgestoadd = next_edge) != NULL);
 }
 
-#endif	// !USE_INTEL_ASM
-	
-
-#if	!USE_INTEL_ASM
 
 /*
 ==============
@@ -225,10 +225,6 @@ void R_RemoveEdges (edge_t *pedge)
 	} while ((pedge = pedge->nextremove) != NULL);
 }
 
-#endif	// !USE_INTEL_ASM
-
-
-#if	!USE_INTEL_ASM
 
 /*
 ==============
@@ -295,7 +291,7 @@ pushback:
 	}
 }
 
-#endif	// !USE_INTEL_ASM
+#endif	// USE_INTEL_ASM
 
 
 /*
@@ -454,7 +450,7 @@ void R_TrailingEdge (surf_t *surf, edge_t *edge)
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ==============
@@ -620,7 +616,7 @@ void R_GenerateSpans (void)
 	R_CleanupSpan ();
 }
 
-#endif	// !USE_INTEL_ASM
+#endif	// USE_INTEL_ASM
 
 
 /*

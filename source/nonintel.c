@@ -21,11 +21,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // nonintel.c: code for non-Intel processors only
 //
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ================
@@ -60,5 +64,5 @@ void R_SurfacePatch (void)
 }
 
 
-#endif	// !USE_INTEL_ASM
+#endif	// USE_INTEL_ASM
 

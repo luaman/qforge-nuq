@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_main.c  -- client main loop
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 
 // we need to declare some mouse variables here, because the menu system

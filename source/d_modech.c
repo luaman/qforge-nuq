@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // d_modech.c: called when mode has just changed
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "d_local.h"
 
@@ -36,7 +40,7 @@ D_Patch
 */
 void D_Patch (void)
 {
-#if USE_INTEL_ASM
+#ifdef USE_INTEL_ASM
 
 	static qboolean protectset8 = false;
 

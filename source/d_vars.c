@@ -19,7 +19,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_vars.c: global refresh variables
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include	"quakedef.h"
 
@@ -46,5 +50,5 @@ short			*d_pzbuffer;
 unsigned int	d_zrowbytes;
 unsigned int	d_zwidth;
 
-#endif	// !USE_INTEL_ASM
+#endif	// USE_INTEL_ASM
 

@@ -23,6 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # include <config.h>
 #endif
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -337,7 +341,7 @@ void R_DrawSurface (void)
 
 //=============================================================================
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ================

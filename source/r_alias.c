@@ -24,6 +24,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # include <config.h>
 #endif
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"	// FIXME: shouldn't be needed (is needed for patch
@@ -454,7 +458,7 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ================
@@ -738,7 +742,7 @@ void R_AliasDrawModel (alight_t *plighting)
 	}
 	else
 	{
-#if	USE_INTEL_ASM
+#ifdef	USE_INTEL_ASM
 		D_Aff8Patch (currententity->colormap);
 #endif
 	}

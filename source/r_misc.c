@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_misc.c
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -292,7 +296,7 @@ void R_TransformFrustum (void)
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ================

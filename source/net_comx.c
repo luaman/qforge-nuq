@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // net_comx.c
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <dos.h>
 #include <dpmi.h>
 

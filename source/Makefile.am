@@ -40,7 +40,7 @@ EXTRA_PROGRAMS= uquake-ggi uquake-mgl uquake-sdl uquake-svga uquake-x11 \
 noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
 if ASM_ARCH
-math_ASM= 	math.S
+math_ASM= 	math.S cl_math.S
 soft_ASM=	d_draw.S d_draw16.S d_parta.S d_polysa.S d_scana.S d_spr8.S \
 		d_varsa.S r_aclipa.S r_aliasa.S r_drawa.S r_edgea.S r_varsa.S \
 		surf16.s surf8.s

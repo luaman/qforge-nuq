@@ -23,6 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # include <config.h>
 #endif
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <math.h>
 #include "quakedef.h"
 
@@ -181,7 +185,7 @@ void BOPS_Error (void)
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ==================
@@ -565,7 +569,7 @@ int GreatestCommonDivisor (int i1, int i2)
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 // TODO: move to nonintel.c
 

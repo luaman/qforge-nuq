@@ -23,6 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # include "config.h"
 #endif
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 
 /*
@@ -484,7 +488,7 @@ POINT TESTING IN HULLS
 ===============================================================================
 */
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 ==================
@@ -519,7 +523,7 @@ int SV_HullPointContents (hull_t *hull, int num, vec3_t p)
 	return num;
 }
 
-#endif	// !USE_INTEL_ASM
+#endif	// USE_INTEL_ASM
 
 
 /*

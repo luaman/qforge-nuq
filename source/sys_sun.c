@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // sys_sun.h -- Sun system driver
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "errno.h"
 #include <sys/types.h>
@@ -294,7 +298,7 @@ void Sys_Sleep (void)
 {
 }
 
-#if !USE_INTEL_ASM
+#ifndef USE_INTEL_ASM
 void Sys_HighFPPrecision (void)
 {
 }
@@ -306,7 +310,7 @@ void Sys_LowFPPrecision (void)
 
 void Sys_Init(void)
 {
-#if USE_INTEL_ASM
+#ifdef USE_INTEL_ASM
 	Sys_SetFPCW();
 #endif
 }

@@ -25,6 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # include <config.h>
 #endif
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"
@@ -94,7 +98,7 @@ void D_WarpScreen (void)
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 =============
@@ -115,7 +119,7 @@ void D_DrawTurbulent8Span (void)
 	} while (--r_turb_spancount > 0);
 }
 
-#endif	// !USE_INTEL_ASM
+#endif	// USE_INTEL_ASM
 
 
 /*
@@ -251,7 +255,7 @@ void Turbulent8 (espan_t *pspan)
 }
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 =============
@@ -389,7 +393,7 @@ void D_DrawSpans8 (espan_t *pspan)
 #endif
 
 
-#if	!USE_INTEL_ASM
+#ifndef	USE_INTEL_ASM
 
 /*
 =============
