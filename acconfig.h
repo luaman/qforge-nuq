@@ -80,7 +80,7 @@
 #undef HAVE_DLOPEN
 
 /* Define if you have zlib */
-#undef HAS_ZLIB
+#undef HAVE_ZLIB
 
 /* If your version of OpenGL uses APIENTRY, define GLAPIENTRY to be APIENTRY */
 #undef GLAPIENTRY
