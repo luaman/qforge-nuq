@@ -100,3 +100,7 @@ void D_EndDirectRect (int x, int y, int width, int height)
 }
 
 
+
+void VID_HandlePause (qboolean pause)
+{
+}

@@ -459,3 +459,7 @@ IN_Init(void)
 
 	return 1;
 }
+
+void IN_HandlePause (qboolean pause)
+{
+}

@@ -1297,3 +1297,7 @@ void IN_Move (usercmd_t *cmd)
 //void VID_UnlockBuffer(void) { }
 //void VID_LockBuffer(void) { }
 
+
+void VID_HandlePause (qboolean pause)
+{
+}

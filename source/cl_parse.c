@@ -43,6 +43,7 @@
 #include "server.h"
 #include "qdefs.h"
 #include "glquake.h"
+#include "input.h"
 
 char *svc_strings[] =
 {
@@ -894,16 +895,14 @@ void CL_ParseServerMessage (void)
 				if (cl.paused)
 				{
 					CDAudio_Pause ();
-#ifdef _WIN32
+					IN_HandlePause (true);
 					VID_HandlePause (true);
-#endif
 				}
 				else
 				{
-					CDAudio_Resume ();
-#ifdef _WIN32
 					VID_HandlePause (false);
-#endif
+					IN_HandlePause (false);
+					CDAudio_Resume ();
 				}
 			}
 			break;

@@ -482,3 +482,7 @@ void VGA_SwapBuffers (viddef_t *lvid, vmode_t *pcurrentmode, vrect_t *rects)
 	VGA_SwapBuffersCopy (lvid, pcurrentmode, rects);
 }
 
+
+void VID_HandlePause (qboolean pause)
+{
+}

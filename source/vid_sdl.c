@@ -515,3 +515,11 @@ VID_SetCaption (char *text)
         SDL_WM_SetCaption(text, NULL);
 }
 
+
+void VID_HandlePause (qboolean pause)
+{
+}
+
+void IN_HandlePause (qboolean pause)
+{
+}

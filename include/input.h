@@ -47,6 +47,8 @@ void IN_ClearStates (void);
 
 void IN_SendKeyEvents (void);
 
+void IN_HandlePause (qboolean pause);
+
 extern	cvar_t	*_windowed_mouse;
 
 

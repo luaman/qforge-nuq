@@ -253,3 +253,7 @@ IN_Move (usercmd_t *cmd)
 		else cmd->forwardmove -= m_forward->value * dy;
 	}
 }
+
+void IN_HandlePause (qboolean pause)
+{
+}

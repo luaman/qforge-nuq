@@ -33,14 +33,19 @@
 
 #include <qtypes.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 void GetEvent( void );
 
-extern Display	*x_disp;
-extern Window	x_win;
-extern qboolean doShm;
-extern int		x_shmeventtype;
-extern qboolean oktodraw;
+extern Display		*x_disp;
+extern int			x_screen;
+extern Window		x_root;
+extern XVisualInfo	*x_visinfo;
+extern Visual		*x_vis;
+extern Window		x_win;
+extern qboolean		doShm;
+extern int			x_shmeventtype;
+extern qboolean		oktodraw;
 
 qboolean x11_add_event( int event, void (*event_handler)(XEvent *));
 qboolean x11_del_event( int event, void (*event_handler)(XEvent *));
@@ -48,5 +53,10 @@ void x11_process_event( void );
 void x11_process_events( void );
 void x11_open_display( void );
 void x11_close_display( void );
+void x11_create_null_cursor(void);
+void x11_set_vidmode(int width, int height);
+void x11_restore_vidmode(void);
+void x11_create_window(int width, int height);
+void x11_grab_keyboard(void);
 
 #endif	// __CONTEXT_X11_H__

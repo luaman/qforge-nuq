@@ -709,3 +709,7 @@ void outb(unsigned char value, unsigned short port)
 {
 	__asm__ __volatile__ ("outb %b0,%w1" : : "a" (value) , "Nd" (port));
 }
+
+void VID_HandlePause (qboolean pause)
+{
+}

@@ -789,3 +789,7 @@ void VID_MenuKey (int key)
 	}
 }
 
+
+void VID_HandlePause (qboolean pause)
+{
+}

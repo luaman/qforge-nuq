@@ -623,3 +623,6 @@ Con_DPrintf("OUT: y:%f p:%f r:%f f:%f s:%f u:%f\n", extern_control->viewangles[Y
 		V_StopPitchDrift ();
 }
 
+void IN_HandlePause (qboolean pause)
+{
+}

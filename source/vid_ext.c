@@ -798,3 +798,7 @@ void VID_ExtraSwapBuffers (viddef_t *lvid, vmode_t *pcurrentmode,
 	}
 }
 
+
+void VID_HandlePause (qboolean pause)
+{
+}

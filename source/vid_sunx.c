@@ -1268,3 +1268,7 @@ void IN_Move (usercmd_t *cmd)
 	}
 	mouse_x = mouse_y = 0.0;
 }
+
+void VID_HandlePause (qboolean pause)
+{
+}

@@ -198,6 +198,7 @@ void Cvar_Set (cvar_t *var, char *value)
 	var->string = malloc (strlen(value)+1);
 	strcpy (var->string, value);
 	var->value = atof (var->string);
+	var->int_val = atoi (var->string);
 
 	if ((var->flags & CVAR_SERVERINFO) && changed) {
 		if (sv.active)
