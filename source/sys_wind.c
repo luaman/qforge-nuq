@@ -83,7 +83,7 @@ int Sys_FileOpenRead (char *path, int *hndl)
 	
 	i = findhandle ();
 
-	f = fopen(path, "rb");
+	f = Qopen(path, "rb");
 	if (!f)
 	{
 		*hndl = -1;
@@ -102,7 +102,7 @@ int Sys_FileOpenWrite (char *path)
 	
 	i = findhandle ();
 
-	f = fopen(path, "wb");
+	f = Qopen(path, "wb");
 	if (!f)
 		Sys_Error ("Error opening %s: %s", path,strerror(errno));
 	sys_handles[i] = f;
@@ -112,7 +112,7 @@ int Sys_FileOpenWrite (char *path)
 
 void Sys_FileClose (int handle)
 {
-	fclose (sys_handles[handle]);
+	Qclose (sys_handles[handle]);
 	sys_handles[handle] = NULL;
 }
 
@@ -135,10 +135,10 @@ int	Sys_FileTime (char *path)
 {
 	QFile	*f;
 	
-	f = fopen(path, "rb");
+	f = Qopen(path, "rb");
 	if (f)
 	{
-		fclose(f);
+		Qclose(f);
 		return 1;
 	}
 	

@@ -748,7 +748,7 @@ void SaveGamestate()
 	snprintf (name, sizeof(name), "%s/%s.gip", com_gamedir, sv.name);
 	
 	Con_Printf ("Saving game to %s...\n", name);
-	f = fopen (name, "w");
+	f = Qopen (name, "w");
 	if (!f)
 	{
 		Con_Printf ("ERROR: couldn't open.\n");
@@ -804,7 +804,7 @@ int LoadGamestate(char *level, char *startspot)
 	snprintf (name, sizeof(name), "%s/%s.gip", com_gamedir, level);
 	
 	Con_Printf ("Loading game from %s...\n", name);
-	f = fopen (name, "r");
+	f = Qopen (name, "r");
 	if (!f)
 	{
 		Con_Printf ("ERROR: couldn't open.\n");

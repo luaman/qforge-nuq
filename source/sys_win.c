@@ -151,7 +151,7 @@ int Sys_FileOpenRead (char *path, int *hndl)
 
 	i = findhandle ();
 
-	f = fopen(path, "rb");
+	f = Qopen(path, "rb");
 
 	if (!f)
 	{
@@ -180,7 +180,7 @@ int Sys_FileOpenWrite (char *path)
 	
 	i = findhandle ();
 
-	f = fopen(path, "wb");
+	f = Qopen(path, "wb");
 	if (!f)
 		Sys_Error ("Error opening %s: %s", path,strerror(errno));
 	sys_handles[i] = f;
@@ -195,7 +195,7 @@ void Sys_FileClose (int handle)
 	int		t;
 
 	t = VID_ForceUnlockedAndReturnState ();
-	fclose (sys_handles[handle]);
+	Qclose (sys_handles[handle]);
 	sys_handles[handle] = NULL;
 	VID_ForceLockState (t);
 }
@@ -236,11 +236,11 @@ int	Sys_FileTime (char *path)
 
 	t = VID_ForceUnlockedAndReturnState ();
 	
-	f = fopen(path, "rb");
+	f = Qopen(path, "rb");
 
 	if (f)
 	{
-		fclose(f);
+		Qclose(f);
 		retval = 1;
 	}
 	else

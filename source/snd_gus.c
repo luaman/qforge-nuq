@@ -342,7 +342,7 @@ static char *stripped_fgets(char *s, int n, QFile *f)
 // Opens an .INI file. Works like fopen
 QFile *ini_fopen(const char *filename, const char *modes)
 {
-   return(fopen(filename,modes));
+   return(Qopen(filename,modes));
 }
 
 // Closes a .INI file. Works like fclose
@@ -350,7 +350,7 @@ int ini_fclose(QFile *f)
 {
    if (f==current_file)
       reset_buffer(NULL);
-   return(fclose(f));
+   return(Qclose(f));
 }
 
 // Puts "field" from "section" from .ini file "f" into "s".

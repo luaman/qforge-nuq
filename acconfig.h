@@ -88,5 +88,8 @@
 /* Define this to something sane if you don't have stricmp */
 #undef stricmp
 
+/* Define this if FPOS_T is a struct */
+#undef HAVE_FPOS_T_STRUCT
+
 @BOTTOM@
 #endif // _CONFIG_H_

@@ -86,7 +86,7 @@ static qboolean		vid_initialized = false;
 static GLXContext	ctx = NULL;
 
 unsigned short	d_8to16table[256];
-unsigned	d_8to24table[256];
+unsigned int	d_8to24table[256];
 unsigned char	d_15to8table[65536];
 
 cvar_t	*vid_mode;
@@ -198,17 +198,17 @@ void VID_ShiftPalette(unsigned char *p)
 
 void	VID_SetPalette (unsigned char *palette)
 {
-	byte	*pal;
-	unsigned r,g,b;
-	unsigned v;
-	int     r1,g1,b1;
-	int		k;
-	unsigned short i;
-	unsigned	*table;
-	QFile *f;
-	char s[255];
-	float dist, bestdist;
-	static qboolean palflag = false;
+	byte			*pal;
+	unsigned int	r,g,b;
+	unsigned int	v;
+	int				r1,g1,b1;
+	int				k;
+	unsigned short	i;
+	unsigned int	*table;
+	QFile			*f;
+	char			s[255];
+	float			dist, bestdist;
+	static qboolean	palflag = false;
 
 //
 // 8 8 8 encoding

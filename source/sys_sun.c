@@ -101,7 +101,7 @@ int Sys_FileOpenRead (char *path, int *hndl)
     
     i = findhandle ();
     
-    f = fopen(path, "rb");
+    f = Qopen(path, "rb");
     if (!f)
     {
 	*hndl = -1;
@@ -129,7 +129,7 @@ int Sys_FileOpenWrite (char *path)
     
     i = findhandle ();
 
-    f = fopen(path, "wb");
+    f = Qopen(path, "wb");
     if (!f)
 	Sys_Error ("Error opening %s: %s", path,strerror(errno));
     sys_handles[i].hFile = f;
@@ -146,7 +146,7 @@ void Sys_FileClose (int handle)
 	if (munmap( sys_handles[handle].pMap, sys_handles[handle].nLen ) != 0)
 	    printf( "failed to unmap handle %d\n", handle );
 
-    fclose (sys_handles[handle].hFile);
+    Qclose (sys_handles[handle].hFile);
     sys_handles[handle].hFile = NULL;
 }
 
@@ -185,10 +185,10 @@ int Sys_FileTime (char *path)
 {
     QFile    *f;
     
-    f = fopen(path, "rb");
+    f = Qopen(path, "rb");
     if (f)
     {
-	fclose(f);
+	Qclose(f);
 	return 1;
     }
     

@@ -83,6 +83,15 @@ AC_HEADER_TIME
 AC_STRUCT_TM
 AC_C_BIGENDIAN
 
+AC_MSG_CHECKING(for type of fpos_t)
+AC_TRY_COMPILE(
+	[#include <stdio.h>],
+	[fpos_t x = 0],
+	AC_MSG_RESULT(off_t),
+	AC_DEFINE(HAVE_FPOS_T_STRUCT)
+	AC_MSG_RESULT(struct)
+)
+
 AC_MSG_CHECKING(for socklen_t in sys/types.h)
 AC_TRY_COMPILE(
 	[#include <sys/types.h>],
