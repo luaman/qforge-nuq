@@ -198,6 +198,7 @@ extern	cvar_t	*gl_ztrick;
 extern	cvar_t	*gl_finish;
 extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_subdivide_size;
+extern	cvar_t	*gl_particles;
 
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
@@ -211,6 +212,8 @@ extern	qboolean	mirror;
 extern	mplane_t	*mirror_plane;
 
 extern	float	r_world_matrix[16];
+
+extern float bubble_sintable[], bubble_costable[];
 
 extern	const char *gl_vendor;
 extern	const char *gl_renderer;
@@ -237,6 +240,9 @@ extern lpSelTexFUNC qglSelectTexture;
 
 extern qboolean gl_mtexable;
 
+void GL_SubdivideSurface (msurface_t *fa);
+void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
+
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
 void GL_BuildLightmaps (void);
@@ -250,5 +256,23 @@ void EmitBothSkyLayers (msurface_t *fa);
 void R_DrawSkyChain (msurface_t *s);
 qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 void R_RotateForEntity (entity_t *e);
+
+void AddLightBlend (float, float, float, float);
+
+typedef struct {
+	int		key;			// allows reusability
+	vec3_t	origin, owner;
+	float	size;
+	float	die, decay;		// duration settings
+	float	minlight;		// lighting threshold
+	float	_color[3];		// RGBA
+	float	*color;
+} fire_t;
+
+void R_AddFire (vec3_t, vec3_t, entity_t *ent);
+fire_t *R_AllocFire (int);
+void R_DrawFire (fire_t *);
+void R_UpdateFires (void);
+
 
 #endif // __glquake_h

@@ -186,7 +186,8 @@ nuq_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 # ... Common stuff
 #
 ogl_SOURCES=	gl_draw.c gl_mesh.c gl_part.c gl_refrag.c gl_rlight.c \
-		gl_rmain.c gl_rmisc.c gl_rsurf.c gl_screen.c gl_view.c gl_warp.c
+		gl_rmain.c gl_rmisc.c gl_rsurf.c gl_screen.c gl_view.c \
+		gl_warp.c gl_model.c
 
 #
 # ... 3Dfx Voodoo 1 and 2 SVGAlib-based console GL

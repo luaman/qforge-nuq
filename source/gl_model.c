@@ -30,6 +30,14 @@
 # include "config.h"
 #endif
 
+#include <string.h>
+
+#include "model.h"
+#include "sys.h"
+#include "qendian.h"
+#include "quakefs.h"
+#include "glquake.h"
+#include "console.h"
 
 model_t	*loadmodel;
 char	loadname[32];	// for hunk tags
@@ -390,7 +398,7 @@ void Mod_LoadTextures (lump_t *l)
 		memcpy ( tx+1, mt+1, pixels);
 		
 
-		if (!Q_strncmp(mt->name,"sky",3))	
+		if (!strncmp(mt->name,"sky",3))	
 			R_InitSky (tx);
 		else
 		{
@@ -806,7 +814,7 @@ void Mod_LoadFaces (lump_t *l)
 		
 	// set the drawing flags flag
 		
-		if (!Q_strncmp(out->texinfo->texture->name,"sky",3))	// sky
+		if (!strncmp(out->texinfo->texture->name,"sky",3))	// sky
 		{
 			out->flags |= (SURF_DRAWSKY | SURF_DRAWTILED);
 #ifndef QUAKE2
@@ -815,7 +823,7 @@ void Mod_LoadFaces (lump_t *l)
 			continue;
 		}
 		
-		if (!Q_strncmp(out->texinfo->texture->name,"*",1))		// turbulent
+		if (!strncmp(out->texinfo->texture->name,"*",1))		// turbulent
 		{
 			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
 			for (i=0 ; i<2 ; i++)
@@ -1258,8 +1266,8 @@ Mod_LoadAliasFrame
 */
 void * Mod_LoadAliasFrame (void * pin, maliasframedesc_t *frame)
 {
-	trivertx_t		*pframe, *pinframe;
-	int				i, j;
+	trivertx_t		*pinframe;
+	int				i;
 	daliasframe_t	*pdaliasframe;
 	
 	pdaliasframe = (daliasframe_t *)pin;
@@ -1420,7 +1428,6 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 	int		i, j, k;
 	char	name[32];
 	int		s;
-	byte	*copy;
 	byte	*skin;
 	byte	*texels;
 	daliasskingroup_t		*pinskingroup;
@@ -1499,7 +1506,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	mdl_t				*pinmodel;
 	stvert_t			*pinstverts;
 	dtriangle_t			*pintriangles;
-	int					version, numframes, numskins;
+	int					version, numframes;
 	int					size;
 	daliasframetype_t	*pframetype;
 	daliasskintype_t	*pskintype;
@@ -1663,9 +1670,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 {
 	dspriteframe_t		*pinframe;
 	mspriteframe_t		*pspriteframe;
-	int					i, width, height, size, origin[2];
-	unsigned short		*ppixout;
-	byte				*ppixin;
+	int					width, height, size, origin[2];
 	char				name[64];
 
 	pinframe = (dspriteframe_t *)pin;
@@ -1676,7 +1681,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 
 	pspriteframe = Hunk_AllocName (sizeof (mspriteframe_t),loadname);
 
-	Q_memset (pspriteframe, 0, sizeof (mspriteframe_t));
+	memset (pspriteframe, 0, sizeof (mspriteframe_t));
 
 	*ppframe = pspriteframe;
 

@@ -32,13 +32,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "bothdefs.h"   // needed by: common.h, net.h, client.h
-
 #include "bspfile.h"    // needed by: glquake.h
 #include "vid.h"
 #include "sys.h"
 #include "mathlib.h"    // needed by: protocol.h, render.h, client.h,
                         //  modelgen.h, glmodel.h
+#include "compat.h"
 #include "wad.h"
 #include "draw.h"
 #include "cvar.h"

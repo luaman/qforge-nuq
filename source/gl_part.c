@@ -35,6 +35,7 @@
 #include "vid.h"
 #include "sys.h"
 #include "mathlib.h"    // needed by: protocol.h, render.h, client.h,
+#include "host.h"
                         //  modelgen.h, glmodel.h
 #include "wad.h"
 #include "draw.h"
@@ -678,7 +679,7 @@ R_AddFire (vec3_t start, vec3_t end, entity_t *ent)
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
-	key = ent-cl_visedicts+1;
+	key = ent-cl_entities+1;
 
 	if (len)
 	{
