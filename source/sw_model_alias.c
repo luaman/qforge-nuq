@@ -38,7 +38,6 @@
 #include "console.h"
 #include "qendian.h"
 #include "checksum.h"
-#include "glquake.h"
 
 extern char loadname[];
 extern model_t *loadmodel;
