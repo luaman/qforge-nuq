@@ -414,13 +414,9 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 	ch->pos += count;
 
 	if (oldphase >= 0) {
-		ldir = dir;
-		rdir = 0;
 		left_phase = oldphase;
 		right_phase = 0;
 	} else {
-		ldir = 0;
-		rdir = dir;
 		left_phase = 0;
 		right_phase = -oldphase;
 	}
@@ -438,22 +434,32 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 
 		if ((oldphase ^ phase) & ~((~0u)>>1)) {
 			// phase change crosses 0
-			int t;
 			c = min (count, abs(oldphase));
 			count -= c;
+			if (oldphase > 0) {
+				ldir = -1;
+				rdir = 0;
+			} else {
+				ldir = 0;
+				rdir = -1;
+			}
 			for ( ; c; c--, i++) {
 				PAINT_CHANNELS;
 				left_phase += ldir;
 				right_phase += rdir;
 			}
-			t = ldir;
-			ldir = rdir & 1;
-			rdir = t & 1;
 			oldphase = 0;
 		}
 		// oldphase and phase [now] on same size of 0
 		c = min (count, abs (phase - oldphase));
 		count -= c;
+		if (phase > 0) {
+			ldir = dir;
+			rdir = 0;
+		} else {
+			ldir = 0;
+			rdir = dir;
+		}
 		for ( ; c; c--, i++) {
 			PAINT_CHANNELS;
 			left_phase += ldir;
