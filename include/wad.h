@@ -26,6 +26,10 @@
 	$Id$
 */
 
+#ifndef __wad_h
+#define __wad_h
+
+#include "qtypes.h"
 
 //===============
 //   TYPES
@@ -81,3 +85,5 @@ void	*W_GetLumpName (char *name);
 void	*W_GetLumpNum (int num);
 
 void SwapPic (qpic_t *pic);
+
+#endif // __wad_h

@@ -28,13 +28,8 @@
 	$Id$
 */
 
-#ifndef _QTYPES_H
-#define _QTYPES_H
-
-#include <stdio.h>
-#include <sys/types.h>
-#include <qdefs.h>
-#include <compat.h>
+#ifndef __qtypes
+#define __qtypes
 
 #define MAX_QPATH	64
 
@@ -61,17 +56,4 @@ typedef	int	func_t;
 typedef	int	string_t;
 typedef	byte	pixel_t;
 
-/*
-typedef	enum	{key_game, key_console, key_message, key_menu} keydest_t;
-typedef	enum	{ ALIAS_SINGLE=0, ALIAS_GROUP } aliasframetype_t;
-typedef	enum	{ ALIAS_SKIN_SINGLE=0, ALIAS_SKIN_GROUP } aliasskintype_t;
-typedef	enum	{ev_void, ev_string, ev_float, ev_vector, ev_entity, ev_field, ev_function, ev_pointer} etype_t;
-typedef	void	(*builtin_t) (void);
-typedef	enum	{touchessolid, drawnode, nodrawnode} solidstate_t;
-typedef	enum	{ ST_SYNC=0, ST_RAND } synctype_t;
-typedef	enum	{ SPR_SINGLE=0, SPR_GROUP } spriteframetype_t;
-typedef	enum	{MS_WINDOWED, MS_FULLSCREEN, MS_FULLDIB, MS_UNINIT} modestate_t;
-typedef	enum	{mod_brush, mod_sprite, mod_alias} modtype_t;
-*/
-
-#endif // _QTYPES_H
+#endif // __qtypes

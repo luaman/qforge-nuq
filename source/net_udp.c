@@ -39,6 +39,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef __sun__
 #include <sys/filio.h>

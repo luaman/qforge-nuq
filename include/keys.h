@@ -29,6 +29,7 @@
 #ifndef __keys_h
 #define __keys_h
 
+#include "quakeio.h"
 #include "qtypes.h"
 
 //

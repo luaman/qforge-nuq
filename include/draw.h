@@ -26,6 +26,10 @@
 	$Id$
 */
 
+#ifndef __draw_h
+#define __draw_h
+
+#include "wad.h"
 
 extern	qpic_t		*draw_disc;	// also used on sbar
 
@@ -44,3 +48,5 @@ void Draw_FadeScreen (void);
 void Draw_String (int x, int y, char *str);
 qpic_t *Draw_PicFromWad (char *name);
 qpic_t *Draw_CachePic (char *path);
+
+#endif // __draw_h

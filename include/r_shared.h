@@ -26,6 +26,11 @@
 	$Id$
 */
 
+#ifndef __r_shared_h
+#define __r_shared_h
+
+#include "d_iface.h"
+
 #ifndef GLQUAKE
 // r_shared.h: general refresh-related stuff shared between the refresh and the
 // driver
@@ -164,3 +169,5 @@ typedef struct edge_s
 #endif	// _R_SHARED_H_
 
 #endif	// GLQUAKE
+
+#endif // __r_shared_h

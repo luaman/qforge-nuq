@@ -30,6 +30,7 @@
 # include "config.h"
 #endif
 
+#include "view.h"
 #include "r_local.h"
 
 /*

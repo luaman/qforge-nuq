@@ -30,7 +30,15 @@
 # include "config.h"
 #endif
 
-
+#include "sbar.h"
+#include "qdefs.h"
+#include "vid.h"
+#include "va.h"
+#include "draw.h"
+#include "wad.h"
+#include "screen.h"
+#include "client.h"
+#include "server.h"
 
 int			sb_updates;		// if >= vid.numpages, no update needed
 

@@ -40,6 +40,7 @@
 #include "render.h"
 #include "cvar.h"
 #include "quakefs.h"
+#include "qdefs.h"
 
 typedef struct
 {

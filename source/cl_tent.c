@@ -30,6 +30,11 @@
 # include "config.h"
 #endif
 
+#include "protocol.h"
+#include "client.h"
+#include "msg.h"
+#include "sys.h"
+#include "console.h"
 
 int			num_temp_entities;
 entity_t	cl_temp_entities[MAX_TEMP_ENTITIES];

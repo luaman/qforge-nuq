@@ -26,6 +26,11 @@
 	$Id$
 */
 
+#ifndef __console_h
+#define __console_h
+
+#include "qtypes.h"
+
 //
 // console
 //
@@ -52,3 +57,4 @@ void Con_ToggleConsole_f (void);
 
 void Con_NotifyBox (char *text);	// during startup for sound / cd warnings
 
+#endif // __console_h

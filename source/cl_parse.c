@@ -41,6 +41,7 @@
 #include "sbar.h"
 #include "screen.h"
 #include "server.h"
+#include "qdefs.h"
 
 char *svc_strings[] =
 {

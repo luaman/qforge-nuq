@@ -29,6 +29,8 @@
 #ifndef __protocol_h
 #define __protocol_h
 
+#include "qtypes.h"
+
 #define	PROTOCOL_VERSION	15
 
 // if the high bit of the servercmd is set, the low bits are fast update flags:
