@@ -61,6 +61,8 @@ Memory is cleared / released when a server or client begins, not when they end.
 
 */
 
+qboolean	msg_suppress_1 = 0;
+
 quakeparms_t host_parms;
 
 qboolean	host_initialized;		// true if into command execution
