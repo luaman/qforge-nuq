@@ -1,17 +1,14 @@
-#!/bin/sh -x
+#!/bin/sh -ex
 
 version=@VERSION@
 temp_dir=/var/tmp
 srcdir=@srcdir@
-if [ "$srcdir" = "." ]; then
-    srcdir=..
-fi
 
 rm -rf BUILD SPECS RPMS SOURCES SRPMS
 mkdir -p BUILD SPECS RPMS/{noarch,i386,i686} SOURCES SRPMS
-(cd ${srcdir}; make dist)
-mv ${srcdir}/nuq-${version}.tar.gz SOURCES
+(cd ..; make dist)
+(cd SOURCES; ln -s ../../nuq-${version}.tar.gz .)
 cat > rpmmacros <<EOF
 %_topdir $PWD
 EOF
-rpm -ba nuq.spec --rcfile rpmrc
+rpm -ba nuq.spec --rcfile ${srcdir}/rpmrc
