@@ -1156,7 +1156,7 @@ void I_DisplayWindow(int window)
 {
 }
 
-void Sys_SendKeyEvents(void)
+void IN_SendKeyEvents(void)
 {
 // get events from x server
 	if (x_disp)

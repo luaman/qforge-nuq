@@ -30,6 +30,12 @@
 # include "config.h"
 #endif
 
+#include "render.h"
+#include "model.h"
+#include "client.h"
+#include "sys.h"
+#include "console.h"
+#include "glquake.h"
 
 mnode_t	*r_pefragtopnode;
 

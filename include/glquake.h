@@ -26,11 +26,15 @@
 	$Id$
 */
 
-// disable data conversion warnings
+#ifndef __glquake_h
+#define __glquake_h
 
+#ifndef __GNUC__
+// disable data conversion warnings
 #pragma warning(disable : 4244)     // MIPS
 #pragma warning(disable : 4136)     // X86
 #pragma warning(disable : 4051)     // ALPHA
+#endif
   
 #ifdef _WIN32
 #include <windows.h>
@@ -38,6 +42,10 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+
+#include "qtypes.h"
+#include "model.h"
+#include "d_iface.h"
 
 void GL_BeginRendering (int *x, int *y, int *width, int *height);
 void GL_EndRendering (void);
@@ -121,40 +129,6 @@ typedef struct surfcache_s
 	struct texture_s	*texture;	// checked for animating textures
 	byte				data[4];	// width*height elements
 } surfcache_t;
-
-
-typedef struct
-{
-	pixel_t		*surfdat;	// destination for generated surface
-	int			rowbytes;	// destination logical width in bytes
-	msurface_t	*surf;		// description for surface to generate
-	fixed8_t	lightadj[MAXLIGHTMAPS];
-							// adjust for lightmap levels for dynamic lighting
-	texture_t	*texture;	// corrected for animating textures
-	int			surfmip;	// mipmapped ratio of surface texels / world pixels
-	int			surfwidth;	// in mipmapped texels
-	int			surfheight;	// in mipmapped texels
-} drawsurf_t;
-
-
-typedef enum {
-	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob, pt_blob2
-} ptype_t;
-
-// !!! if this is changed, it must be changed in d_ifacea.h too !!!
-typedef struct particle_s
-{
-// driver-usable fields
-	vec3_t		org;
-	float		color;
-// drivers never touch the following fields
-	struct particle_s	*next;
-	vec3_t		vel;
-	float		ramp;
-	float		die;
-	ptype_t		type;
-} particle_t;
-
 
 //====================================================
 
@@ -258,8 +232,23 @@ typedef void (APIENTRY *lpMTexFUNC) (GLenum, GLfloat, GLfloat);
 typedef void (APIENTRY *lpSelTexFUNC) (GLenum);
 extern lpMTexFUNC qglMTexCoord2fSGIS;
 extern lpSelTexFUNC qglSelectTextureSGIS;
+extern lpMTexFUNC qglMTexCoord2f;
+extern lpSelTexFUNC qglSelectTexture;
 
 extern qboolean gl_mtexable;
 
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
+void GL_BuildLightmaps (void);
+void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboolean alpha) ;
+void GL_Set2D (void);
+void GL_CheckGamma (unsigned char *pal);
+
+void EmitWaterPolys (msurface_t *fa);
+void EmitSkyPolys (msurface_t *fa);
+void EmitBothSkyLayers (msurface_t *fa);
+void R_DrawSkyChain (msurface_t *s);
+qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+void R_RotateForEntity (entity_t *e);
+
+#endif // __glquake_h

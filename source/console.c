@@ -45,6 +45,7 @@
 #include "qargs.h"
 #include "client.h"
 #include "console.h"
+#include "input.h"
 #include "screen.h"
 #include "keys.h"
 
@@ -657,7 +658,7 @@ void Con_NotifyBox (char *text)
 	{
 		t1 = Sys_DoubleTime ();
 		SCR_UpdateScreen ();
-		Sys_SendKeyEvents ();
+		IN_SendKeyEvents ();
 		t2 = Sys_DoubleTime ();
 		realtime += t2-t1;		// make the cursor blink
 	} while (key_count < 0);

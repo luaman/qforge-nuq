@@ -30,6 +30,17 @@
 # include "config.h"
 #endif
 
+#include <string.h>
+#include <sys/utsname.h>
+
+#include "host.h"
+#include "glquake.h"
+#include "sbar.h"
+#include "vid.h"
+#include "quakefs.h"
+#include "wad.h"
+#include "sys.h"
+#include "console.h"
 
 #define GL_COLOR_INDEX8_EXT     0x80E5
 
@@ -38,6 +49,8 @@ extern unsigned char d_15to8table[65536];
 cvar_t	*gl_nobind;
 cvar_t	*gl_max_size;
 cvar_t	*gl_picmip;
+
+int GL_LoadPicTexture (qpic_t *pic);
 
 byte		*draw_chars;				// 8*8 graphic characters
 qpic_t		*draw_disc;
@@ -118,7 +131,6 @@ int Scrap_AllocBlock (int w, int h, int *x, int *y)
 {
 	int		i, j;
 	int		best, best2;
-	int		bestx;
 	int		texnum;
 
 	for (texnum=0 ; texnum<MAX_SCRAPS ; texnum++)
@@ -344,7 +356,7 @@ void Draw_TextureMode_f (void)
 
 	for (i=0 ; i< 6 ; i++)
 	{
-		if (!Q_strcasecmp (modes[i].name, Cmd_Argv(1) ) )
+		if (!strcasecmp (modes[i].name, Cmd_Argv(1) ) )
 			break;
 	}
 	if (i == 6)
@@ -377,13 +389,13 @@ void Draw_Init (void)
 {
 	int		i;
 	qpic_t	*cb;
-	byte	*dest, *src;
+	byte	*dest;
 	int		x, y;
 	char	ver[40];
 	glpic_t	*gl;
 	int		start;
 	byte	*ncdata;
-	int		f, fstep;
+	struct utsname utsname;
 
 
 	gl_nobind = Cvar_Get("gl_nobind", "0", CVAR_NONE, "None");
@@ -391,7 +403,7 @@ void Draw_Init (void)
 	gl_picmip = Cvar_Get("gl_picmip", "0", CVAR_NONE, "None");
 
 	// 3dfx can only handle 256 wide textures
-	if (!Q_strncasecmp ((char *)gl_renderer, "3dfx",4) ||
+	if (!strncasecmp ((char *)gl_renderer, "3dfx",4) ||
 		strstr((char *)gl_renderer, "Glide"))
 		Cvar_Set(gl_max_size, "256");
 
@@ -417,12 +429,10 @@ void Draw_Init (void)
 	SwapPic (cb);
 
 	// hack the version number directly into the pic
-#if defined(__linux__)
-	sprintf (ver, "(Linux %2.2f, gl %4.2f) %4.2f", (float)LINUX_VERSION, (float)GLQUAKE_VERSION, (float)VERSION);
-#else
-	sprintf (ver, "(gl %4.2f) %4.2f", (float)GLQUAKE_VERSION, (float)VERSION);
-#endif
+	uname(&utsname);
+	sprintf (ver, "(%s %s, gl %x) %s", utsname.sysname, utsname.release, GL_VERSION, VERSION);
 	dest = cb->data + 320*186 + 320 - 11 - 8*strlen(ver);
+
 	y = strlen(ver);
 	for (x=0 ; x<y ; x++)
 		Draw_CharToConback (ver[x], dest+(x<<3));
@@ -504,10 +514,6 @@ smoothly scrolled off.
 */
 void Draw_Character (int x, int y, int num)
 {
-	byte			*dest;
-	byte			*source;
-	unsigned short	*pusdest;
-	int				drawline;	
 	int				row, col;
 	float			frow, fcol, size;
 
@@ -575,9 +581,6 @@ Draw_AlphaPic
 */
 void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 {
-	byte			*dest, *source;
-	unsigned short	*pusdest;
-	int				v, u;
 	glpic_t			*gl;
 
 	if (scrap_dirty)
@@ -612,9 +615,6 @@ Draw_Pic
 */
 void Draw_Pic (int x, int y, qpic_t *pic)
 {
-	byte			*dest, *source;
-	unsigned short	*pusdest;
-	int				v, u;
 	glpic_t			*gl;
 
 	if (scrap_dirty)
@@ -642,10 +642,6 @@ Draw_TransPic
 */
 void Draw_TransPic (int x, int y, qpic_t *pic)
 {
-	byte	*dest, *source, tbyte;
-	unsigned short	*pusdest;
-	int				v, u;
-
 	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
 		 (unsigned)(y + pic->height) > vid.height)
 	{
@@ -1098,8 +1094,6 @@ void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboole
 {
 	int			i, s;
 	qboolean	noalpha;
-	int			p;
-	static unsigned j;
 	int			samples;
     static	unsigned char scaled[1024*512];	// [512*256];
 	int			scaled_width, scaled_height;
@@ -1241,8 +1235,7 @@ GL_LoadTexture
 */
 int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
 {
-	qboolean	noalpha;
-	int			i, p, s;
+	int			i;
 	gltexture_t	*glt;
 
 	// see if the texture is allready present

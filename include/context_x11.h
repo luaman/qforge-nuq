@@ -1,9 +1,11 @@
 /*
-	input.h
+	context_x11.h
 
-	@description@
+	(description)
 
 	Copyright (C) 1996-1997  Id Software, Inc.
+	Copyright (C) 1999,2000  contributors of the QuakeForge project
+	Please see the file "AUTHORS" for a list of contributors
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -26,28 +28,25 @@
 	$Id$
 */
 
-#ifndef __input_h
-#define __input_h
+#ifndef __CONTEXT_X11_H__
+#define __CONTEXT_X11_H__
 
-#include "client.h"
-#include "cvar.h"
+#include <qtypes.h>
+#include <X11/Xlib.h>
 
-void IN_Init (void);
+void GetEvent( void );
 
-void IN_Shutdown (void);
+extern Display	*x_disp;
+extern Window	x_win;
+extern qboolean doShm;
+extern int		x_shmeventtype;
+extern qboolean oktodraw;
 
-void IN_Commands (void);
-// oportunity for devices to stick commands on the script buffer
+qboolean x11_add_event( int event, void (*event_handler)(XEvent *));
+qboolean x11_del_event( int event, void (*event_handler)(XEvent *));
+void x11_process_event( void );
+void x11_process_events( void );
+void x11_open_display( void );
+void x11_close_display( void );
 
-void IN_Move (usercmd_t *cmd);
-// add additional movement on top of the keyboard move cmd
-
-void IN_ClearStates (void);
-// restores all button and position states to defaults
-
-void IN_SendKeyEvents (void);
-
-extern	cvar_t	*_windowed_mouse;
-
-
-#endif // __input_h
+#endif	// __CONTEXT_X11_H__

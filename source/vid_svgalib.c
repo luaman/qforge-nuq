@@ -824,7 +824,7 @@ void VID_DitherOff(void)
     }
 }
 
-void Sys_SendKeyEvents(void)
+void IN_SendKeyEvents(void)
 {
 	if (!svgalib_inited)
 		return;

@@ -794,7 +794,7 @@ int TTY_Connect(int handle, char *host)
 				break;
 			}
 
-			Sys_SendKeyEvents ();
+			IN_SendKeyEvents ();
 			if (key_count == 0)
 			{
 				if (key_lastpress != K_ESCAPE)

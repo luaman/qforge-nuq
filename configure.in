@@ -962,7 +962,7 @@ if test "x$HAVE_X" = xyes; then
 	TARGETS="$TARGETS $PACKAGE-x11\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS X11"
 	if test "x$HAVE_GLX" = xyes; then
-#		TARGETS="$TARGETS $PACKAGE-glx\$(EXEEXT)"
+		TARGETS="$TARGETS $PACKAGE-glx\$(EXEEXT)"
 		CL_TARGETS="$CL_TARGETS GLX"
 	fi
 fi

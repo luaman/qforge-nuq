@@ -173,9 +173,9 @@ nuq_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 # ... X11
 #
-x11_SOURCES=		vid_x11.c dga_check.c
+x11_SOURCES=		in_x11.c context_x11.c dga_check.c
 
-nuq_x11_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(x11_SOURCES)
+nuq_x11_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(x11_SOURCES) vid_x11.c
 nuq_x11_LDADD=	$(client_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(X_SHM_LIB)
 nuq_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -200,7 +200,7 @@ nuq_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 # ... OpenGL in X Window
 #
-glx_SOURCES=	vid_glx.c in_x11.c context_x11.c dga_check.c
+glx_SOURCES=	vid_glx.c $(x11_SOURCES)
 
 nuq_glx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
 nuq_glx_LDADD=	$(client_LIBS) $(GLX_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(DL_LIBS)

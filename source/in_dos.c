@@ -459,7 +459,7 @@ qboolean WaitJoyButton (void)
 	do 
 	{
 		key_count = -1;
-		Sys_SendKeyEvents ();
+		IN_SendKeyEvents ();
 		key_count = 0;
 		if (key_lastpress == K_ESCAPE)
 		{
@@ -479,7 +479,7 @@ qboolean WaitJoyButton (void)
 	do 
 	{ 
 		key_count = -1;
-		Sys_SendKeyEvents ();
+		IN_SendKeyEvents ();
 		key_count = 0;
 		if (key_lastpress == K_ESCAPE)
 		{

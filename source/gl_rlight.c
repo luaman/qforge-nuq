@@ -30,6 +30,9 @@
 # include "config.h"
 #endif
 
+#include "client.h"
+#include "glquake.h"
+#include "view.h"
 
 int	r_dlightframecount;
 

@@ -68,6 +68,8 @@ extern	unsigned	d_8to24table[256];
 extern void (*vid_menudrawfn)(void);
 extern void (*vid_menukeyfn)(int key);
 
+qboolean VID_Is8bit(void);
+
 void	VID_SetPalette (unsigned char *palette);
 // called at startup and after any gamma correction
 

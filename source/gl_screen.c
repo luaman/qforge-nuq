@@ -30,6 +30,19 @@
 # include "config.h"
 #endif
 
+#include "glquake.h"
+#include "menu.h"
+#include "view.h"
+#include "input.h"
+#include "cvar.h"
+#include "console.h"
+#include "draw.h"
+#include "screen.h"
+#include "host.h"
+#include "sys.h"
+#include "client.h"
+#include "keys.h"
+#include "sbar.h"
 
 /*
 
@@ -261,7 +274,6 @@ Internal use only
 */
 static void SCR_CalcRefdef (void)
 {
-	vrect_t		vrect;
 	float		size;
 	int		h;
 	qboolean		full = false;
@@ -277,15 +289,15 @@ static void SCR_CalcRefdef (void)
 	
 // bound viewsize
 	if (scr_viewsize->value < 30)
-		Cvar_Set ("viewsize","30");
+		Cvar_Set (scr_viewsize,"30");
 	if (scr_viewsize->value > 120)
-		Cvar_Set ("viewsize","120");
+		Cvar_Set (scr_viewsize,"120");
 
 // bound field of view
 	if (scr_fov->value < 10)
-		Cvar_Set ("fov","10");
+		Cvar_Set (scr_fov,"10");
 	if (scr_fov->value > 170)
-		Cvar_Set ("fov","170");
+		Cvar_Set (scr_fov,"170");
 
 // intermission is always full screen	
 	if (cl.intermission)
@@ -349,7 +361,7 @@ Keybinding command
 */
 void SCR_SizeUp_f (void)
 {
-	Cvar_SetValue ("viewsize",scr_viewsize->value+10);
+	Cvar_SetValue (scr_viewsize,scr_viewsize->value+10);
 	vid.recalc_refdef = 1;
 }
 
@@ -363,7 +375,7 @@ Keybinding command
 */
 void SCR_SizeDown_f (void)
 {
-	Cvar_SetValue ("viewsize",scr_viewsize->value-10);
+	Cvar_SetValue (scr_viewsize,scr_viewsize->value-10);
 	vid.recalc_refdef = 1;
 }
 
@@ -758,7 +770,7 @@ int SCR_ModalMessage (char *text)
 	do
 	{
 		key_count = -1;		// wait for a key down and up
-		Sys_SendKeyEvents ();
+		IN_SendKeyEvents ();
 	} while (key_lastpress != 'y' && key_lastpress != 'n' && key_lastpress != K_ESCAPE);
 
 	scr_fullupdate = 0;
@@ -827,9 +839,6 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen (void)
 {
-	static float	oldscr_viewsize;
-	vrect_t		vrect;
-
 	if (block_drawing)
 		return;
 

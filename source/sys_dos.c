@@ -493,7 +493,7 @@ void Sys_Shutdown(void)
 
 #define SC_RSHIFT       0x36 
 #define SC_LSHIFT       0x2a 
-void Sys_SendKeyEvents (void)
+void IN_SendKeyEvents (void)
 {
 	int k, next;
 	int outkey;

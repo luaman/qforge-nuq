@@ -170,4 +170,11 @@ void D_DeleteSurfaceCache (void);
 void D_InitCaches (void *buffer, int size);
 void R_SetVrect (vrect_t *pvrect, vrect_t *pvrectin, int lineadj);
 
+void R_DrawBrushModel (entity_t *e);
+void R_DrawWorld (void);
+void R_RenderDlights (void);
+void R_DrawWaterSurfaces (void);
+struct msurface_s;
+void R_RenderBrushPoly (struct msurface_s *fa);
+
 #endif // __render_h
