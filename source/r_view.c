@@ -605,9 +605,9 @@ void V_CalcIntermissionRefdef (void)
 
 // allways idle in intermission
 	old = v_idlescale->value;
-	v_idlescale->value = 1;
+	Cvar_SetValue (v_idlescale, 1);
 	V_AddIdle ();
-	v_idlescale->value = old;
+	Cvar_SetValue (v_idlescale, old);
 }
 
 /*

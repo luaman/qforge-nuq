@@ -1102,10 +1102,10 @@ void VID_CheckModedescFixup (int mode)
 		stretch = modelist[mode].stretched;
 
 		if (vid_config_x->int_val < (320 << stretch))
-			vid_config_x->int_val = 320 << stretch;
+			Cvar_SetValue (vid_config_x, 320 << stretch);
 
 		if (vid_config_y->int_val < (200 << stretch))
-			vid_config_y->int_val = 200 << stretch;
+			Cvar_SetValue (vid_config_y, 200 << stretch);
 
 		x = vid_config_x->int_val;
 		y = vid_config_y->int_val;

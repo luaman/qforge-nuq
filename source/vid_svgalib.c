@@ -411,14 +411,14 @@ VID_SetMode(int modenum, unsigned char *palette)
 	int err;
 
 	if ((modenum >= num_modes) || (modenum < 0) || !modes[modenum].width){
-		vid_mode->int_val = (float)current_mode;
+		Cvar_SetValue (vid_mode, current_mode);
 
 		Con_Printf("No such video mode: %d\n",modenum);
 
 		return 0;
 	}
 
-	vid_mode->int_val = modenum;
+	Cvar_SetValue (vid_mode, modenum);
 
 	current_mode=modenum;
 
