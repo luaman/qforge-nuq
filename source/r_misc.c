@@ -453,33 +453,25 @@ r_refdef.viewangles[2]=    0;
 	r_dowarpold = r_dowarp;
 	r_dowarp = r_waterwarp->int_val && (r_viewleaf->contents <= CONTENTS_WATER);
 
-	if ((r_dowarp != r_dowarpold) || r_viewchanged || lcd_x->value)
-	{
-		if (r_dowarp)
-		{
-			if ((vid.width <= vid.maxwarpwidth) &&
-				(vid.height <= vid.maxwarpheight))
-			{
+	if ((r_dowarp != r_dowarpold) || r_viewchanged) {
+		if (r_dowarp) {
+			if ((vid.width <= vid.maxwarpwidth) && (vid.height <= vid.maxwarpheight)) {
 				vrect.x = 0;
 				vrect.y = 0;
 				vrect.width = vid.width;
 				vrect.height = vid.height;
 
 				R_ViewChanged (&vrect, sb_lines, vid.aspect);
-			}
-			else
-			{
+			} else {
 				w = vid.width;
 				h = vid.height;
 
-				if (w > vid.maxwarpwidth)
-				{
+				if (w > vid.maxwarpwidth) {
 					h *= (float)vid.maxwarpwidth / w;
 					w = vid.maxwarpwidth;
 				}
 
-				if (h > vid.maxwarpheight)
-				{
+				if (h > vid.maxwarpheight) {
 					h = vid.maxwarpheight;
 					w *= (float)vid.maxwarpheight / h;
 				}
@@ -494,9 +486,7 @@ r_refdef.viewangles[2]=    0;
 							   vid.aspect * (h / w) *
 								 ((float)vid.width / (float)vid.height));
 			}
-		}
-		else
-		{
+		} else {
 			vrect.x = 0;
 			vrect.y = 0;
 			vrect.width = vid.width;
