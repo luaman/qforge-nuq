@@ -30,6 +30,7 @@
 # include "config.h"
 #endif
 
+#include <time.h>
 #include "r_local.h"
 #include "screen.h"
 #include "sbar.h"
@@ -433,7 +434,7 @@ void SCR_DrawFPS (void)
 	int x, y;
 	char st[80];
 
-	if (!show_fps->value)
+	if (!show_fps->int_val)
 		return;
 
 	t = Sys_DoubleTime();
@@ -442,13 +443,47 @@ void SCR_DrawFPS (void)
 		fps_count = 0;
 		lastframetime = t;
 	}
-
-       sprintf(st, "%3d FPS", lastfps);
-       x = vid.width - strlen(st) * 8 - 8;
-       y = vid.height - sb_lines - 8;
-       Draw_String8 (x, y, st);
+	snprintf (st, sizeof(st), "%-3d FPS", lastfps);
+	/* Misty: New trick! (for me) the ? makes this work like a if then else - IE: if 
+	cl_hudswap->int_val is not null, do first case, else (else is a : here) do second case.
+	Deek taught me this trick */
+	x = cl_hudswap->int_val ? vid.width - ((strlen (st) * 8) + 8) : 8;
+	y = vid.height - sb_lines - 8;
+	Draw_String8 (x, y, st);
 }
 
+/* Misty: I like to see the time */
+void SCR_DrawTime (void)
+{
+	extern cvar_t *show_time;
+	int x, y;
+	char st[80];
+	char local_time[120];
+	time_t systime;
+	
+	/* any cvar that can take multiple settings must be able to handle abuse. */
+	if (show_time->int_val <= 0)
+		return;
+	
+	/* actually find the time and set systime to it*/
+	time(&systime);
+	
+	if (show_time->int_val == 1) {
+		/* now set local_time to 24 hour time using hours:minutes format */
+		strftime (local_time, sizeof (local_time), "%k:%M",
+				  localtime (&systime));
+	} else if (show_time->int_val >= 2) {
+		/* >= is another cvar abuse protector */
+		strftime (local_time, sizeof (local_time), "%l:%M %P",
+				  localtime (&systime));
+	}
+			
+	/* now actually print it to the screen directly above where show_fps is */
+	snprintf (st, sizeof(st), "%s", local_time);
+	x = cl_hudswap->int_val ? vid.width - ((strlen (st) * 8) + 8) : 8;
+	y = vid.height - sb_lines - 16;
+	Draw_String8 (x, y, st);
+}
 
 /*
 ==============
@@ -984,6 +1019,7 @@ void SCR_UpdateScreen (void)
 		SCR_DrawTurtle ();
 		SCR_DrawPause ();
 		SCR_DrawFPS ();
+		SCR_DrawTime ();
 		SCR_CheckDrawCenterString ();
 		Sbar_Draw ();
 		SCR_DrawConsole ();

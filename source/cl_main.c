@@ -66,6 +66,7 @@ cvar_t	*m_forward;
 cvar_t	*m_side;
 
 cvar_t	*show_fps;
+cvar_t	*show_time;
 
 int	fps_count;
 
@@ -85,6 +86,9 @@ void
 CL_InitCvars(void)
 {
 	show_fps = Cvar_Get("show_fps", "0", CVAR_NONE, "None");
+		// Misty: I like to be able to see the time when I play
+	show_time = Cvar_Get("show_time", "0", CVAR_NONE,
+			"display the current time");
 	cl_warncmd = Cvar_Get("cl_warncmd",  "0", CVAR_NONE, "None");
 	cl_name = Cvar_Get("_cl_name", "player", CVAR_ARCHIVE, "None");
 	cl_color = Cvar_Get("_cl_color", "0", CVAR_ARCHIVE, "None");
