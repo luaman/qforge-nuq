@@ -55,19 +55,17 @@ int GIB_Get_Arg (char *start)
 	int i;
 	int ret = -2;
 
-	Con_Printf("Parsing at %s\n", start);
-
 	if (*start == '\'')
 	{
-		ret = GIB_End_Quote(start);
+		ret = GIB_End_Quote(start) + 1;
 	}
 	if (*start == '\"')
 	{
-		ret = GIB_End_DQuote(start);                          
+		ret = GIB_End_DQuote(start) + 1;                          
 	}
 	if (*start == '{')
 	{
-		ret = GIB_End_Bracket(start);
+		ret = GIB_End_Bracket(start) + 1;
 	}
 
 	if (ret == -1)
