@@ -117,7 +117,7 @@ server_SOURCES= host.c host_cmd.c \
 		pr_cmds.c pr_edict.c pr_exec.c \
 		sv_main.c sv_move.c sv_phys.c sv_user.c
 
-common_SOURCES+= $(client_SOURCES) $(server_SOURCES)
+combined_SOURCES= $(common_SOURCES) $(client_SOURCES) $(server_SOURCES)
 
 #
 # Software-rendering targets
@@ -136,7 +136,7 @@ soft_SOURCES=	d_edge.c d_fill.c d_init.c d_modech.c d_part.c d_polyse.c \
 #
 ggi_SOURCES=		vid_ggi.c
 
-uquake_ggi_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(ggi_SOURCES)
+uquake_ggi_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(ggi_SOURCES)
 uquake_ggi_LDADD=	$(client_LIBS) $(GGI_LIBS)
 uquake_ggi_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -145,7 +145,7 @@ uquake_ggi_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 mgl_SOURCES=		vid_mgl.c in_win.c
 
-uquake_mgl_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(mgl_SOURCES)
+uquake_mgl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(mgl_SOURCES)
 uquake_mgl_LDADD=	$(client_LIBS) $(MGL_LIBS)
 uquake_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -154,7 +154,7 @@ uquake_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 sdl_SOURCES=		vid_sdl.c
 
-uquake_sdl_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(sdl_SOURCES)
+uquake_sdl_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(sdl_SOURCES)
 uquake_sdl_LDADD=	$(client_LIBS) $(SDL_LIBS)
 uquake_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -163,7 +163,7 @@ uquake_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 svga_SOURCES=		d_copy.S vid_svgalib.c
 
-uquake_svga_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(svga_SOURCES)
+uquake_svga_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(svga_SOURCES)
 uquake_svga_LDADD=	$(client_LIBS) $(SVGA_LIBS)
 uquake_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -172,7 +172,7 @@ uquake_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 x11_SOURCES=		vid_x11.c dga_check.c
 
-uquake_x11_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(x11_SOURCES)
+uquake_x11_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(x11_SOURCES)
 uquake_x11_LDADD=	$(client_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(X_SHM_LIB)
 uquake_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -190,7 +190,7 @@ ogl_SOURCES=	gl_draw.c gl_mesh.c gl_part.c gl_refrag.c gl_rlight.c \
 #
 tdfx_SOURCES=	vid_3dfxsvga.c in_svgalib.c
 
-uquake_3dfx_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(tdfx_SOURCES)
+uquake_3dfx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(tdfx_SOURCES)
 uquake_3dfx_LDADD=	$(client_LIBS) $(TDFXGL_LIBS) $(SVGA_LIBS) $(DL_LIBS)
 uquake_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -199,7 +199,7 @@ uquake_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 glx_SOURCES=	vid_glx.c in_x11.c context_x11.c dga_check.c
 
-uquake_glx_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
+uquake_glx_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
 uquake_glx_LDADD=	$(client_LIBS) $(GLX_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(DL_LIBS)
 uquake_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -208,7 +208,7 @@ uquake_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 sgl_SOURCES=	vid_sgl.c
 
-uquake_sgl_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(sgl_SOURCES)
+uquake_sgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(sgl_SOURCES)
 uquake_sgl_LDADD=	$(client_LIBS) $(SDL_LIBS) $(GLX_LIBS) $(DL_LIBS)
 uquake_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -217,7 +217,7 @@ uquake_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 wgl_SOURCES=	vid_wgl.c
 
-uquake_wgl_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(wgl_SOURCES)
+uquake_wgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(wgl_SOURCES)
 uquake_wgl_LDADD=	$(client_LIBS)
 uquake_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
