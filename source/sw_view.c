@@ -145,41 +145,7 @@ void V_RenderView (void)
 
 	R_PushDlights (vec3_origin);
 
-	if (lcd_x->value)
-	{
-		//
-		// render two interleaved views
-		//
-		int		i;
-
-		vid.rowbytes <<= 1;
-		vid.aspect *= 0.5;
-
-		r_refdef.viewangles[YAW] -= lcd_yaw->value;
-		for (i=0 ; i<3 ; i++)
-			r_refdef.vieworg[i] -= right[i]*lcd_x->value;
-		R_RenderView ();
-
-		vid.buffer += vid.rowbytes>>1;
-
-		R_PushDlights (vec3_origin);
-
-		r_refdef.viewangles[YAW] += lcd_yaw->value*2;
-		for (i=0 ; i<3 ; i++)
-			r_refdef.vieworg[i] += 2*right[i]*lcd_x->value;
-		R_RenderView ();
-
-		vid.buffer -= vid.rowbytes>>1;
-
-		r_refdef.vrect.height <<= 1;
-
-		vid.rowbytes >>= 1;
-		vid.aspect *= 2;
-	}
-	else
-	{
-		R_RenderView ();
-	}
+	R_RenderView ();
 
 	if (crosshair->int_val)
 		Draw_Crosshair();
