@@ -936,28 +936,38 @@ dnl ==================================================================
 dnl Find out what to build and finish
 dnl ==================================================================
 
+ENABLE_MGL=yes
+ENABLE_GGI=yes
+ENABLE_SDL=yes
+ENABLE_SGL=yes
+ENABLE_SVGA=yes
+ENABLE_X11=yes
+ENABLE_GLX=yes
+ENABLE_3DFX=yes
+ENABLE_DED=no
+
 CL_TARGETS=""
-if test "x$HAVE_MGL" = xyes; then
+if test "x$HAVE_MGL" = xyes -a "x$ENABLE_MGL" = xyes; then
 #	TARGETS="$TARGETS $PACKAGE-mgl\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS MGL"
 fi
-if test "x$HAVE_GGI" = xyes; then
+if test "x$HAVE_GGI" = xyes -a "x$ENABLE_GGI" = xyes; then
 #	TARGETS="$TARGETS $PACKAGE-ggi\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS GGI"
 fi
-if test "x$HAVE_SDL" = xyes; then
+if test "x$HAVE_SDL" = xyes -a "x$ENABLE_SDL" = xyes; then
 	TARGETS="$TARGETS $PACKAGE-sdl\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS SDL"
 fi
-if test "x$HAVE_SGL" = xyes -a "x$HAVE_GLX" = xyes; then
+if test "x$HAVE_SGL" = xyes -a "x$HAVE_GLX" = xyes -a "x$ENABLE_SGL" = xyes; then
 	TARGETS="$TARGETS $PACKAGE-sgl\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS SDL-GL"
 fi
-if test "x$HAVE_SVGA" = xyes; then
+if test "x$HAVE_SVGA" = xyes -a "x$ENABLE_SVGA" = xyes; then
 	TARGETS="$TARGETS $PACKAGE-svga\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS SVGAlib"
 fi
-if test "x$HAVE_X" = xyes; then
+if test "x$HAVE_X" = xyes -a "x$ENABLE_X11" = xyes; then
 	TARGETS="$TARGETS $PACKAGE-x11\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS X11"
 	if test "x$HAVE_GLX" = xyes; then
@@ -965,9 +975,12 @@ if test "x$HAVE_X" = xyes; then
 		CL_TARGETS="$CL_TARGETS GLX"
 	fi
 fi
-if test "x$HAVE_TDFXGL" = xyes; then
+if test "x$HAVE_TDFXGL" = xyes -a "x$ENABLE_3DFX" = xyes; then
 	TARGETS="$TARGETS $PACKAGE-3dfx\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS 3Dfx"
+fi
+if test "x$ENABLE_DED" = xyes -a "x$ENABLE_DED" = xyes; then
+	TARGETS="$TARGETS $PACKAGE-ded\$(EXEEXT)"
 fi
 AC_SUBST(TARGETS)
 
@@ -989,6 +1002,7 @@ AC_MSG_RESULT([
 
 	Build type: $BUILD_TYPE
 	Targets:$CL_TARGETS
+	Server:$ENABLE_DED
 
 	System game data directory: $sharepath
 	Per-user game data directory: $userpath

@@ -35,7 +35,7 @@ INCLUDES=	-I$(top_srcdir)/include $(GGI_CFLAGS) $(MGL_CFLAGS) $(SDL_CFLAGS) $(SV
 bin_PROGRAMS =	@TARGETS@
 
 EXTRA_PROGRAMS= nuq-ggi nuq-mgl nuq-sdl nuq-svga nuq-x11 \
-		nuq-3dfx nuq-glx nuq-sgl nuq-wgl
+		nuq-3dfx nuq-glx nuq-sgl nuq-wgl nuq-ded
 
 noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 
@@ -50,7 +50,7 @@ common_ASM=	sys_ia32.S worlda.S $(math_ASM)
 
 common_SOURCES= crc.c cvar.c cmd.c mathlib.c wad.c world.c \
 		model.c model_alias.c model_brush.c model_sprite.c \
-		msg.c r_part.c sizebuf.c qendian.c qargs.c quakefs.c \
+		msg.c sizebuf.c qendian.c qargs.c quakefs.c \
 		va.c quakeio.c link.c com.c \
 		zone.c $(common_ASM)
 
@@ -114,7 +114,7 @@ EXTRA_libqfcd_a_SOURCES=net_dos.c net_bw.c net_ipx.c net_mp.c net_ser.c \
 client_LIBS=	-L. -lqfsys -lqfsnd -lqfcd -lqfnet $(SOUND_LIBS) $(NET_LIBS)
 
 client_SOURCES= cl_cam.c cl_demo.c cl_input.c cl_main.c cl_parse.c \
-		cl_tent.c console.c keys.c menu.c sbar.c r_view.c \
+		cl_tent.c console.c keys.c menu.c sbar.c r_part.c r_view.c \
 		nonintel.c gib.c gib_instructions.c gib_vars.c \
 		gib_interpret.c gib_modules.c gib_parse.c gib_stack.c
 
@@ -227,6 +227,15 @@ wgl_SOURCES=	vid_wgl.c
 nuq_wgl_SOURCES=	$(combined_SOURCES) $(ogl_SOURCES) $(wgl_SOURCES)
 nuq_wgl_LDADD=	$(client_LIBS)
 nuq_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# dedicated server
+#
+ded_SOURCES=sys_unixd.c sv_ded.c
+
+nuq_ded_SOURCES=$(common_SOURCES) $(server_SOURCES) $(ded_SOURCES)
+nuq_ded_LDADD= libqfnet.a
+nuq_ded_DEPENDENCIES=libqfnet.a
 
 #
 # Stuff that doesn't get linked into an executable NEEDS to be mentioned here,

@@ -48,6 +48,11 @@
 #include <sys/mman.h>
 #include <errno.h>
 
+#include "client.h"
+#include "sys.h"
+#include "host.h"
+#include "qtypes.h"
+#include "qargs.h"
 
 qboolean	isDedicated;
 
@@ -401,6 +406,7 @@ main (int argc, char *argv[])
 	double			time, oldtime;
 	quakeparms_t	parms;
 	char			*newargv[256];
+	int				j;
 
 //	signal (SIGFPE, floating_point_exception_handler);
 	signal (SIGFPE, SIG_IGN);
@@ -441,7 +447,7 @@ main (int argc, char *argv[])
 	
 	while (1) { 	// Main message loop
 		time = Sys_DoubleTime ();
-		if ((time - oldtime) < sys_ticrate->value {
+		if ((time - oldtime) < sys_ticrate->value) {
 			usleep(1);
 			continue;
 		}
