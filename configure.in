@@ -951,7 +951,7 @@ if test "x$HAVE_SDL" = xyes; then
 	CL_TARGETS="$CL_TARGETS SDL"
 fi
 if test "x$HAVE_SGL" = xyes -a "x$HAVE_GLX" = xyes; then
-#	TARGETS="$TARGETS $PACKAGE-sgl\$(EXEEXT)"
+	TARGETS="$TARGETS $PACKAGE-sgl\$(EXEEXT)"
 	CL_TARGETS="$CL_TARGETS SDL-GL"
 fi
 if test "x$HAVE_SVGA" = xyes; then
