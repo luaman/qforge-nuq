@@ -26,6 +26,9 @@
 	$Id$
 */
 
+#ifndef __quakedef_h
+#define __quakedef_h
+
 
 //#define	GLTEST			// experimental stuff
 
@@ -200,84 +203,6 @@ void	VID_UnlockBuffer (void);
 
 #define	SOUND_CHANNELS		8
 
-// This makes anyone on id's net privileged
-// Use for multiplayer testing only - VERY dangerous!!!
-// #define IDGODS
-
-//#include "common.h"
-#include "bspfile.h"
-#include "vid.h"
-#include "sys.h"
-#include "zone.h"
-#include "mathlib.h"
-
-#include "wad.h"
-#include "draw.h"
-#include "cvar.h"
-#include "screen.h"
-#include "net.h"
-#include "protocol.h"
-#include "cmd.h"
-#include "sbar.h"
-#include "sound.h"
-#include "render.h"
-#include "client.h"
-#include "progs.h"
-#include "server.h"
-
-#ifdef GLQUAKE
-#include "gl_model.h"
-#else
-#include "model.h"
-#include "d_iface.h"
-#endif
-
-#include "input.h"
-#include "world.h"
-#include "keys.h"
-#include "console.h"
-#include "view.h"
-#include "menu.h"
-#include "crc.h"
-#include "cdaudio.h"
-
-#ifdef GLQUAKE
-#include "glquake.h"
-#endif
-
-extern qboolean noclip_anglehack;
-
-
-//
-// host
-//
-extern	quakeparms_t host_parms;
-
-extern	cvar_t	*sys_ticrate;
-extern	cvar_t	*sys_nostdout;
-extern	cvar_t	*developer;
-
-extern	cvar_t	*pausable;
-
-extern	qboolean	host_initialized;		// true if into command execution
-extern	double		host_frametime;
-extern	byte		*host_basepal;
-extern	byte		*host_colormap;
-extern	int			host_framecount;	// incremented every frame, never reset
-extern	double		realtime;			// not bounded in any way, changed at
-										// start of every frame, never reset
-
-void Host_ClearMemory (void);
-void Host_ServerFrame (void);
-void Host_InitCommands (void);
-void Host_Init (quakeparms_t *parms);
-void Host_Shutdown(void);
-void Host_Error (char *error, ...);
-void Host_EndGame (char *message, ...);
-void Host_Frame (float time);
-void Host_Quit_f (void);
-void Host_ClientCommands (char *fmt, ...);
-void Host_ShutdownServer (qboolean crash);
 
 extern qboolean		msg_suppress_1;		// suppresses resolution and cache size console output
 										//  an fullscreen DIB focus gain/loss
@@ -287,13 +212,4 @@ extern int			current_skill;		// skill level for currently loaded level (in case
 
 extern qboolean		isDedicated;
 
-extern int			minimum_memory;
-
-//
-// chase
-//
-extern	cvar_t	*chase_active;
-
-void Chase_Init (void);
-void Chase_Reset (void);
-void Chase_Update (void);
+#endif // __quakedef_h
