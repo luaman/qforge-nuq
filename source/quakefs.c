@@ -900,8 +900,9 @@ COM_InitFilesystem ( void )
 /*
 	start up with basegame->string by default
 */
-	COM_CreatePath (va("%s/%s/dummy", fs_userpath->string,
-				fs_basegame->string));
+	if (strcmp (fs_userpath->string, FS_USERPATH))
+		COM_CreatePath (va("%s/%s/dummy", fs_userpath->string,
+						fs_basegame->string));
 	COM_AddGameDirectory(fs_basegame->string);
 	if (hipnotic)
 		COM_AddGameDirectory ("hipnotic");
