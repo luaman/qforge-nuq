@@ -75,5 +75,5 @@ int Mod_Fullbright (byte *skin, int width, int height, char *name)
 		free(ptexels);
 		return texnum;
 	}
-	return -1;
+	return 0;
 }

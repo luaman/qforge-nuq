@@ -154,7 +154,7 @@ void *Mod_LoadSkin (byte *skin, int skinsize, int snum, int gnum, qboolean group
 		snprintf(name, sizeof(name), "fb_%s_%i", loadmodel->name,snum);
 	}
 	fbtexnum = Mod_Fullbright(skin+1, pheader->mdl.skinwidth, pheader->mdl.skinheight, name);
-	if ((loadmodel->hasfullbrights=(fbtexnum!=-1))) {
+	if ((loadmodel->hasfullbrights=(fbtexnum))) {
 		pheader->gl_fb_texturenum[snum][gnum] = fbtexnum;
 	}
 	if (group) {

@@ -45,12 +45,18 @@ extern model_t *loadmodel;
 extern byte mod_novis[];
 extern byte *mod_base;
 
+int Mod_Fullbright(byte *skin, int width, int height, char *name);
+
 const int mod_lightmap_bytes = 3;
 
 void
 Mod_ProcessTexture(miptex_t *mt, texture_t	*tx)
 {
+	char name[32];
+
 	texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
+	snprintf (name, sizeof(name), "fb_%s", mt->name);
+	tx->gl_fb_texturenum = Mod_Fullbright ((byte *)(tx+1), tx->width, tx->height, name);
 	tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, 1);
 	texture_mode = GL_LINEAR;
 }

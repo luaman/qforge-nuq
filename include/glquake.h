@@ -204,6 +204,7 @@ extern	cvar_t	*gl_subdivide_size;
 extern	cvar_t	*gl_particles;
 extern	cvar_t	*gl_fires;
 extern	cvar_t	*gl_fb_models;
+extern	cvar_t	*gl_fb_bmodels;
 
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
