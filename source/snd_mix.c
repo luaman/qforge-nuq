@@ -39,7 +39,8 @@
 #endif
 
 #define	PAINTBUFFER_SIZE	512
-portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE+100];
+portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE * 2];
+int		max_overpaint;	// number of extra samples painted due to phase shift
 int		snd_scaletable[32][256];
 int 	*snd_p, snd_linear_count, snd_vol;
 short	*snd_out;
@@ -279,15 +280,16 @@ void S_PaintChannels(int endtime)
 
 	while (paintedtime < endtime)
 	{
-	// if paintbuffer is smaller than DMA buffer
+		// if paintbuffer is smaller than DMA buffer
 		end = endtime;
 		if (endtime - paintedtime > PAINTBUFFER_SIZE)
 			end = paintedtime + PAINTBUFFER_SIZE;
 
-	// clear the paint buffer
-		memset(paintbuffer, 0, (end - paintedtime) * sizeof(portable_samplepair_t));
+		// clear the paint buffer
+		//memset(paintbuffer, 0, (end - paintedtime) * sizeof(portable_samplepair_t));
+		max_overpaint = 0;
 
-	// paint in the channels.
+		// paint in the channels.
 		ch = channels;
 		for (i=0; i<total_channels ; i++, ch++)
 		{
@@ -302,7 +304,8 @@ void S_PaintChannels(int endtime)
 			ltime = paintedtime;
 
 			while (ltime < end)
-			{	// paint up to end
+			{
+				// paint up to end
 				if (ch->end < end)
 					count = ch->end - ltime;
 				else
@@ -318,7 +321,7 @@ void S_PaintChannels(int endtime)
 					ltime += count;
 				}
 
-			// if at end of loop, restart
+				// if at end of loop, restart
 				if (ltime >= ch->end)
 				{
 					if (sc->loopstart >= 0)
@@ -336,8 +339,12 @@ void S_PaintChannels(int endtime)
 															  
 		}
 
-	// transfer out according to DMA format
+		// transfer out according to DMA format
 		S_TransferPaintBuffer(end);
+
+		memcpy (paintbuffer, paintbuffer + end - paintedtime, max_overpaint * sizeof (paintbuffer[0]));
+		memset (paintbuffer + max_overpaint, 0, sizeof (paintbuffer) - max_overpaint * sizeof (paintbuffer[0]));
+
 		paintedtime = end;
 	}
 }
@@ -397,9 +404,13 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 	if (ch->phase >= 0) {
 		left_phase = ch->phase;
 		right_phase = 0;
+		if (ch->phase > max_overpaint)
+			max_overpaint = ch->phase;
 	} else {
 		left_phase = 0;
 		right_phase = -ch->phase;
+		if (-ch->phase > max_overpaint)
+			max_overpaint = -ch->phase;
 	}
 	sfx = (signed short *)sc->data + ch->pos;
 
@@ -408,8 +419,6 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 		data = sfx[i];
 		left = (data * leftvol) >> 8;
 		right = (data * rightvol) >> 8;
-		//paintbuffer[i].left += left;
-		//paintbuffer[i].right += right;
 		paintbuffer[i+left_phase].left += left;
 		paintbuffer[i+right_phase].right += right;
 	}
