@@ -138,14 +138,14 @@ void Draw_Init (void)
 
 /*
 ================
-Draw_Character
+Draw_Character8
 
 Draws one 8*8 graphics character with 0 being transparent.
 It can be clipped to the top of the screen to allow the console to be
 smoothly scrolled off.
 ================
 */
-void Draw_Character (int x, int y, int num)
+void Draw_Character8 (int x, int y, int num)
 {
 	byte			*dest;
 	byte			*source;
@@ -238,14 +238,14 @@ void Draw_Character (int x, int y, int num)
 
 /*
 ================
-Draw_String
+Draw_String8
 ================
 */
-void Draw_String (int x, int y, char *str)
+void Draw_String8 (int x, int y, char *str)
 {
 	while (*str)
 	{
-		Draw_Character (x, y, *str);
+		Draw_Character8 (x, y, *str);
 		str++;
 		x += 8;
 	}

@@ -306,9 +306,9 @@ Draws one solid graphics character
 void Sbar_DrawCharacter (int x, int y, int num)
 {
 	if (cl.gametype == GAME_DEATHMATCH)
-		Draw_Character ( x /*+ ((vid.width - 320)>>1) */ + 4 , y + vid.height-SBAR_HEIGHT, num);
+		Draw_Character8 ( x /*+ ((vid.width - 320)>>1) */ + 4 , y + vid.height-SBAR_HEIGHT, num);
 	else
-		Draw_Character ( x + ((vid.width - 320)>>1) + 4 , y + vid.height-SBAR_HEIGHT, num);
+		Draw_Character8 ( x + ((vid.width - 320)>>1) + 4 , y + vid.height-SBAR_HEIGHT, num);
 }
 
 /*
@@ -319,9 +319,9 @@ Sbar_DrawString
 void Sbar_DrawString (int x, int y, char *str)
 {
 	if (cl.gametype == GAME_DEATHMATCH)
-		Draw_String (x /*+ ((vid.width - 320)>>1)*/, y+ vid.height-SBAR_HEIGHT, str);
+		Draw_String8 (x /*+ ((vid.width - 320)>>1)*/, y+ vid.height-SBAR_HEIGHT, str);
 	else
-		Draw_String (x + ((vid.width - 320)>>1), y+ vid.height-SBAR_HEIGHT, str);
+		Draw_String8 (x + ((vid.width - 320)>>1), y+ vid.height-SBAR_HEIGHT, str);
 }
 
 /*
@@ -1144,12 +1144,12 @@ void Sbar_DeathmatchOverlay (void)
 		f = s->frags;
 		sprintf (num, "%3i",f);
 
-		Draw_Character ( x+8 , y, num[0]);
-		Draw_Character ( x+16 , y, num[1]);
-		Draw_Character ( x+24 , y, num[2]);
+		Draw_Character8 ( x+8 , y, num[0]);
+		Draw_Character8 ( x+16 , y, num[1]);
+		Draw_Character8 ( x+24 , y, num[2]);
 
 		if (k == cl.viewentity - 1)
-			Draw_Character ( x - 8, y, 12);
+			Draw_Character8 ( x - 8, y, 12);
 
 #if 0
 {
@@ -1165,12 +1165,12 @@ void Sbar_DeathmatchOverlay (void)
 
 		sprintf (num, "%3i:%i%i", minutes, tens, units);
 
-		Draw_String ( x+48 , y, num);
+		Draw_String8 ( x+48 , y, num);
 }
 #endif
 
 	// draw name
-		Draw_String (x+64, y, s->name);
+		Draw_String8 (x+64, y, s->name);
 
 		y += 10;
 	}
@@ -1243,13 +1243,13 @@ void Sbar_MiniDeathmatchOverlay (void)
 		f = s->frags;
 		sprintf (num, "%3i",f);
 
-		Draw_Character ( x+8 , y, num[0]);
-		Draw_Character ( x+16 , y, num[1]);
-		Draw_Character ( x+24 , y, num[2]);
+		Draw_Character8 ( x+8 , y, num[0]);
+		Draw_Character8 ( x+16 , y, num[1]);
+		Draw_Character8 ( x+24 , y, num[2]);
 
 		if (k == cl.viewentity - 1) {
-			Draw_Character ( x, y, 16);
-			Draw_Character ( x + 32, y, 17);
+			Draw_Character8 ( x, y, 16);
+			Draw_Character8 ( x + 32, y, 17);
 		}
 
 #if 0
@@ -1266,12 +1266,12 @@ void Sbar_MiniDeathmatchOverlay (void)
 
 		sprintf (num, "%3i:%i%i", minutes, tens, units);
 
-		Draw_String ( x+48 , y, num);
+		Draw_String8 ( x+48 , y, num);
 }
 #endif
 
 	// draw name
-		Draw_String (x+48, y, s->name);
+		Draw_String8 (x+48, y, s->name);
 
 		y += 8;
 	}

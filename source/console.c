@@ -524,7 +524,7 @@ void Con_DrawInput (void)
 	y = con_vislines-16;
 
 	for (i=0 ; i<con_linewidth ; i++)
-		Draw_Character ( (i+1)<<3, con_vislines - 16, text[i]);
+		Draw_Character8 ( (i+1)<<3, con_vislines - 16, text[i]);
 
 // remove cursor
 	key_lines[edit_line][key_linepos] = 0;
@@ -563,7 +563,7 @@ void Con_DrawNotify (void)
 		scr_copytop = 1;
 
 		for (x = 0 ; x < con_linewidth ; x++)
-			Draw_Character ( (x+1)<<3, v, text[x]);
+			Draw_Character8 ( (x+1)<<3, v, text[x]);
 
 		v += 8;
 	}
@@ -576,13 +576,13 @@ void Con_DrawNotify (void)
 	
 		x = 0;
 		
-		Draw_String (8, v, "say:");
+		Draw_String8 (8, v, "say:");
 		while(chat_buffer[x])
 		{
-			Draw_Character ( (x+5)<<3, v, chat_buffer[x]);
+			Draw_Character8 ( (x+5)<<3, v, chat_buffer[x]);
 			x++;
 		}
-		Draw_Character ( (x+5)<<3, v, 10+((int)(realtime*con_cursorspeed)&1));
+		Draw_Character8 ( (x+5)<<3, v, 10+((int)(realtime*con_cursorspeed)&1));
 		v += 8;
 	}
 	
@@ -625,7 +625,7 @@ void Con_DrawConsole (int lines, qboolean drawinput)
 		text = con_text + (j % con_totallines)*con_linewidth;
 
 		for (x=0 ; x<con_linewidth ; x++)
-			Draw_Character ( (x+1)<<3, y, text[x]);
+			Draw_Character8 ( (x+1)<<3, y, text[x]);
 	}
 
 // draw the input prompt, user text, and cursor if desired

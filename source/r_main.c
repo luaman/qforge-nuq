@@ -958,7 +958,7 @@ void R_EdgeDrawing (void)
 		R_ScanEdges ();
 }
 
-
+void R_SetupFrame(void);
 /*
 ================
 R_RenderView
