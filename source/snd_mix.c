@@ -273,11 +273,11 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int endtime);
 
 void S_PaintChannels(int endtime)
 {
-	int 	i;
-	int 	end;
-	channel_t *ch;
+	int 		i;
+	int 		end;
+	channel_t	*ch;
 	sfxcache_t	*sc;
-	int		ltime, count;
+	int			ltime, count;
 
 	while (paintedtime < endtime)
 	{
@@ -343,8 +343,12 @@ void S_PaintChannels(int endtime)
 		// transfer out according to DMA format
 		S_TransferPaintBuffer(end);
 
-		memcpy (paintbuffer, paintbuffer + end - paintedtime, max_overpaint * sizeof (paintbuffer[0]));
-		memset (paintbuffer + max_overpaint, 0, sizeof (paintbuffer) - max_overpaint * sizeof (paintbuffer[0]));
+		memcpy (paintbuffer,
+				paintbuffer + end - paintedtime,
+				max_overpaint * sizeof (paintbuffer[0]));
+		memset (paintbuffer + max_overpaint,
+				0,
+				sizeof (paintbuffer) - max_overpaint * sizeof (paintbuffer[0]));
 
 		paintedtime = end;
 	}
@@ -427,16 +431,20 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 			old_phase_left = 0;
 			old_phase_right = -ch->oldphase;
 		}
+
 		new_phase_left = left_phase;
 		new_phase_right = right_phase;
+
 		if (new_phase_left > old_phase_left)
 			count_left = 2 * (new_phase_left - old_phase_left);
 		else
 			count_left = old_phase_left - new_phase_left;
+
 		if (new_phase_right > old_phase_right)
 			count_right = 2 * (new_phase_right - old_phase_right);
 		else
 			count_right = old_phase_right - new_phase_right;
+
 		c = min (count, max (count_right, count_left));
 		count -= c;
 		while (c) {
