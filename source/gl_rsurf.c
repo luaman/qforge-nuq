@@ -599,11 +599,14 @@ dynamic:
 
 void GL_WaterSurface(msurface_t *s)
 {
+	int i;
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	if (lighthalf)
 		glColor4f(0.5,0.5,0.5, r_wateralpha->value);
 	else
 		glColor4f(1,1,1, r_wateralpha->value);
+	i = s->texinfo->texture->gl_texturenum;
+	glBindTexture (GL_TEXTURE_2D, i);
 	if (r_wateralpha->value < 1.0)
 	{
 		glDepthMask(0);
