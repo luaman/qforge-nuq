@@ -1124,6 +1124,7 @@ AC_MSG_RESULT([
 	Build type: $BUILD_TYPE
 	Targets:$CL_TARGETS
 	Server: $ENABLE_DED
+	Compression support: $HAVE_ZLIB
 
 	System game data directory: $sharepath
 	Per-user game data directory: $userpath
