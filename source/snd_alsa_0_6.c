@@ -241,7 +241,7 @@ qboolean SNDDMA_Init(void)
 	shm->submission_chunk=frag_size;			// don't mix less than this #
 	shm->samplepos=0;							// in mono samples
 	shm->samplebits=setup.format.format==SND_PCM_SFMT_S16_LE?16:8;
-	shm->samples=setup.buffer_size*frame_size/(shm->samplebits/8);	// mono samples in buffer
+	shm->samples=setup.buffer_size*shm->channels;	// mono samples in buffer
 	shm->speed=setup.format.rate;
 	shm->buffer=(unsigned char*)mmap_data;
     Con_Printf("%5d stereo\n", shm->channels - 1);
