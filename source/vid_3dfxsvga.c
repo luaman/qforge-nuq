@@ -54,6 +54,7 @@
 
 #include "console.h"
 #include "glquake.h"
+#include "host.h"
 #include "qargs.h"
 #include "qendian.h"
 #include "quakefs.h"
