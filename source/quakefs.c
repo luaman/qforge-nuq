@@ -937,7 +937,7 @@ COM_InitFilesystem ( void )
 	start up with basegame->string by default
 */
 	COM_CreateGameDirectory(fs_basegame->string);
-	if ((i = COM_CheckParm ("-game")) && i < com_argc-1) {
+	if ((i = COM_CheckParm ("-game")) && i < com_argc - 1) {
 		COM_CreateGameDirectory(com_argv[i+1]);
 	}
 	if (hipnotic) {
