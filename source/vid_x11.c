@@ -190,7 +190,7 @@ PIXEL24 xlib_rgb24(int r,int g,int b)
 
 void st2_fixup( XImage *framebuf, int x, int y, int width, int height)
 {
-	int xi,yi;
+	int yi;
 	unsigned char *src;
 	PIXEL16 *dest;
 	register int count, n;
@@ -226,7 +226,7 @@ void st2_fixup( XImage *framebuf, int x, int y, int width, int height)
 
 void st3_fixup( XImage *framebuf, int x, int y, int width, int height)
 {
-	int xi,yi;
+	int yi;
 	unsigned char *src;
 	PIXEL24 *dest;
 	register int count, n;
@@ -964,8 +964,6 @@ void GetEvent(void)
 
 void	VID_Update (vrect_t *rects)
 {
-	vrect_t full;
-
 // if the window changes dimension, skip this frame
 
 	if (config_notify)
