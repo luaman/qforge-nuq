@@ -422,6 +422,33 @@ void SCR_DrawNet (void)
 	Draw_Pic (scr_vrect.x+64, scr_vrect.y, scr_net);
 }
 
+void SCR_DrawFPS (void)
+{
+	extern cvar_t *show_fps;
+	static double lastframetime;
+	double t;
+	extern int fps_count;
+	static int lastfps;
+	int x, y;
+	char st[80];
+
+	if (!show_fps->value)
+		return;
+
+	t = Sys_DoubleTime();
+	if ((t - lastframetime) >= 1.0) {
+		lastfps = fps_count;
+		fps_count = 0;
+		lastframetime = t;
+	}
+
+       sprintf(st, "%3d FPS", lastfps);
+       x = vid.width - strlen(st) * 8 - 8;
+       y = vid.height - sb_lines - 8;
+       Draw_String8 (x, y, st);
+}
+
+
 /*
 ==============
 DrawPause
@@ -962,6 +989,7 @@ void SCR_UpdateScreen (void)
 		SCR_DrawNet ();
 		SCR_DrawTurtle ();
 		SCR_DrawPause ();
+		SCR_DrawFPS ();
 		SCR_CheckDrawCenterString ();
 		Sbar_Draw ();
 		SCR_DrawConsole ();
