@@ -393,17 +393,11 @@ void SND_PaintChannelFrom8 (channel_t *ch, sfxcache_t *sc, int count)
 
 void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 {
-	int leftvol, rightvol;
-	signed short *sfx;
-	int	i = 0;
-	unsigned int left_phase, right_phase;	// never allowed < 0 anyway
-	int oldphase = ch->oldphase * 2;
-	int phase = ch->phase * 2;
+	int				leftvol, rightvol;
+	signed short	*sfx;
+	unsigned int	i = 0;
+	unsigned int	left_phase, right_phase;	// never allowed < 0 anyway
 
-	int dir = (phase - oldphase) > 0 ? 1 : -1;
-	int ldir;
-	int rdir;
-	
 	leftvol = ch->leftvol;
 	rightvol = ch->rightvol;
 
@@ -413,63 +407,77 @@ void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
 	sfx = (signed short *)sc->data + ch->pos;
 	ch->pos += count;
 
-	if (oldphase >= 0) {
-		left_phase = oldphase;
+	if (ch->phase >= 0) {
+		left_phase = ch->phase;
 		right_phase = 0;
 	} else {
 		left_phase = 0;
-		right_phase = -oldphase;
+		right_phase = -ch->phase;
 	}
 
-#define PAINT_CHANNELS	do {												\
-							int data = sfx[i];								\
-							int left = (data * leftvol) >> 8;				\
-							int right = (data * rightvol) >> 8;				\
-							paintbuffer[i + left_phase / 2].left += left;	\
-							paintbuffer[i + right_phase / 2].right += right;\
-						} while (0)
+	if (ch->oldphase != ch->phase) {
+		unsigned int	olp, orp, nlp, nrp;
+		unsigned int	cl, cr, c;
 
-	if (oldphase != phase) {
-		int c;
-
-		if ((oldphase ^ phase) & ~((~0u)>>1)) {
-			// phase change crosses 0
-			c = min (count, abs(oldphase));
-			count -= c;
-			if (oldphase > 0) {
-				ldir = -1;
-				rdir = 0;
-			} else {
-				ldir = 0;
-				rdir = -1;
-			}
-			for ( ; c; c--, i++) {
-				PAINT_CHANNELS;
-				left_phase += ldir;
-				right_phase += rdir;
-			}
-			oldphase = 0;
-		}
-		// oldphase and phase [now] on same size of 0
-		c = min (count, abs (phase - oldphase));
-		count -= c;
-		if (phase > 0) {
-			ldir = dir;
-			rdir = 0;
+		if (ch->oldphase >= 0) {
+			olp = ch->oldphase;
+			orp = 0;
 		} else {
-			ldir = 0;
-			rdir = dir;
+			olp = 0;
+			orp = -ch->oldphase;
 		}
-		for ( ; c; c--, i++) {
-			PAINT_CHANNELS;
-			left_phase += ldir;
-			right_phase += rdir;
+		nlp = left_phase;
+		nrp = right_phase;
+		if (nlp > olp)
+			cl = 2 * (nlp - olp);
+		else
+			cl = olp - nlp;
+		if (nrp > orp)
+			cr = 2 * (nrp - orp);
+		else
+			cr = orp - nrp;
+		c = min (count, max (cr, cl));
+		count -= c;
+		while (c) {
+			int data = sfx[i];
+			int left = (data * leftvol) >> 8;
+			int right = (data * rightvol) >> 8;
+			if (nlp < olp) {
+				if (!(cl & 1)) {
+					paintbuffer[i + olp].left += left;
+					olp--;
+				}
+				cl--;
+			} else if (nlp > olp) {
+				paintbuffer[i + olp].left += left;
+				olp++;
+				paintbuffer[i + olp].left += left;
+			} else {
+				paintbuffer[i + olp].left += left;
+			}
+			if (nrp < orp) {
+				if (!(cr & 1)) {
+					paintbuffer[i + orp].right += right;
+					orp--;
+				}
+				cr--;
+			} else if (nrp > orp) {
+				paintbuffer[i + orp].right += right;
+				orp++;
+				paintbuffer[i + orp].right += right;
+			} else {
+				paintbuffer[i + orp].right += right;
+			}
+			c--;
+			i++;
 		}
 	}
 
 	for (; count ; count--, i++) {
-		PAINT_CHANNELS;
+		int data = sfx[i];
+		int left = (data * leftvol) >> 8;
+		int right = (data * rightvol) >> 8;
+		paintbuffer[i + left_phase].left += left;
+		paintbuffer[i + right_phase].right += right;
 	}
-#undef PAINT_CHANNELS
 }
-
