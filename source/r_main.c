@@ -329,16 +329,16 @@ void R_SetVrect (vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
 	float		size;
 	qboolean	full = false;
 
-	if (scr_viewsize->value >= 100.0) {
-		size = 100.0;
+	if (scr_viewsize->int_val >= 100) {
+		size = 100;
 		full = true;
 	} else {
-		size = scr_viewsize->value;
+		size = scr_viewsize->int_val;
 	}
 
 	if (cl.intermission) {
 		full = true;
-		size = 100.0;
+		size = 100;
 		lineadj = 0;
 	}
 	size /= 100;
