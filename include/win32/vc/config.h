@@ -65,11 +65,6 @@
 /* Version string */
 #include "..\version.h"
 
-/* Define if you want to use QF-style defaults instead of Id-style */
-
-/* Define this to the subdirectory name of the default game */
-#define BASEGAME "id1"
-
 /* Define if you have the XFree86 DGA extension */
 #undef HAVE_DGA
 
