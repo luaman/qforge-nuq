@@ -515,6 +515,7 @@ void S_StartSound(int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float f
 	target_chan->entnum = entnum;
 	target_chan->entchannel = entchannel;
 	SND_Spatialize(target_chan);
+	target_chan->oldphase = target_chan->phase;
 
 	if (!target_chan->leftvol && !target_chan->rightvol)
 		return;		// not audible at all
@@ -686,6 +687,7 @@ void S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
     ss->end = paintedtime + sc->length;	
 	
 	SND_Spatialize (ss);
+	ss->oldphase = ss->phase;
 }
 
 

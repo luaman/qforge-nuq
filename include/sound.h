@@ -90,6 +90,7 @@ typedef struct
 	vec_t	dist_mult;		// distance multiplier (attenuation/clipK)
 	int		master_vol;		// 0-255 master volume
 	int		phase;			// phase shift between l-r in samples
+	int		oldphase;		// phase shift between l-r in samples
 } channel_t;
 
 typedef struct

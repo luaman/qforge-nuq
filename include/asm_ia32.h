@@ -94,7 +94,8 @@
 #define ch_dist_mult	44
 #define ch_master_vol	48
 #define ch_phase		52
-#define ch_size			56
+#define ch_phase		56
+#define ch_size			60
 
 // portable_samplepair_t structure
 // !!! if this is changed, it much be changed in sound.h too !!!
