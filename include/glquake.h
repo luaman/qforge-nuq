@@ -252,7 +252,6 @@ extern lpSelTexFUNC qglSelectTexture;
 extern qboolean gl_mtexable;
 
 void GL_SubdivideSurface (msurface_t *fa);
-void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
