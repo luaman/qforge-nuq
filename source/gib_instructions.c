@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "cvar.h"
 #include "console.h"
 #include "qargs.h"
@@ -50,11 +51,17 @@ void GIB_Init_Instructions (void)
 	GIB_AddInstruction("call", GIB_Call_f);
 	GIB_AddInstruction("varprint", GIB_VarPrint_f);
 	GIB_AddInstruction("return", GIB_Return_f);
+	GIB_AddInstruction("varsub", GIB_VarSub_f);
+	GIB_AddInstruction("con", GIB_Con_f);
+	GIB_AddInstruction("listfetch", GIB_ListFetch_f);
+	GIB_AddInstruction("eval", GIB_Eval_f);
+	GIB_AddInstruction("backtick", GIB_BackTick_f);
 }
+
 
 int GIB_Echo_f (void)
 {
-	Con_Printf("%s\n",GIB_Argv(1));
+	Con_Printf(GIB_Argv(1));
 	return 0;
 }
 
@@ -76,7 +83,10 @@ int GIB_Call_f (void)
 		GIB_SUBARGV[i] = GIB_Argv(i + 1);
 	ret = GIB_Run_Sub (mod, sub);
 	if (gib_subret)
+	{
 		GIB_Var_Set("retval", gib_subret);
+		free (gib_subret);
+	}
 	gib_subret = 0;
 	return ret;
 }
@@ -103,4 +113,166 @@ int GIB_Return_f (void)
 	gib_subret = malloc(strlen(GIB_Argv(1)) + 1);
 	strcpy(gib_subret, GIB_Argv(1));
 	return GIB_E_RETURN; // Signal to block executor to return immediately
+}
+
+int GIB_VarSub_f (void)
+{
+	char buffer[1024];
+	int ret;
+
+	if (GIB_Argc() != 1)
+		return GIB_E_NUMARGS;	
+
+	if ((ret = GIB_ExpandVars(GIB_Argv(1), buffer, 1024)))
+		return ret;
+	GIB_Var_Set ("retval", buffer);
+	return 0;
+}
+
+int GIB_ListFetch_f (void)
+{
+	char *element;
+	gib_var_t *var;
+	int i, n, m;
+
+	if (GIB_Argc() != 2)
+		return GIB_E_NUMARGS;
+		
+	if (!(var = GIB_Var_FindLocal(GIB_Argv(1))))
+		return GIB_E_NOVAR;
+	for (i = 0; isspace(var->value[i]); i++);
+	for (n = 1; n < atoi(GIB_Argv(2)); n++)
+	{
+		if ((m = GIB_Get_Arg (var->value + i)) < 1)
+			return GIB_E_ULIMIT;
+		i += m;
+		for (; isspace(var->value[i]); i++);
+	}
+	if ((m = GIB_Get_Arg (var->value + i)) < 1)
+			return GIB_E_ULIMIT;
+	element = malloc(m + 1);
+	strncpy(element, var->value + i, m);
+	element[m] = 0;
+	GIB_Var_Set ("retval", element);
+	return 0;
+}
+	
+int GIB_Con_f (void)
+{
+	if (GIB_Argc() != 1)
+		return GIB_E_NUMARGS;
+	
+	Cmd_ExecuteString (GIB_Argv(1), src_command);
+	
+	return 0;
+}
+
+int GIB_Eval_f (void)
+{
+	gib_var_t *var;
+	char *buffer;
+	int ret;
+
+	if (GIB_Argc() != 1)
+		return GIB_E_NUMARGS;
+	if (!(var = GIB_Var_FindLocal (GIB_Argv(1))))
+		return GIB_E_NOVAR;
+	buffer = malloc(strlen(var->value) + 1);
+	strcpy(buffer, var->value);
+	gib_argofs++; /* HACK HACK HACK - This is required or
+				GIB_Execute_Instruction will smash gib_argv */
+	ret = GIB_Execute_Block (buffer, 0);
+	gib_argofs--;
+	free (buffer);
+	return ret;
+}
+
+int GIB_BackTick_f (void)
+{
+	char buffer[1024];
+	int ret;
+
+	if (GIB_Argc() != 1)
+		return GIB_E_NUMARGS;
+	if ((ret = GIB_ExpandBackticks (GIB_Argv(1), buffer, 1024)))
+		return ret;
+	GIB_Var_Set ("retval", buffer);
+	return 0;
+}
+
+
+int GIB_ExpandVars (char *source, char *buffer, int buffersize)
+{
+	int i, n, m;
+	
+	char varname[256];
+	gib_var_t *var;
+
+	for (i = 0, n = 0; i <= strlen(source); i++)
+	{
+		if (source[i] == '$')
+		{
+			m = 0;
+			while(isalnum(source[++i]))
+					varname[m++] = source[i];
+					
+			varname[m++] = 0;
+			if (!(var = GIB_Var_FindLocal (varname)))
+				return GIB_E_NOVAR;
+			if (n + strlen(var->value) >= buffersize)
+				return GIB_E_BUFFER;
+			memcpy(buffer + n, var->value, strlen(var->value));
+			
+			n += strlen(var->value);
+			i--;
+		}
+		else
+		{
+			if (n >= buffersize + 1)
+				return GIB_E_BUFFER;
+			buffer[n++] = source[i];
+		}
+	}
+	return 0;
+}
+
+int GIB_ExpandBackticks (char *source, char *buffer, int buffersize)
+{
+	int i, n, m, ret;
+	
+	char tick[256];
+	gib_var_t *var;
+
+	for (i = 0, n = 0; i <= strlen(source); i++)
+	{
+		if (source[i] == '`')
+		{
+			m = 0;
+			while(source[++i] != '`')
+					tick[m++] = source[i];
+					
+			tick[m++] = 0;
+			gib_argofs++;
+			ret = GIB_Execute_Inst (tick);
+			gib_argofs--;
+			if (ret)
+			{
+				return ret;
+			}
+			if (!(var = GIB_Var_FindLocal ("retval")))
+				return GIB_E_NOVAR;
+			if (n + strlen(var->value) >= buffersize)
+				return GIB_E_BUFFER;
+			memcpy(buffer + n, var->value, strlen(var->value));
+			
+			n += strlen(var->value);
+		}
+		else
+		{
+			if (n >= buffersize + 1)
+				return GIB_E_BUFFER;
+			buffer[n++] = source[i];
+		}
+	}
+	return 0;
 }

@@ -29,14 +29,18 @@ int GIB_SUBARGC;
 int gib_argc[GIB_MAXCALLS];
 char *gib_argv[GIB_MAXCALLS][80];
 
+int gib_argofs = 0;
+
+char errorline[1024];
+
 char *GIB_Argv(int i)
 {
-	return gib_argv[gib_subsp][i];
+	return gib_argv[gib_subsp + gib_argofs][i];
 }
 
 int GIB_Argc(void)
 {
-	return gib_argc[gib_subsp];
+	return gib_argc[gib_subsp + gib_argofs];
 }
 
 void GIB_Strip_Arg (char *arg)
@@ -54,7 +58,7 @@ int GIB_Execute_Block (char *block, int retflag)
 	char *code;
 	
 	i = 0;
-	
+
 	while ((len = GIB_Get_Inst(block + i)) > 0)
 	{
 		code = malloc(len + 1);
@@ -65,7 +69,11 @@ int GIB_Execute_Block (char *block, int retflag)
 			if (retflag && ret == GIB_E_RETURN)
 				return 0;
 			else
+			{
+				strcpy(errorline, code);
+				free (code);
 				return ret;
+			}
 		}
 		free (code);
 		i += len + 1;
@@ -76,8 +84,11 @@ int GIB_Execute_Block (char *block, int retflag)
 int GIB_Execute_Inst (char *inst)
 {
 	char *buffer;
+	char *buffer2;
+	char *buffer3;
 	int i, n, len, ret;
 	gib_inst_t *ginst;
+
 
 	buffer = malloc(strlen(inst) + 1);
 	i = 0;
@@ -93,38 +104,48 @@ int GIB_Execute_Inst (char *inst)
 			buffer[n] = inst[i];
 		n++;
 	}
-	gib_argc[gib_subsp] = 0;
-	for (i = 0; buffer[i] != ' '; i++);
-	gib_argv[gib_subsp][0] = malloc(i + 1);
-	strncpy(gib_argv[gib_subsp][0], buffer, i);
-	gib_argv[gib_subsp][0][i] = 0;
+
+
+	buffer2 = malloc(2048);
+	buffer3 = malloc(2048);
+	GIB_ExpandVars (buffer, buffer2, 2048);
+	GIB_ExpandBackticks (buffer2, buffer3, 2048);
+	
+	gib_argc[gib_subsp + gib_argofs] = 0;
+	for (i = 0; buffer3[i] != ' '; i++);
+	gib_argv[gib_subsp + gib_argofs][0] = malloc(i + 1);
+	strncpy(gib_argv[gib_subsp + gib_argofs][0], buffer3, i);
+	gib_argv[gib_subsp + gib_argofs][0][i] = 0;
 	for (n = 0;;n++)
 	{
-		for (;isspace(buffer[i]); i++);
-		if (buffer[i] == 0)
+		for (;isspace(buffer3[i]); i++);
+		if (buffer3[i] == 0)
 			break;
-		if ((len = GIB_Get_Arg(buffer + i)) < 0) // Parse error
-			return len;
+		if ((len = GIB_Get_Arg(buffer3 + i)) < 0) // Parse error
+			return GIB_E_PARSE;
 		else
 		{
-			gib_argv[gib_subsp][n + 1] = malloc(len + 1);
-			strncpy(gib_argv[gib_subsp][n + 1], buffer + i, len);
-			gib_argv[gib_subsp][n + 1][len] = 0;
+			gib_argv[gib_subsp + gib_argofs][n + 1] = malloc(len + 1);
+			strncpy(gib_argv[gib_subsp + gib_argofs][n + 1], buffer3 + i, len);
+			gib_argv[gib_subsp + gib_argofs][n + 1][len] = 0;
+			GIB_ExpandEscapes (gib_argv[gib_subsp + gib_argofs][n + 1]);
 			i += len;
 		}
 	}
-	gib_argc[gib_subsp] = n;
+	gib_argc[gib_subsp + gib_argofs] = n;
 	
 	free(buffer);
+	free(buffer2);
+	free(buffer3);
 	
 	for (i = 1; i <= n; i++)
-		GIB_Strip_Arg (gib_argv[gib_subsp][i]);
-	if (!(ginst = GIB_Find_Instruction(gib_argv[gib_subsp][0])))
+		GIB_Strip_Arg (gib_argv[gib_subsp + gib_argofs][i]);
+	if (!(ginst = GIB_Find_Instruction(gib_argv[gib_subsp + gib_argofs][0])))
 		return 1;	
 	ret = ginst->func ();
 
 	for (i = 0; i <= n; i++)
-		free(gib_argv[gib_subsp][i]);
+		free(gib_argv[gib_subsp + gib_argofs][i]);
 	return ret;
 }
 

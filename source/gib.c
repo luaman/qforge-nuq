@@ -51,7 +51,7 @@ void GIB_Gib_f (void)
 		GIB_SUBARGV[i] = Cmd_Argv(i + 1);
 	ret = GIB_Run_Sub(mod, sub);
 	if (ret != 0)
-		Con_Printf("Error in execution of %s!\nError code: %i\n", Cmd_Argv(1), ret);
+		Con_Printf("Error in execution of %s!\nError code: %i\n\nLine at fault: %s\n", Cmd_Argv(1), ret, errorline);
 	}
 }
 

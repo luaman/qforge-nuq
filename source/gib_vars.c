@@ -47,7 +47,6 @@ void GIB_Var_Set (char *key, char *value)
 	gib_var_t *var;
 	if ((var = GIB_Var_FindLocal(key)))
 	{
-		Con_Printf("Value already found.\n");
 		free(var->value);
 	}
 	else

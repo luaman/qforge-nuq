@@ -6,10 +6,14 @@ extern gib_sub_t *gib_currentsub[GIB_MAXCALLS];
 extern int gib_subsp;
 
 extern int gib_argc[GIB_MAXCALLS];
-char *gib_argv[GIB_MAXCALLS][80];
+extern char *gib_argv[GIB_MAXCALLS][80];
+
+extern int gib_argofs;
 
 extern char *GIB_SUBARGV[GIB_MAXSUBARGS];
 extern int GIB_SUBARGC;
+
+extern char errorline[1024];
 
 char *GIB_Argv(int i);
 int GIB_Argc(void);
