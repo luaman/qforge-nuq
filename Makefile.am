@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = include source doc
 
-EXTRA_DIST = RPM/build_rpm.in RPM/uquake.spec.in \
+EXTRA_DIST = RPM/build_rpm.in RPM/nuq.spec.in \
 	tools/gas2masm/Makefile tools/gas2masm/gas2masm.c \
 	tools/gas2masm/gas2masm.dsp tools/gas2masm/gas2masm.dsw \
 	tools/gas2masm/gas2masm.mak tools/gas2masm/gas2masm.mdp

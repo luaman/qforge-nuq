@@ -43,7 +43,7 @@ noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 math_ASM= 	math.S cl_math.S
 soft_ASM=	d_draw.S d_draw16.S d_parta.S d_polysa.S d_scana.S d_spr8.S \
 		d_varsa.S r_aclipa.S r_aliasa.S r_drawa.S r_edgea.S r_varsa.S \
-		surf16.s surf8.s
+		surf16.S surf8.S
 sound_ASM=	snd_mixa.S
 common_ASM=	sys_ia32.S worlda.S $(math_ASM)
 #endif
@@ -165,7 +165,7 @@ nuq_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 #
 # ... Linux SVGAlib
 #
-svga_SOURCES=		d_copy.S vid_svgalib.c
+svga_SOURCES=		d_copy.S vid_svgalib.c in_svgalib.c
 
 nuq_svga_SOURCES=	$(combined_SOURCES) $(soft_SOURCES) $(svga_SOURCES)
 nuq_svga_LDADD=	$(client_LIBS) $(SVGA_LIBS)
@@ -230,6 +230,4 @@ nuq_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
 # Stuff that doesn't get linked into an executable NEEDS to be mentioned here,
 # or it won't be distributed with 'make dist'
 #
-EXTRA_DIST=	nuq-server.mak nuq-server.dsp \
-		nuq-mgl.mak nuq-sdl.mak nuq.dsp \
-		nuq-sgl.mak nuq-wgl.mak
+EXTRA_DIST=	#nuq.dsp
