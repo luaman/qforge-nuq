@@ -1816,13 +1816,6 @@ void VID_LockBuffer (void)
 		screenwidth = WARP_WIDTH;
 	else
 		screenwidth = vid.rowbytes;
-
-/*
-// disabled until someone fixes, not defined right or anything
-        if (lcd_x->value)
-                screenwidth <<= 1;
-                */
-
 }
 		
 		
