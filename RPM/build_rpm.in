@@ -9,18 +9,8 @@ fi
 
 rm -rf BUILD SPECS RPMS SOURCES SRPMS
 mkdir -p BUILD SPECS RPMS/{noarch,i386,i686} SOURCES SRPMS
-rm -rf ${temp_dir}/nuq-${version}
-cp -a $srcdir ${temp_dir}/nuq-${version}
-dest_dir=$PWD
-cd ${temp_dir}/nuq-${version}
-# this is needed to ensure there is a makefile
-./bootstrap
-./configure
-make distclean
-cd ${temp_dir}
-tar zcf ${dest_dir}/SOURCES/nuq-${version}.tar.gz nuq-${version}
-cd ${dest_dir}
-rm -rf ${temp_dir}/nuq-${version}
+(cd ${srcdir}; make dist)
+mv ${srcdir}/nuq-${version}.tar.gz SOURCES
 cat > rpmmacros <<EOF
 %_topdir $PWD
 EOF

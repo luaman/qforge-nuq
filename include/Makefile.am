@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 EXTRA_DIST = adivtab.h anorm_dots.h anorms.h asm_draw.h asm_ia32.h \
-	bspfile.h block16.h cdaudio.h chase.h client.h cmd.h compat.h \
+	bspfile.h block16.h cdaudio.h chase.h client.h checksum.h cmd.h compat.h \
 	conproc.h console.h context_x11.h crc.h cvar.h \
 	dga_check.h d_iface.h d_ifacea.h d_local.h dosisms.h draw.h \
 	gcc_attr.h gib_error.h gib.h gib_instructions.h \
-	gib_interpret.h gib_modules.h gib_parse.h gib_vars.h glquake.h \
+	gib_interpret.h gib_modules.h gib_parse.h gib_stack.h  gib_vars.h glquake.h \
 	gl_warp_sin.h host.h info.h input.h keys.h link.h mathlib.h mdfour.h menu.h \
 	modelgen.h model.h mpdosock.h msg.h net_bw.h net_dgrm.h net.h \
 	net_ipx.h net_loop.h net_mp.h net_ser.h net_udp.h net_vcr.h \

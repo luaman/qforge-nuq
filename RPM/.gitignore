@@ -2,3 +2,9 @@ Makefile
 Makefile.in
 build_rpm
 nuq.spec
+rpmmacros
+BUILD
+RPMS
+SOURCES
+SPECS
+SRPMS
