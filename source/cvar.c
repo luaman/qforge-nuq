@@ -225,6 +225,7 @@ void Cvar_SetROM (cvar_t *var, char *value)
 	var->string = malloc (strlen(value)+1);
 	strcpy (var->string, value);
 	var->value = atof (var->string);
+	var->int_val = atoi (var->string);
 
 	if ((var->flags & CVAR_SERVERINFO) && changed) {
 		if (sv.active)
@@ -470,6 +471,7 @@ cvar_t *Cvar_Get(char *name, char *string, int cvarflags, char *description)
 		v->flags = cvarflags;
 		v->description = strdup(description);
 		v->value = atof (v->string);
+		v->int_val = atoi (v->string);
 		return v;
 	}
 	// Cvar does exist, so we update the flags and return.
