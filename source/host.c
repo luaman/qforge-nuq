@@ -84,6 +84,8 @@ jmp_buf 	host_abortserver;
 byte		*host_basepal;
 byte		*host_colormap;
 
+cvar_t  *fs_globalcfg;
+
 cvar_t	*host_framerate;
 cvar_t	*host_speeds;
 
@@ -97,11 +99,7 @@ cvar_t	*teamplay;
 cvar_t	*samelevel;
 cvar_t	*noexit;
 
-#ifdef QUAKE2
 cvar_t	*developer;
-#else
-cvar_t	*developer;
-#endif
 
 cvar_t	*skill;
 cvar_t	*deathmatch;
@@ -882,16 +880,38 @@ void Host_Init (quakeparms_t *parms)
 	com_argv = parms->argv;
 
 	Memory_Init (parms->membase, parms->memsize);
+	Cvar_Init ();
+	CL_InitCvars ();
+
 	Cbuf_Init ();
 	Cmd_Init ();
-	Cvar_Init ();
 
-	CL_InitCvars ();
+        // execute +set as early as possible
+        Cmd_StuffCmds_f ();
+        Cbuf_Execute_Sets ();
+
+	// execute the global configuration file if it exists
+	// would have been nice if Cmd_Exec_f could have been used, but it
+	// only reads from within the quake file system, and changing that is
+	// probably Not A Good Thing (tm).
+	fs_globalcfg = Cvar_Get("fs_globalcfg", FS_GLOBALCFG,
+							CVAR_ROM, "global configuration file");
+	Cmd_Exec_File (fs_globalcfg->string);
+	Cbuf_Execute_Sets ();
+
+	Cmd_StuffCmds_f ();
+	Cbuf_Execute_Sets ();
+
+	V_Init ();
 	SCR_InitCvars ();
 	VID_InitCvars ();
 	COM_Init ();
 
-	V_Init ();
+	// reparse the command line for + commands other than set
+	// (sets still done, but it doesn't matter)
+	Cmd_StuffCmds_f ();
+	Cbuf_Execute ();
+
 	Chase_Init ();
 	Host_InitVCR (parms);
 	Host_InitLocal ();

@@ -131,6 +131,12 @@ void	Cmd_Print (char *text);
 // used by command functions to send output to either the graphics console or
 // passed as a print message to the client
 
+void Cmd_StuffCmds_f (void);
+
+void Cbuf_Execute_Sets (void);
+void Cmd_Exec_File (char *path);
+
+
 #define		MAX_COM_TOKEN   1024
 extern char		com_token[MAX_COM_TOKEN];
 char *COM_Parse (char *data);
