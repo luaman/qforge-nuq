@@ -262,7 +262,7 @@ int MPATH_CheckNewConnections (void)
 	if (net_acceptsocket == -1)
 		return -1;
 
-	if (recvfrom (net_acceptsocket, buf, 4, MSG_PEEK, NULL, NULL) > 0)
+	if (recvfrom (net_acceptsocket, buf, 4, MSG_PEEK, NULL, NULL) >= 0)
 		return net_acceptsocket;
 	return -1;
 }
