@@ -1,7 +1,7 @@
 /*
 	gl_model.c
 
-	@description@
+	model loading and caching
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -26,18 +26,41 @@
 	$Id$
 */
 
+// models are the only shared resource between a client and server running
+// on the same machine.
+
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
 #endif
-
+#include <math.h>
 #include <string.h>
+#include <stdio.h>
 
-#include "model.h"
-#include "sys.h"
 #include "qendian.h"
-#include "quakefs.h"
-#include "glquake.h"
+#include "msg.h"
+#include "bspfile.h"    // needed by: glquake.h
+#include "vid.h"
+#include "sys.h"
+#include "mathlib.h"    // needed by: protocol.h, render.h, client.h,
+                        //  modelgen.h, glmodel.h
+#include "wad.h"
+#include "draw.h"
+#include "cvar.h"
+#include "crc.h"
+#include "net.h"        // needed by: client.h
+#include "protocol.h"   // needed by: client.h
+#include "cmd.h"
+#include "sbar.h"
+#include "render.h"     // needed by: client.h, gl_model.h, glquake.h
+#include "client.h"     // need cls in this file
+#include "model.h"		// needed by: glquake.h
 #include "console.h"
+#include "glquake.h"
+#include "quakefs.h"
+
+void Sys_Error (char *error, ...);
+
+extern int texture_mode;
 
 model_t	*loadmodel;
 char	loadname[32];	// for hunk tags
@@ -46,6 +69,9 @@ void Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void Mod_LoadBrushModel (model_t *mod, void *buffer);
 void Mod_LoadAliasModel (model_t *mod, void *buffer);
 model_t *Mod_LoadModel (model_t *mod, qboolean crash);
+void R_InitSky(struct texture_s *mt);
+void GL_SubdivideSurface (msurface_t *fa);
+void Mod_LoadMMNearest(miptex_t *mx, texture_t	*tx);
 
 byte	mod_novis[MAX_MAP_LEAFS/8];
 
@@ -53,6 +79,8 @@ byte	mod_novis[MAX_MAP_LEAFS/8];
 model_t	mod_known[MAX_MOD_KNOWN];
 int		mod_numknown;
 
+unsigned *model_checksum;
+texture_t *r_notexture_mip;
 cvar_t	*gl_subdivide_size;
 
 /*
@@ -64,28 +92,6 @@ void Mod_Init (void)
 {
 	gl_subdivide_size = Cvar_Get("gl_subdivide_size", "128", CVAR_ARCHIVE, "None");
 	memset (mod_novis, 0xff, sizeof(mod_novis));
-}
-
-/*
-===============
-Mod_Init
-
-Caches the data if needed
-===============
-*/
-void *Mod_Extradata (model_t *mod)
-{
-	void	*r;
-	
-	r = Cache_Check (&mod->cache);
-	if (r)
-		return r;
-
-	Mod_LoadModel (mod, true);
-	
-	if (!mod->cache.data)
-		Sys_Error ("Mod_Extradata: caching failed");
-	return mod->cache.data;
 }
 
 /*
@@ -225,25 +231,6 @@ model_t *Mod_FindName (char *name)
 
 /*
 ==================
-Mod_TouchModel
-
-==================
-*/
-void Mod_TouchModel (char *name)
-{
-	model_t	*mod;
-	
-	mod = Mod_FindName (name);
-	
-	if (!mod->needload)
-	{
-		if (mod->type == mod_alias)
-			Cache_Check (&mod->cache);
-	}
-}
-
-/*
-==================
 Mod_LoadModel
 
 Loads a model into the cache
@@ -265,14 +252,6 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 		}
 		else
 			return mod;		// not cached at all
-	}
-
-//
-// because the world is so huge, load it one piece at a time
-//
-	if (!crash)
-	{
-	
 	}
 	
 //
@@ -299,6 +278,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 
 // call the apropriate loader
 	mod->needload = false;
+	mod->hasfullbrights = false;
 	
 	switch (LittleLong(*(unsigned *)buf))
 	{
@@ -396,15 +376,12 @@ void Mod_LoadTextures (lump_t *l)
 			tx->offsets[j] = mt->offsets[j] + sizeof(texture_t) - sizeof(miptex_t);
 		// the pixels immediately follow the structures
 		memcpy ( tx+1, mt+1, pixels);
-		
 
 		if (!strncmp(mt->name,"sky",3))	
 			R_InitSky (tx);
 		else
 		{
-			texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
-			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, 1);
-			texture_mode = GL_LINEAR;
+			Mod_LoadMMNearest(mt, tx);
 		}
 	}
 
@@ -502,6 +479,8 @@ void Mod_LoadTextures (lump_t *l)
 	}
 }
 
+extern byte *COM_LoadFile (char *path, int usehunk);
+
 /*
 =================
 Mod_LoadLighting
@@ -509,13 +488,36 @@ Mod_LoadLighting
 */
 void Mod_LoadLighting (lump_t *l)
 {
+	int		i;
+	byte		*in, *out;
+	byte		d;
+	char		litfilename[1024];
+		
 	if (!l->filelen)
 	{
 		loadmodel->lightdata = NULL;
 		return;
 	}
-	loadmodel->lightdata = Hunk_AllocName ( l->filelen, loadname);	
-	memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
+
+	strcpy(litfilename, loadmodel->name);
+	COM_StripExtension(litfilename, litfilename);
+	strcat(litfilename, ".lit");
+
+	loadmodel->lightdata = (byte*) COM_LoadHunkFile (litfilename);
+	if (!loadmodel->lightdata) // expand the white lighting data
+	{
+		loadmodel->lightdata = Hunk_AllocName ( l->filelen*3, litfilename);
+		in = loadmodel->lightdata + l->filelen*2; // place the file at the end, so it will not be overwritten until the very last write
+		out = loadmodel->lightdata;
+		memcpy (in, mod_base + l->fileofs, l->filelen);
+		for (i = 0;i < l->filelen;i++)
+		{
+			d = *in++;
+			*out++ = d;
+			*out++ = d;
+			*out++ = d;
+		}
+	}
 }
 
 
@@ -668,10 +670,13 @@ void Mod_LoadTexinfo (lump_t *l)
 
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
-		for (j=0 ; j<8 ; j++)
+		for (j=0 ; j<4 ; j++) {
 			out->vecs[0][j] = LittleFloat (in->vecs[0][j]);
+			out->vecs[1][j] = LittleFloat (in->vecs[1][j]);
+		}
 		len1 = Length (out->vecs[0]);
 		len2 = Length (out->vecs[1]);
+
 		len1 = (len1 + len2)/2;
 		if (len1 < 0.32)
 			out->mipadjust = 4;
@@ -681,12 +686,6 @@ void Mod_LoadTexinfo (lump_t *l)
 			out->mipadjust = 2;
 		else
 			out->mipadjust = 1;
-#if 0
-		if (len1 + len2 < 0.001)
-			out->mipadjust = 1;		// don't crash
-		else
-			out->mipadjust = 1 / floor( (len1+len2)/2 + 0.1 );
-#endif
 
 		miptex = LittleLong (in->miptex);
 		out->flags = LittleLong (in->flags);
@@ -810,7 +809,7 @@ void Mod_LoadFaces (lump_t *l)
 		if (i == -1)
 			out->samples = NULL;
 		else
-			out->samples = loadmodel->lightdata + i;
+			out->samples = loadmodel->lightdata + (i * 3);
 		
 	// set the drawing flags flag
 		
@@ -834,7 +833,6 @@ void Mod_LoadFaces (lump_t *l)
 			GL_SubdivideSurface (out);	// cut up polygon for warps
 			continue;
 		}
-
 	}
 }
 
@@ -910,6 +908,8 @@ void Mod_LoadLeafs (lump_t *l)
 	dleaf_t 	*in;
 	mleaf_t 	*out;
 	int			i, j, count, p;
+	//char		s[80];
+	qboolean	isnotmap = true;
 
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -919,7 +919,9 @@ void Mod_LoadLeafs (lump_t *l)
 
 	loadmodel->leafs = out;
 	loadmodel->numleafs = count;
-
+	//sprintf(s, "maps/%s.bsp", Info_ValueForKey(cl.serverinfo,"map"));
+	if (!strncmp("maps/", loadmodel->name,5))
+		isnotmap = false;
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
 		for (j=0 ; j<3 ; j++)
@@ -950,6 +952,11 @@ void Mod_LoadLeafs (lump_t *l)
 		{
 			for (j=0 ; j<out->nummarksurfaces ; j++)
 				out->firstmarksurface[j]->flags |= SURF_UNDERWATER;
+		}
+		if (isnotmap)
+		{
+			for (j=0 ; j<out->nummarksurfaces ; j++)
+				out->firstmarksurface[j]->flags |= SURF_DONTWARP;
 		}
 	}	
 }
@@ -1097,7 +1104,6 @@ void Mod_LoadSurfedges (lump_t *l)
 		out[i] = LittleLong (in[i]);
 }
 
-
 /*
 =================
 Mod_LoadPlanes
@@ -1154,6 +1160,8 @@ float RadiusFromBounds (vec3_t mins, vec3_t maxs)
 	return Length (corner);
 }
 
+unsigned Com_BlockChecksum (void *buffer, int length);
+
 /*
 =================
 Mod_LoadBrushModel
@@ -1178,6 +1186,22 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	for (i=0 ; i<sizeof(dheader_t)/4 ; i++)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
+
+	// checksum all of the map, except for entities
+	mod->checksum = 0;
+	mod->checksum2 = 0;
+
+	for (i = 0; i < HEADER_LUMPS; i++) {
+		if (i == LUMP_ENTITIES)
+			continue;
+		mod->checksum ^= LittleLong(Com_BlockChecksum(mod_base + header->lumps[i].fileofs, 
+			header->lumps[i].filelen));
+
+		if (i == LUMP_VISIBILITY || i == LUMP_LEAFS || i == LUMP_NODES)
+			continue;
+		mod->checksum2 ^= LittleLong(Com_BlockChecksum(mod_base + header->lumps[i].fileofs, 
+			header->lumps[i].filelen));
+	}
 
 // load into heap
 	
@@ -1229,13 +1253,74 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		{	// duplicate the basic information
 			char	name[10];
 
-			sprintf (name, "*%i", i+1);
+			snprintf (name, sizeof(name), "*%i", i+1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);
 			mod = loadmodel;
 		}
 	}
+}
+
+void Sys_Error (char *error, ...);
+
+extern char	loadname[];	// for hunk tags
+extern model_t	*loadmodel;
+extern model_t	mod_known[];
+extern int	mod_numknown;
+
+void Mod_LoadSpriteModel (model_t *mod, void *buffer);
+void Mod_LoadAliasModel (model_t *mod, void *buffer);
+model_t *Mod_LoadModel (model_t *mod, qboolean crash);
+model_t *Mod_FindName (char *name);
+
+/*
+===============
+Mod_Init
+
+Caches the data if needed
+===============
+*/
+void *Mod_Extradata (model_t *mod)
+{
+	void	*r;
+	
+	r = Cache_Check (&mod->cache);
+	if (r)
+		return r;
+
+	Mod_LoadModel (mod, true);
+	
+	if (!mod->cache.data)
+		Sys_Error ("Mod_Extradata: caching failed");
+	return mod->cache.data;
+}
+
+/*
+==================
+Mod_TouchModel
+
+==================
+*/
+void Mod_TouchModel (char *name)
+{
+	model_t	*mod;
+	
+	mod = Mod_FindName (name);
+	
+	if (!mod->needload)
+	{
+		if (mod->type == mod_alias)
+			Cache_Check (&mod->cache);
+	}
+}
+
+void
+Mod_LoadMMNearest(miptex_t *mt, texture_t	*tx)
+{
+	texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
+	tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, 1);
+	texture_mode = GL_LINEAR;
 }
 
 /*
@@ -1256,8 +1341,7 @@ mtriangle_t	triangles[MAXALIASTRIS];
 trivertx_t	*poseverts[MAXALIASFRAMES];
 int			posenum;
 
-byte		**player_8bit_texels_tbl;
-byte		*player_8bit_texels;
+byte		player_8bit_texels[320*200];
 
 /*
 =================
@@ -1429,7 +1513,6 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 	char	name[32];
 	int		s;
 	byte	*skin;
-	byte	*texels;
 	daliasskingroup_t		*pinskingroup;
 	int		groupskins;
 	daliasskininterval_t	*pinskinintervals;
@@ -1447,21 +1530,67 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
 
 			// save 8 bit texels for the player model to remap
-	//		if (!strcmp(loadmodel->name,"progs/player.mdl")) {
-				texels = Hunk_AllocName(s, loadname);
-				pheader->texels[i] = texels - (byte *)pheader;
-				memcpy (texels, (byte *)(pskintype + 1), s);
-	//		}
-			sprintf (name, "%s_%i", loadmodel->name, i);
+			if (!strcmp(loadmodel->name,"progs/player.mdl"))
+			{
+				if (s > sizeof(player_8bit_texels))
+					Sys_Error ("Player skin too large");
+				memcpy (player_8bit_texels, (byte *)(pskintype + 1), s);
+			}
+
+			// This block is GL fullbright support for objects...
+			{
+				int		pixels;
+				byte	*ptexel;
+
+				// Check for fullbright pixels..
+				pixels = pheader->skinwidth * pheader->skinheight;
+				ptexel = (byte *)(pskintype + 1);
+
+				for (j=0 ; j<pixels ; j++) {
+					if (ptexel[j] >= 256-32) {
+						loadmodel->hasfullbrights = true;
+						break;
+					}
+				}
+
+				if (loadmodel->hasfullbrights) {
+					byte	*ptexels;
+
+					//ptexels = Hunk_Alloc(s);
+					ptexels = malloc(pixels);
+
+					snprintf(name, sizeof(name), "fb_%s_%i", loadmodel->name,i);
+					Con_DPrintf("FB Model ID: '%s'\n", name);
+					for (j=0 ; j<pixels ; j++) {
+						if (ptexel[j] >= 256-32) {
+							ptexels[j] = ptexel[j];
+						} else {
+							ptexels[j] = 255;
+						}
+					}
+					pheader->gl_fb_texturenum[i][0] =
+						pheader->gl_fb_texturenum[i][1] =
+						pheader->gl_fb_texturenum[i][2] =
+						pheader->gl_fb_texturenum[i][3] =
+						GL_LoadTexture (name, pheader->skinwidth,
+								pheader->skinheight, ptexels, true, true, 1);
+
+					free(ptexels);
+				}
+			}
+
+
+			snprintf (name, sizeof(name), "%s_%i", loadmodel->name, i);
 			pheader->gl_texturenum[i][0] =
 			pheader->gl_texturenum[i][1] =
 			pheader->gl_texturenum[i][2] =
 			pheader->gl_texturenum[i][3] =
 				GL_LoadTexture (name, pheader->skinwidth, 
-				pheader->skinheight, (byte *)(pskintype + 1), true, false, 1);
+				pheader->skinheight, (byte *)(pskintype + 1), true, true, 1);
 			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
 		} else {
 			// animating skin group.  yuck.
+			Con_Printf("Animating Skin Group, if you get this message please notify warp@debian.org\n");
 			pskintype++;
 			pinskingroup = (daliasskingroup_t *)pskintype;
 			groupskins = LittleLong (pinskingroup->numskins);
@@ -1472,12 +1601,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			for (j=0 ; j<groupskins ; j++)
 			{
 					Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
-					if (j == 0) {
-						texels = Hunk_AllocName(s, loadname);
-						pheader->texels[i] = texels - (byte *)pheader;
-						memcpy (texels, (byte *)(pskintype), s);
-					}
-					sprintf (name, "%s_%i_%i", loadmodel->name, i,j);
+					snprintf (name, sizeof(name), "%s_%i_%i", loadmodel->name, i,j);
 					pheader->gl_texturenum[i][j&3] = 
 						GL_LoadTexture (name, pheader->skinwidth, 
 						pheader->skinheight, (byte *)(pskintype), true, false, 1);
@@ -1492,6 +1616,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 
 	return (void *)pskintype;
 }
+
 
 //=========================================================================
 
@@ -1511,7 +1636,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasframetype_t	*pframetype;
 	daliasskintype_t	*pskintype;
 	int					start, end, total;
-	
+
 	start = Hunk_LowMark ();
 
 	pinmodel = (mdl_t *)buffer;
@@ -1695,7 +1820,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->left = origin[0];
 	pspriteframe->right = width + origin[0];
 
-	sprintf (name, "%s_%i", loadmodel->name, framenum);
+	snprintf (name, sizeof(name), "%s_%i", loadmodel->name, framenum);
 	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true, 1);
 
 	return (void *)((byte *)pinframe + sizeof (dspriteframe_t) + size);
