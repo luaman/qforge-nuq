@@ -73,12 +73,8 @@ HWND 		mainwindow;
 
 int modestate; // fixme: just to avoid cross-comp. errors - remove later
                                                         
-// The original defaults
-//#define    BASEWIDTH    320
-//#define    BASEHEIGHT   200
-// Much better for high resolution displays
-#define    BASEWIDTH    (320*2)
-#define    BASEHEIGHT   (200*2)
+#define    BASEWIDTH    320
+#define    BASEHEIGHT   200
 
 int    VGA_width, VGA_height, VGA_rowbytes, VGA_bufferrowbytes = 0;
 byte    *VGA_pagebase;
