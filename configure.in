@@ -848,30 +848,15 @@ dnl Set $prefix and $exec_prefix to $ac_default_prefix if they are not set
 test "x$prefix" = xNONE && prefix=$ac_default_prefix
 test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
 
-AC_ARG_WITH(newstyle,
-[  --with-newstyle         compile with defaults a bit different than those
-                          used by Id Software (does not affect gameplay)],
-	newstyle=$withval, newstyle=auto
-)
-AC_MSG_CHECKING([configuration style])
-if test "x$newstyle" = xyes -o "x$newstyle" = "x"; then
-	AC_MSG_RESULT([new style])
-	AC_DEFINE(NEWSTYLE)
-	AC_DEFINE(BASEGAME, "base")
-	default_globalconf="/etc/$PACKAGE.conf"
-	eval foo="$datadir"
-	default_sharepath="$foo/games/quakeforge"
-	default_userpath="~/.quakeforge"
-else
-	AC_MSG_RESULT([old style (id Software defaults)])
-	AC_DEFINE(BASEGAME, "id1")
-	if test "x$SYSTYPE" = xWIN32; then
-		default_globalconf="%WINDIR%/$PACKAGE.conf"
-	else
-		default_globalconf="/etc/$PACKAGE.conf"
-	fi
+if test "x$SYSTYPE" = xWIN32; then
+	default_globalconf="~/${PACKAGE}.conf"
 	default_sharepath="."
 	default_userpath="."
+else
+	default_globalconf="/etc/${PACKAGE}.conf"
+	eval foo="$datadir"
+	default_sharepath="$foo/games/$PACKAGE"
+	default_userpath="~/.$PACKAGE"
 fi
 
 AC_ARG_WITH(global-cfg,
