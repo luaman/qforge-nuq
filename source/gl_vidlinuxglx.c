@@ -68,7 +68,7 @@ unsigned short	d_8to16table[256];
 unsigned		d_8to24table[256];
 unsigned char	d_15to8table[65536];
 
-cvar_t	vid_mode = {"vid_mode","0",false};
+cvar_t	*vid_mode;
  
 static qboolean        mouse_avail;
 static qboolean        mouse_active;
@@ -104,7 +104,7 @@ int		texture_extension_number = 1;
 
 float		gldepthmin, gldepthmax;
 
-cvar_t	gl_ztrick = {"gl_ztrick","1"};
+cvar_t	*gl_ztrick;
 
 const char *gl_vendor;
 const char *gl_renderer;
@@ -627,8 +627,6 @@ GL_BeginRendering
 */
 void GL_BeginRendering (int *x, int *y, int *width, int *height)
 {
-	extern cvar_t gl_clear;
-
 	*x = *y = 0;
 	*width = scr_width;
 	*height = scr_height;
@@ -753,11 +751,11 @@ void VID_Init(unsigned char *palette)
 	int MajorVersion, MinorVersion;
 	int actualWidth, actualHeight;
 
-	Cvar_RegisterVariable (&vid_mode);
+	vid_mode = Cvar_Get("vid_mode", "0", CVAR_NONE, "None");
 	Cvar_RegisterVariable (&in_mouse);
 	Cvar_RegisterVariable (&in_dgamouse);
-	Cvar_RegisterVariable (&m_filter);
-	Cvar_RegisterVariable (&gl_ztrick);
+	m_filter = Cvar_Get("m_filter", "0", CVAR_ARCHIVE, "None");
+	gl_ztrick = Cvar_Get("gl_ztrick", "1", CVAR_NONE, "None");
 	
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
@@ -964,7 +962,7 @@ void IN_MouseMove (usercmd_t *cmd)
 	if (!mouse_avail)
 		return;
    
-	if (m_filter.value)
+	if (m_filter->value)
 	{
 		mx = (mx + old_mouse_x) * 0.5;
 		my = (my + old_mouse_y) * 0.5;
@@ -972,21 +970,21 @@ void IN_MouseMove (usercmd_t *cmd)
 	old_mouse_x = mx;
 	old_mouse_y = my;
 
-	mx *= sensitivity.value;
-	my *= sensitivity.value;
+	mx *= sensitivity->value;
+	my *= sensitivity->value;
 
 // add mouse X/Y movement to cmd
-	if ( (in_strafe.state & 1) || (lookstrafe.value && (in_mlook.state & 1) ))
-		cmd->sidemove += m_side.value * mx;
+	if ( (in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1) ))
+		cmd->sidemove += m_side->value * mx;
 	else
-		cl.viewangles[YAW] -= m_yaw.value * mx;
+		cl.viewangles[YAW] -= m_yaw->value * mx;
 	
 	if (in_mlook.state & 1)
 		V_StopPitchDrift ();
 		
 	if ( (in_mlook.state & 1) && !(in_strafe.state & 1))
 	{
-		cl.viewangles[PITCH] += m_pitch.value * my;
+		cl.viewangles[PITCH] += m_pitch->value * my;
 		if (cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
 		if (cl.viewangles[PITCH] < -70)
@@ -995,9 +993,9 @@ void IN_MouseMove (usercmd_t *cmd)
 	else
 	{
 		if ((in_strafe.state & 1) && noclip_anglehack)
-			cmd->upmove -= m_forward.value * my;
+			cmd->upmove -= m_forward->value * my;
 		else
-			cmd->forwardmove -= m_forward.value * my;
+			cmd->forwardmove -= m_forward->value * my;
 	}
 	mx = my = 0;
 }

@@ -48,7 +48,7 @@
 #include "quakedef.h"
 #include "d_local.h"
 
-cvar_t		m_filter = {"m_filter","0", true};
+cvar_t	*m_filter;
 
 qboolean        mouse_avail;
 int             mouse_buttons=3;
@@ -159,6 +159,11 @@ static PIXEL24 st2d_8to24table[256];
 static int shiftmask_fl=0;
 static long r_shift,g_shift,b_shift;
 static unsigned long r_mask,g_mask,b_mask;
+
+void
+VID_InitCvars(void)
+{
+}
 
 void shiftmask_init()
 {
@@ -1199,7 +1204,7 @@ char *Sys_ConsoleInput (void)
 
 void IN_Init (void)
 {
-	Cvar_RegisterVariable (&m_filter);
+	m_filter = Cvar_Get("m_filter", "0", CVAR_ARCHIVE, "None");
 	if ( COM_CheckParm ("-nomouse") )
 		return;
 	mouse_x = mouse_y = 0.0;
@@ -1232,7 +1237,7 @@ void IN_Move (usercmd_t *cmd)
 	if (!mouse_avail)
 		return;
    
-	if (m_filter.value) {
+	if (m_filter->value) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
@@ -1240,27 +1245,27 @@ void IN_Move (usercmd_t *cmd)
 	old_mouse_x = mouse_x;
 	old_mouse_y = mouse_y;
    
-	mouse_x *= sensitivity.value;
-	mouse_y *= sensitivity.value;
+	mouse_x *= sensitivity->value;
+	mouse_y *= sensitivity->value;
    
-	if ( (in_strafe.state & 1) || (lookstrafe.value && (in_mlook.state & 1) ))
-		cmd->sidemove += m_side.value * mouse_x;
+	if ( (in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1) ))
+		cmd->sidemove += m_side->value * mouse_x;
 	else
-		cl.viewangles[YAW] -= m_yaw.value * mouse_x;
+		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 	if (in_mlook.state & 1)
 		V_StopPitchDrift ();
    
 	if ( (in_mlook.state & 1) && !(in_strafe.state & 1)) {
-		cl.viewangles[PITCH] += m_pitch.value * mouse_y;
+		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
 		if (cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
 		if (cl.viewangles[PITCH] < -70)
 			cl.viewangles[PITCH] = -70;
 	} else {
 		if ((in_strafe.state & 1) && noclip_anglehack)
-			cmd->upmove -= m_forward.value * mouse_y;
+			cmd->upmove -= m_forward->value * mouse_y;
 		else
-			cmd->forwardmove -= m_forward.value * mouse_y;
+			cmd->forwardmove -= m_forward->value * mouse_y;
 	}
 	mouse_x = mouse_y = 0.0;
 }

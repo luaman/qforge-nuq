@@ -65,32 +65,32 @@ jmp_buf 	host_abortserver;
 byte		*host_basepal;
 byte		*host_colormap;
 
-cvar_t	host_framerate = {"host_framerate","0"};	// set for slow motion
-cvar_t	host_speeds = {"host_speeds","0"};			// set for running times
+cvar_t	*host_framerate;
+cvar_t	*host_speeds;
 
-cvar_t	sys_ticrate = {"sys_ticrate","0.05"};
-cvar_t	serverprofile = {"serverprofile","0"};
+cvar_t	*sys_ticrate;
+cvar_t	*serverprofile;
 
-cvar_t	fraglimit = {"fraglimit","0",false,true};
-cvar_t	timelimit = {"timelimit","0",false,true};
-cvar_t	teamplay = {"teamplay","0",false,true};
+cvar_t	*fraglimit;
+cvar_t	*timelimit;
+cvar_t	*teamplay;
 
-cvar_t	samelevel = {"samelevel","0"};
-cvar_t	noexit = {"noexit","0",false,true};
+cvar_t	*samelevel;
+cvar_t	*noexit;
 
 #ifdef QUAKE2
-cvar_t	developer = {"developer","1"};	// should be 0 for release!
+cvar_t	*developer;
 #else
-cvar_t	developer = {"developer","0"};
+cvar_t	*developer;
 #endif
 
-cvar_t	skill = {"skill","1"};						// 0 - 3
-cvar_t	deathmatch = {"deathmatch","0"};			// 0, 1, or 2
-cvar_t	coop = {"coop","0"};			// 0 or 1
+cvar_t	*skill;
+cvar_t	*deathmatch;
+cvar_t	*coop;
 
-cvar_t	pausable = {"pausable","1"};
+cvar_t	*pausable;
 
-cvar_t	temp1 = {"temp1","0"};
+cvar_t	*temp1;
 
 
 /*
@@ -206,9 +206,9 @@ void	Host_FindMaxClients (void)
 	svs.clients = Hunk_AllocName (svs.maxclientslimit*sizeof(client_t), "clients");
 
 	if (svs.maxclients > 1)
-		Cvar_SetValue ("deathmatch", 1.0);
+		Cvar_SetValue(deathmatch, 1.0);
 	else
-		Cvar_SetValue ("deathmatch", 0.0);
+		Cvar_SetValue(deathmatch, 0.0);
 }
 
 
@@ -221,25 +221,25 @@ void Host_InitLocal (void)
 {
 	Host_InitCommands ();
 	
-	Cvar_RegisterVariable (&host_framerate);
-	Cvar_RegisterVariable (&host_speeds);
+	host_framerate = Cvar_Get("host_framerate", "0", CVAR_NONE, "set for slow motion");
+	host_speeds = Cvar_Get("host_speeds", "0", CVAR_NONE, "set for running times");
 
-	Cvar_RegisterVariable (&sys_ticrate);
-	Cvar_RegisterVariable (&serverprofile);
+	sys_ticrate = Cvar_Get("sys_ticrate", "0.05", CVAR_NONE, "None");
+	serverprofile = Cvar_Get("serverprofile", "0", CVAR_NONE, "None");
 
-	Cvar_RegisterVariable (&fraglimit);
-	Cvar_RegisterVariable (&timelimit);
-	Cvar_RegisterVariable (&teamplay);
-	Cvar_RegisterVariable (&samelevel);
-	Cvar_RegisterVariable (&noexit);
-	Cvar_RegisterVariable (&skill);
-	Cvar_RegisterVariable (&developer);
-	Cvar_RegisterVariable (&deathmatch);
-	Cvar_RegisterVariable (&coop);
+	fraglimit = Cvar_Get("fraglimit", "0", CVAR_SERVERINFO, "None");
+	timelimit = Cvar_Get("timelimit", "0", CVAR_SERVERINFO, "None");
+	teamplay = Cvar_Get("teamplay", "0", CVAR_SERVERINFO, "None");
+	samelevel = Cvar_Get("samelevel", "0", CVAR_NONE, "None");
+	noexit = Cvar_Get("noexit", "0", CVAR_SERVERINFO, "None");
+	skill = Cvar_Get("skill", "1", CVAR_NONE, "0 - 3");
+	developer = Cvar_Get("developer", "0", CVAR_NONE, "should be 0 for release!");
+	deathmatch = Cvar_Get("deathmatch", "0", CVAR_NONE, "0, 1, or 2");
+	coop = Cvar_Get("coop", "0", CVAR_NONE, "0 or 1");
 
-	Cvar_RegisterVariable (&pausable);
+	pausable = Cvar_Get("pausable", "1", CVAR_NONE, "None");
 
-	Cvar_RegisterVariable (&temp1);
+	temp1 = Cvar_Get("temp1", "0", CVAR_NONE, "None");
 
 	Host_FindMaxClients ();
 	
@@ -519,8 +519,8 @@ qboolean Host_FilterTime (float time)
 	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
 
-	if (host_framerate.value > 0)
-		host_frametime = host_framerate.value;
+	if (host_framerate->value > 0)
+		host_frametime = host_framerate->value;
 	else
 	{	// don't allow really long or short frames
 		if (host_frametime > 0.1)
@@ -705,12 +705,12 @@ void _Host_Frame (float time)
 	}
 
 // update video
-	if (host_speeds.value)
+	if (host_speeds->value)
 		time1 = Sys_DoubleTime ();
 		
 	SCR_UpdateScreen ();
 
-	if (host_speeds.value)
+	if (host_speeds->value)
 		time2 = Sys_DoubleTime ();
 		
 // update audio
@@ -724,7 +724,7 @@ void _Host_Frame (float time)
 	
 	CDAudio_Update();
 
-	if (host_speeds.value)
+	if (host_speeds->value)
 	{
 		pass1 = (time1 - time3)*1000;
 		time3 = Sys_DoubleTime ();
@@ -744,7 +744,7 @@ void Host_Frame (float time)
 	static int		timecount;
 	int		i, c, m;
 
-	if (!serverprofile.value)
+	if (!serverprofile->value)
 	{
 		_Host_Frame (time);
 		return;
@@ -857,18 +857,24 @@ void Host_Init (quakeparms_t *parms)
 	host_parms = *parms;
 
 	if (parms->memsize < minimum_memory)
-		Sys_Error ("Only %4.1f megs of memory available, can't execute game", parms->memsize / (float)0x100000);
+		Sys_Error ("Only %4.1fMB of memory available, can't execute game", parms->memsize / (float)0x100000);
 
 	com_argc = parms->argc;
 	com_argv = parms->argv;
 
 	Memory_Init (parms->membase, parms->memsize);
 	Cbuf_Init ();
-	Cmd_Init ();	
+	Cmd_Init ();
+	Cvar_Init ();
+
+	CL_InitCvars ();
+	SCR_InitCvars ();
+	VID_InitCvars ();
+	COM_Init (parms->basedir);
+
 	V_Init ();
 	Chase_Init ();
 	Host_InitVCR (parms);
-	COM_Init (parms->basedir);
 	Host_InitLocal ();
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();
@@ -893,32 +899,18 @@ void Host_Init (quakeparms_t *parms)
 		if (!host_colormap)
 			Sys_Error ("Couldn't load gfx/colormap.lmp");
 
-#ifndef _WIN32 // on non win32, mouse comes before video for security reasons
-		IN_Init ();
-#endif
 		VID_Init (host_basepal);
+		IN_Init ();
 
 		Draw_Init ();
 		SCR_Init ();
 		R_Init ();
-#ifndef	_WIN32
-	// on Win32, sound initialization has to come before video initialization, so we
-	// can put up a popup if the sound hardware is in use
-		S_Init ();
-#else
 
-#ifdef	GLQUAKE
-	// FIXME: doesn't use the new one-window approach yet
 		S_Init ();
-#endif
 
-#endif	// _WIN32
 		CDAudio_Init ();
 		Sbar_Init ();
 		CL_Init ();
-#ifdef _WIN32 // on non win32, mouse comes before video for security reasons
-		IN_Init ();
-#endif
 	}
 
 	Cbuf_InsertText ("exec quake.rc\n");

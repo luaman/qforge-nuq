@@ -246,35 +246,35 @@ typedef struct
 //
 // cvars
 //
-extern	cvar_t	cl_name;
-extern	cvar_t	cl_color;
+extern	cvar_t	*cl_name;
+extern	cvar_t	*cl_color;
 
-extern	cvar_t	cl_upspeed;
-extern	cvar_t	cl_forwardspeed;
-extern	cvar_t	cl_backspeed;
-extern	cvar_t	cl_sidespeed;
+extern	cvar_t	*cl_upspeed;
+extern	cvar_t	*cl_forwardspeed;
+extern	cvar_t	*cl_backspeed;
+extern	cvar_t	*cl_sidespeed;
 
-extern	cvar_t	cl_movespeedkey;
+extern	cvar_t	*cl_movespeedkey;
 
-extern	cvar_t	cl_yawspeed;
-extern	cvar_t	cl_pitchspeed;
+extern	cvar_t	*cl_yawspeed;
+extern	cvar_t	*cl_pitchspeed;
 
-extern	cvar_t	cl_anglespeedkey;
+extern	cvar_t	*cl_anglespeedkey;
 
-extern	cvar_t	cl_autofire;
+extern	cvar_t	*cl_autofire;
 
-extern	cvar_t	cl_shownet;
-extern	cvar_t	cl_nolerp;
+extern	cvar_t	*cl_shownet;
+extern	cvar_t	*cl_nolerp;
 
-extern	cvar_t	cl_pitchdriftspeed;
-extern	cvar_t	lookspring;
-extern	cvar_t	lookstrafe;
-extern	cvar_t	sensitivity;
+extern	cvar_t	*cl_pitchdriftspeed;
+extern	cvar_t	*lookspring;
+extern	cvar_t	*lookstrafe;
+extern	cvar_t	*sensitivity;
 
-extern	cvar_t	m_pitch;
-extern	cvar_t	m_yaw;
-extern	cvar_t	m_forward;
-extern	cvar_t	m_side;
+extern	cvar_t	*m_pitch;
+extern	cvar_t	*m_yaw;
+extern	cvar_t	*m_forward;
+extern	cvar_t	*m_side;
 
 
 #define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc
@@ -300,6 +300,7 @@ dlight_t *CL_AllocDlight (int key);
 void	CL_DecayLights (void);
 
 void CL_Init (void);
+void CL_InitCvars (void);
 
 void CL_EstablishConnection (char *host);
 void CL_Signon1 (void);

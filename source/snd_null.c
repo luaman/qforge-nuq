@@ -32,8 +32,8 @@
 
 #include "quakedef.h"
 
-cvar_t bgmvolume = {"bgmvolume", "1", true};
-cvar_t volume = {"volume", "0.7", true};
+cvar_t	*bgmvolume;
+cvar_t	*volume;
 
  
 void S_Init (void)

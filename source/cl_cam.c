@@ -34,10 +34,10 @@
 
 qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, trace_t *trace);
 
-cvar_t	chase_back = {"chase_back", "100"};
-cvar_t	chase_up = {"chase_up", "16"};
-cvar_t	chase_right = {"chase_right", "0"};
-cvar_t	chase_active = {"chase_active", "0"};
+cvar_t	*chase_back;
+cvar_t	*chase_up;
+cvar_t	*chase_right;
+cvar_t	*chase_active;
 
 vec3_t	chase_pos;
 vec3_t	chase_angles;
@@ -48,10 +48,10 @@ vec3_t	chase_dest_angles;
 
 void Chase_Init (void)
 {
-	Cvar_RegisterVariable (&chase_back);
-	Cvar_RegisterVariable (&chase_up);
-	Cvar_RegisterVariable (&chase_right);
-	Cvar_RegisterVariable (&chase_active);
+	chase_back = Cvar_Get("chase_back", "100", CVAR_NONE, "None");
+	chase_up = Cvar_Get("chase_up", "16", CVAR_NONE, "None");
+	chase_right = Cvar_Get("chase_right", "0", CVAR_NONE, "None");
+	chase_active = Cvar_Get("chase_active", "0", CVAR_NONE, "None");
 }
 
 void Chase_Reset (void)
@@ -84,9 +84,9 @@ void Chase_Update (void)
 	// calc exact destination
 	for (i=0 ; i<3 ; i++)
 		chase_dest[i] = r_refdef.vieworg[i] 
-		- forward[i]*chase_back.value
-		- right[i]*chase_right.value;
-	chase_dest[2] = r_refdef.vieworg[2] + chase_up.value;
+		- forward[i]*chase_back->value
+		- right[i]*chase_right->value;
+	chase_dest[2] = r_refdef.vieworg[2] + chase_up->value;
 
 	// find the spot the player is looking at
 	VectorMA (r_refdef.vieworg, 4096, forward, dest);

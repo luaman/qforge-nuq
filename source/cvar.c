@@ -1,9 +1,12 @@
 /*
 	cvar.c
 
-	@description@
+	dynamic variable tracking
 
 	Copyright (C) 1996-1997  Id Software, Inc.
+	Copyright (C) 1999,2000  Nelson Rush.
+	Copyright (C) 1999,2000  contributors of the QuakeForge project
+	Please see the file "AUTHORS" for a list of contributors
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -27,13 +30,27 @@
 */
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
 #endif
 
+//#include "commdef.h"
 #include "quakedef.h"
+#include "cvar.h"
+#include "console.h"
+//#include "qargs.h"
+#include "cmd.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 cvar_t	*cvar_vars;
 char	*cvar_null_string = "";
+extern cvar_t  *developer;
+cvar_alias_t *calias_vars;
 
 /*
 ============
@@ -43,12 +60,48 @@ Cvar_FindVar
 cvar_t *Cvar_FindVar (char *var_name)
 {
 	cvar_t	*var;
-	
+
 	for (var=cvar_vars ; var ; var=var->next)
-		if (!Q_strcmp (var_name, var->name))
+		if (!strcmp (var_name, var->name))
 			return var;
 
 	return NULL;
+}
+
+cvar_t *Cvar_FindAlias (char *alias_name)
+{
+	cvar_alias_t	*alias;
+
+	for (alias = calias_vars ; alias ; alias=alias->next)
+		if (!strcmp (alias_name, alias->name))
+			return alias->cvar;
+	return NULL;
+}
+
+void Cvar_Alias_Get (char *name, cvar_t *cvar)
+{
+	cvar_alias_t	*alias;
+	cvar_t		*var;
+
+	if (Cmd_Exists (name))
+	{
+		Con_Printf ("CAlias_Get: %s is a command\n", name);
+		return;
+	}
+	if (Cvar_FindVar(name))
+	{
+		Con_Printf ("CAlias_Get: tried to alias used cvar name %s\n",name);
+		return;
+	}
+	var = Cvar_FindAlias(name);	
+	if (!var)
+	{
+		alias = (cvar_alias_t *) calloc(1, sizeof(cvar_alias_t));
+		alias->next = calias_vars;
+		calias_vars = alias;
+		alias->name = strdup(name);	
+		alias->cvar = cvar;
+	}
 }
 
 /*
@@ -59,11 +112,13 @@ Cvar_VariableValue
 float	Cvar_VariableValue (char *var_name)
 {
 	cvar_t	*var;
-	
+
 	var = Cvar_FindVar (var_name);
 	if (!var)
+		var = Cvar_FindAlias(var_name);
+	if (!var)
 		return 0;
-	return Q_atof (var->string);
+	return atof (var->string);
 }
 
 
@@ -75,8 +130,10 @@ Cvar_VariableString
 char *Cvar_VariableString (char *var_name)
 {
 	cvar_t *var;
-	
+
 	var = Cvar_FindVar (var_name);
+	if (!var)
+		var = Cvar_FindAlias(var_name);
 	if (!var)
 		return cvar_null_string;
 	return var->string;
@@ -91,17 +148,33 @@ Cvar_CompleteVariable
 char *Cvar_CompleteVariable (char *partial)
 {
 	cvar_t		*cvar;
-	int			len;
-	
-	len = Q_strlen(partial);
-	
+	cvar_alias_t	*alias;
+	int		len;
+
+	len = strlen(partial);
+
 	if (!len)
 		return NULL;
-		
-// check functions
+
+	// check exact match
 	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
-		if (!Q_strncmp (partial,cvar->name, len))
+		if (!strcasecmp (partial,cvar->name))
 			return cvar->name;
+	
+	// check aliases too :)
+	for (alias=calias_vars ; alias ; alias=alias->next)
+		if (!strcasecmp (partial, alias->name))
+			return alias->name;
+
+	// check partial match
+	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
+		if (!strncasecmp (partial,cvar->name, len))
+			return cvar->name;
+
+	// check aliases too :)
+	for (alias=calias_vars ; alias ; alias=alias->next)
+		if (!strncasecmp (partial, alias->name, len))
+			return alias->name;
 
 	return NULL;
 }
@@ -112,27 +185,49 @@ char *Cvar_CompleteVariable (char *partial)
 Cvar_Set
 ============
 */
-void Cvar_Set (char *var_name, char *value)
+void Cvar_Set (cvar_t *var, char *value)
 {
-	cvar_t	*var;
-	qboolean changed;
-	
-	var = Cvar_FindVar (var_name);
-	if (!var)
-	{	// there is an error in C code if this happens
-		Con_Printf ("Cvar_Set: variable %s not found\n", var_name);
-		return;
-	}
+	int changed;
 
-	changed = Q_strcmp(var->string, value);
-	
-	Z_Free (var->string);	// free the old value string
-	
-	var->string = Z_Malloc (Q_strlen(value)+1);
-	Q_strcpy (var->string, value);
-	var->value = Q_atof (var->string);
-	if (var->server && changed)
-	{
+	if (!var)
+		return;
+	if(var->flags&CVAR_ROM)
+		return;
+
+	changed = strcmp(var->string, value);
+	free (var->string);   // free the old value string
+
+	var->string = malloc (strlen(value)+1);
+	strcpy (var->string, value);
+	var->value = atof (var->string);
+
+	if ((var->flags & CVAR_SERVERINFO) && changed) {
+		if (sv.active)
+			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name, var->string);
+	}
+}
+
+
+/*
+	Cvar_SetROM
+
+	doesn't check for CVAR_ROM flag
+*/
+void Cvar_SetROM (cvar_t *var, char *value)
+{
+	int changed;
+
+	if (!var)
+		return;
+
+	changed = strcmp(var->string, value);
+	free (var->string);   // free the old value string
+
+	var->string = malloc (strlen(value)+1);
+	strcpy (var->string, value);
+	var->value = atof (var->string);
+
+	if ((var->flags & CVAR_SERVERINFO) && changed) {
 		if (sv.active)
 			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name, var->string);
 	}
@@ -143,49 +238,18 @@ void Cvar_Set (char *var_name, char *value)
 Cvar_SetValue
 ============
 */
-void Cvar_SetValue (char *var_name, float value)
+// 1999-09-07 weird cvar zeros fix by Maddes
+void Cvar_SetValue (cvar_t *var_name, float value)
 {
 	char	val[32];
-	
-	sprintf (val, "%f",value);
+	int		i;
+
+	sprintf (val, "%f", value);
+	for (i=strlen(val)-1 ; i>0 && val[i]=='0' && val[i-1]!='.' ; i--)
+	{
+		val[i] = 0;
+	}
 	Cvar_Set (var_name, val);
-}
-
-
-/*
-============
-Cvar_RegisterVariable
-
-Adds a freestanding variable to the variable list.
-============
-*/
-void Cvar_RegisterVariable (cvar_t *variable)
-{
-	char	*oldstr;
-	
-// first check to see if it has allready been defined
-	if (Cvar_FindVar (variable->name))
-	{
-		Con_Printf ("Can't register variable %s, allready defined\n", variable->name);
-		return;
-	}
-	
-// check for overlap with a command
-	if (Cmd_Exists (variable->name))
-	{
-		Con_Printf ("Cvar_RegisterVariable: %s is a command\n", variable->name);
-		return;
-	}
-		
-// copy the value off, because future sets will Z_Free it
-	oldstr = variable->string;
-	variable->string = Z_Malloc (Q_strlen(variable->string)+1);	
-	Q_strcpy (variable->string, oldstr);
-	variable->value = Q_atof (variable->string);
-	
-// link the variable in
-	variable->next = cvar_vars;
-	cvar_vars = variable;
 }
 
 /*
@@ -202,8 +266,10 @@ qboolean	Cvar_Command (void)
 // check variables
 	v = Cvar_FindVar (Cmd_Argv(0));
 	if (!v)
+		v = Cvar_FindAlias (Cmd_Argv(0));
+	if (!v)
 		return false;
-		
+
 // perform a variable print or set
 	if (Cmd_Argc() == 1)
 	{
@@ -211,7 +277,7 @@ qboolean	Cvar_Command (void)
 		return true;
 	}
 
-	Cvar_Set (v->name, Cmd_Argv(1));
+	Cvar_Set (v, Cmd_Argv(1));
 	return true;
 }
 
@@ -227,9 +293,210 @@ with the archive flag set to true.
 void Cvar_WriteVariables (FILE *f)
 {
 	cvar_t	*var;
-	
+
 	for (var = cvar_vars ; var ; var = var->next)
-		if (var->archive)
+		if (var->flags&CVAR_ARCHIVE)
 			fprintf (f, "%s \"%s\"\n", var->name, var->string);
+}
+
+void Cvar_Set_f(void)
+{
+	cvar_t *var;
+	char *value;
+	char *var_name;
+
+	if (Cmd_Argc() != 3)
+	{
+		Con_Printf ("usage: set <cvar> <value>\n");
+		return;
+	}
+	var_name = Cmd_Argv (1);
+	value = Cmd_Argv (2);
+	var = Cvar_FindVar (var_name);
+	if (!var)
+		var = Cvar_FindAlias (var_name);
+	if (var)
+	{
+		Cvar_Set (var, value);
+	}
+	else
+	{
+		var = Cvar_Get (var_name, value, CVAR_USER_CREATED|CVAR_HEAP,
+				"User created cvar");
+	}
+}
+
+void Cvar_Setrom_f(void)
+{
+	cvar_t *var;
+	char *value;
+	char *var_name;
+
+	if (Cmd_Argc() != 2)
+	{
+		Con_Printf ("usage: setrom <cvar>\n");
+		return;
+	}
+	var_name = Cmd_Argv (1);
+	value = Cmd_Argv (2);
+	var = Cvar_FindVar (var_name);
+	if (!var)
+		var = Cvar_FindAlias (var_name);
+	if (var)
+	{
+		var->flags |= CVAR_ROM;
+	}
+	else
+	{
+		Con_Printf ("cvar %s not found\n", var_name);
+	}
+}
+
+void Cvar_Toggle_f (void)
+{
+	cvar_t *var;
+
+	if (Cmd_Argc() != 2)
+	{
+		Con_Printf ("toggle <cvar> : toggle a cvar on/off\n");
+		return;
+	}
+
+	var = Cvar_FindVar (Cmd_Argv(1));
+	if (!var)
+		var = Cvar_FindAlias(Cmd_Argv(1));
+	if (!var)
+	{
+		Con_Printf ("Unknown variable \"%s\"\n", Cmd_Argv(1));
+		return;
+	}
+
+	Cvar_Set (var, var->value ? "0" : "1");
+}
+
+void Cvar_Help_f (void)
+{
+	char	*var_name;
+	cvar_t	*var;
+
+	if (Cmd_Argc() != 2)
+	{
+		Con_Printf ("usage: help <cvar>\n");
+		return;
+	}
+
+	var_name = Cmd_Argv (1);
+	var = Cvar_FindVar (var_name);
+	if (!var)
+		var = Cvar_FindAlias (var_name);
+	if (var)
+	{
+		Con_Printf ("%s\n",var->description);
+		return;
+	}
+	Con_Printf ("variable not found\n");
+}
+
+void Cvar_CvarList_f (void)
+{
+	cvar_t	*var;
+	int i;
+
+	for (var=cvar_vars, i=0 ; var ; var=var->next, i++)
+	{
+		Con_Printf("%s\n",var->name);
+	}
+	Con_Printf ("------------\n%d variables\n", i);
+}
+
+void Cvar_Init()
+{
+	developer = Cvar_Get ("developer","0",0,"None");
+
+	Cmd_AddCommand ("set", Cvar_Set_f);
+	Cmd_AddCommand ("setrom", Cvar_Setrom_f);
+	Cmd_AddCommand ("toggle", Cvar_Toggle_f);
+	Cmd_AddCommand ("help",Cvar_Help_f);
+	Cmd_AddCommand ("cvarlist",Cvar_CvarList_f);
+}
+
+void Cvar_Shutdown (void)
+{
+	cvar_t	*var,*next;
+	cvar_alias_t	*alias,*nextalias;
+
+	// Free cvars
+	var = cvar_vars;
+	while(var)
+	{
+		next = var->next;
+		free(var->description);
+		free(var->string);
+		free(var->name);
+		free(var);
+		var = next;
+	}
+	// Free aliases 
+	alias = calias_vars;
+	while(alias)
+	{
+		nextalias = alias->next;
+		free(alias->name);
+		free(alias);
+		alias = nextalias;
+	}
+}
+
+
+cvar_t *Cvar_Get(char *name, char *string, int cvarflags, char *description)
+{
+
+	cvar_t		*v;
+
+	if (Cmd_Exists (name))
+	{
+		Con_Printf ("Cvar_Get: %s is a command\n",name);
+		return NULL;
+	}
+	v = Cvar_FindVar(name);
+	if (!v)
+	{
+		v = (cvar_t *) calloc(1, sizeof(cvar_t));
+		// Cvar doesn't exist, so we create it
+		v->next = cvar_vars;
+		cvar_vars = v;
+		v->name = strdup(name);
+		v->string = malloc (strlen(string)+1);
+		strcpy (v->string, string);
+		v->flags = cvarflags;
+		v->description = strdup(description);
+		v->value = atof (v->string);
+		return v;
+	}
+	// Cvar does exist, so we update the flags and return.
+	v->flags ^= CVAR_USER_CREATED;
+	v->flags ^= CVAR_HEAP;
+	v->flags |= cvarflags;
+	if (!strcmp (v->description,"User created cvar"))
+	{	
+		// Set with the real description
+		free(v->description);
+		v->description = strdup (description);
+	}
+	return v;
+}
+
+/*
+	Cvar_SetFlags
+
+	sets a Cvar's flags simply and easily
+*/
+void
+Cvar_SetFlags (cvar_t *var, int cvarflags)
+{
+	if (var == NULL)
+		return;
+
+	var->flags = cvarflags;
 }
 

@@ -34,3 +34,5 @@ void CDAudio_Pause(void);
 void CDAudio_Resume(void);
 void CDAudio_Shutdown(void);
 void CDAudio_Update(void);
+
+extern	cvar_t	*bgmvolume;

@@ -86,6 +86,11 @@ static void	*vid_surfcache;
 
 int	VID_options_items = 1;
 
+void
+VID_InitCvars(void)
+{
+}
+
 static void
 do_scale8(int xsize, int ysize, uint8 *dest, uint8 *src)
 {

@@ -53,8 +53,8 @@
 #define MIN_WIDTH 320
 #define MIN_HEIGHT 200
 
-cvar_t		_windowed_mouse = {"_windowed_mouse","0", true};
-cvar_t		m_filter = {"m_filter","0", true};
+cvar_t	*_windowed_mouse;
+cvar_t	*m_filter;
 float old_windowed_mouse;
 
 // The following X property format is defined in Motif 1.1's
@@ -156,7 +156,7 @@ static int verbose=1;
 
 static byte current_palette[768];
 
-cvar_t pixel_multiply = {"pixel_multiply", "2", true};
+cvar_t	*pixel_multiply;
 int current_pixel_multiply = 2;
 
 #define PM(a) (int)((current_pixel_multiply)?((a)*current_pixel_multiply):(a))
@@ -168,6 +168,11 @@ static XilImage				display_image  = NULL;
 static XilImage				quake_image  = NULL;
 static int				use_mt = 0;
 static int				count_frames = 0;
+
+void
+VID_InitCvars(void)
+{
+}
 
 /*
 ================
@@ -236,7 +241,7 @@ qboolean CheckPixelMultiply (void)
 	unsigned int value_mask;
 	int old_pixel;
 
-	if ((m = (int)pixel_multiply.value) != current_pixel_multiply) {
+	if ((m = (int)pixel_multiply->value) != current_pixel_multiply) {
 		if (m < 1)
 			m = 1;
 		if (m > 4)
@@ -244,7 +249,7 @@ qboolean CheckPixelMultiply (void)
 
 		old_pixel = current_pixel_multiply;
 		current_pixel_multiply = m;
-		Cvar_SetValue("pixel_multiply", m);
+		Cvar_SetValue(pixel_multiply, m);
 		
 		if(XGetWindowAttributes(x_disp, x_win, & wattr) == 0)
 			return true; // ???
@@ -400,7 +405,7 @@ void	VID_Init (unsigned char *palette)
 	
 	Cmd_AddCommand ("gamma", VID_Gamma_f);
 
-	Cvar_RegisterVariable (&pixel_multiply);
+	pixel_multiply = Cvar_Get("pixel_multiply", "2", CVAR_ARCHIVE, "None");
 
 	if (pipe(render_pipeline) < 0) 
 		Sys_Error("VID_Init: pipe");
@@ -515,9 +520,9 @@ void	VID_Init (unsigned char *palette)
 //
 // See if we're going to do pixel multiply
 //
-	if (pixel_multiply.value < 1 || pixel_multiply.value > 4)
-		Cvar_SetValue("pixel_multiply", 2);
-	current_pixel_multiply = pixel_multiply.value;
+	if (pixel_multiply->value < 1 || pixel_multiply->value > 4)
+		Cvar_SetValue(pixel_multiply, 2);
+	current_pixel_multiply = pixel_multiply->value;
 
 	w = 320*current_pixel_multiply; // minimum width
 	h = 200*current_pixel_multiply; // minimum height
@@ -847,7 +852,7 @@ void GetEvent(void)
 
 		case MotionNotify:
 
-			if (_windowed_mouse.value) {
+			if (_windowed_mouse->value) {
 				mouse_x = (float) ((int)x_event.xmotion.x - (int)(vid.width/2));
 				mouse_y = (float) ((int)x_event.xmotion.y - (int)(vid.height/2));
 	//printf("m: x=%d,y=%d, mx=%3.2f,my=%3.2f\n", 
@@ -915,10 +920,10 @@ void GetEvent(void)
 #endif
 	}
 
-	if (old_windowed_mouse != _windowed_mouse.value) {
-		old_windowed_mouse = _windowed_mouse.value;
+	if (old_windowed_mouse != _windowed_mouse->value) {
+		old_windowed_mouse = _windowed_mouse->value;
 
-		if (!_windowed_mouse.value) {
+		if (!_windowed_mouse->value) {
 			/* ungrab the pointer */
 			XUngrabPointer(x_disp,CurrentTime);
 		} else {
@@ -1223,8 +1228,8 @@ void Sys_SendKeyEvents(void)
 
 void IN_Init (void)
 {
-	Cvar_RegisterVariable (&_windowed_mouse);
-	Cvar_RegisterVariable (&m_filter);
+	_windowed_mouse = Cvar_Get("_windowed_mouse", "0", CVAR_ARCHIVE, "None");
+	m_filter = Cvar_Get("m_filter", "0", CVAR_ARCHIVE, "None");
    if ( COM_CheckParm ("-nomouse") )
      return;
    mouse_x = mouse_y = 0.0;
@@ -1257,7 +1262,7 @@ void IN_Move (usercmd_t *cmd)
 	if (!mouse_avail)
 		return;
    
-	if (m_filter.value) {
+	if (m_filter->value) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
@@ -1265,27 +1270,27 @@ void IN_Move (usercmd_t *cmd)
 	old_mouse_x = mouse_x;
 	old_mouse_y = mouse_y;
    
-	mouse_x *= sensitivity.value;
-	mouse_y *= sensitivity.value;
+	mouse_x *= sensitivity->value;
+	mouse_y *= sensitivity->value;
    
-	if ( (in_strafe.state & 1) || (lookstrafe.value && (in_mlook.state & 1) ))
-		cmd->sidemove += m_side.value * mouse_x;
+	if ( (in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1) ))
+		cmd->sidemove += m_side->value * mouse_x;
 	else
-		cl.viewangles[YAW] -= m_yaw.value * mouse_x;
+		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 	if (in_mlook.state & 1)
 		V_StopPitchDrift ();
    
 	if ( (in_mlook.state & 1) && !(in_strafe.state & 1)) {
-		cl.viewangles[PITCH] += m_pitch.value * mouse_y;
+		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
 		if (cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
 		if (cl.viewangles[PITCH] < -70)
 			cl.viewangles[PITCH] = -70;
 	} else {
 		if ((in_strafe.state & 1) && noclip_anglehack)
-			cmd->upmove -= m_forward.value * mouse_y;
+			cmd->upmove -= m_forward->value * mouse_y;
 		else
-			cmd->forwardmove -= m_forward.value * mouse_y;
+			cmd->forwardmove -= m_forward->value * mouse_y;
 	}
 	mouse_x = mouse_y = 0.0;
 }

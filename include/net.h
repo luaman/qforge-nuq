@@ -215,7 +215,6 @@ extern int			DEFAULTnet_hostport;
 extern int			net_hostport;
 
 extern int net_driverlevel;
-extern cvar_t		hostname;
 extern char			playername[];
 extern int			playercolor;
 
@@ -343,3 +342,13 @@ extern	qboolean	slistSilent;
 extern	qboolean	slistLocal;
 
 void NET_Slist_f (void);
+
+extern cvar_t	*config_com_port;
+extern cvar_t	*config_com_irq;
+extern cvar_t	*config_com_baud;
+extern cvar_t	*config_com_modem;
+extern cvar_t	*config_modem_dialtype;
+extern cvar_t	*config_modem_clear;
+extern cvar_t	*config_modem_init;
+extern cvar_t	*config_modem_hangup;
+extern cvar_t	*hostname;

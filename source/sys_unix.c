@@ -59,9 +59,9 @@ int nostdout = 0;
 char *basedir = ".";
 char *cachedir = "/tmp";
 
-cvar_t  sys_linerefresh = {"sys_linerefresh","0"};// set for entity display
-cvar_t	timestamps = {"timestamps", "0"};			// Set for timestamps
-cvar_t	timeformat = {"timeformat", "[%b %e %X] "}; // Default timestamp format
+cvar_t	*sys_linerefresh;
+cvar_t	*timestamps;
+cvar_t	*timeformat;
 
 /* The translation table between the graphical font and plain ASCII  --KB */
 static char qfont_table[256] = {
@@ -272,10 +272,10 @@ Sys_Printf (char *fmt, ...)
     if (nostdout)
         return;
 
-	if (timestamps.value && timeformat.string) {
+	if (timestamps && timeformat && timestamps->value && timeformat->string) {
 		mytime = time (NULL);
 		local = localtime (&mytime);
-		strftime (stamp, sizeof (stamp), timeformat.string, local);
+		strftime (stamp, sizeof (stamp), timeformat->string, local);
 		
 		snprintf (final, sizeof (final), "%s%s", stamp, start);
 	} else {
@@ -466,15 +466,15 @@ int main (int c, char **v)
 
         if (cls.state == ca_dedicated)
         {   // play vcrfiles at max speed
-            if (time < sys_ticrate.value && (vcrFile == -1 || recording) )
+            if (time < sys_ticrate->value && (vcrFile == -1 || recording) )
             {
 				usleep(1);
                 continue;       // not time to run a server only tic yet
             }
-            time = sys_ticrate.value;
+            time = sys_ticrate->value;
         }
 
-        if (time > sys_ticrate.value*2)
+        if (time > sys_ticrate->value*2)
             oldtime = newtime;
         else
             oldtime += time;
@@ -482,8 +482,8 @@ int main (int c, char **v)
         Host_Frame (time);
 
 // graphic debugging aids
-        if (sys_linerefresh.value)
-            Sys_LineRefresh ();
+//	if (sys_linerefresh->value)
+//		Sys_LineRefresh ();
     }
 
 }

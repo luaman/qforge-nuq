@@ -182,43 +182,42 @@ R_Init
 void R_Init (void)
 {	
 	extern byte *hunk_base;
-	extern cvar_t gl_finish;
 
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);	
 	Cmd_AddCommand ("envmap", R_Envmap_f);	
 	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);	
 
-	Cvar_RegisterVariable (&r_norefresh);
-	Cvar_RegisterVariable (&r_lightmap);
-	Cvar_RegisterVariable (&r_fullbright);
-	Cvar_RegisterVariable (&r_drawentities);
-	Cvar_RegisterVariable (&r_drawviewmodel);
-	Cvar_RegisterVariable (&r_shadows);
-	Cvar_RegisterVariable (&r_mirroralpha);
-	Cvar_RegisterVariable (&r_wateralpha);
-	Cvar_RegisterVariable (&r_dynamic);
-	Cvar_RegisterVariable (&r_novis);
-	Cvar_RegisterVariable (&r_speeds);
+	r_norefresh = Cvar_Get("r_norefresh", "0", CVAR_NONE, "None");
+	r_lightmap = Cvar_Get("r_lightmap", "0", CVAR_NONE, "None");
+	r_fullbright = Cvar_Get("r_fullbright", "0", CVAR_NONE, "None");
+	r_drawentities = Cvar_Get("r_drawentities", "1", CVAR_NONE, "None");
+	r_drawviewmodel = Cvar_Get("r_drawviewmodel", "1", CVAR_NONE, "None");
+	r_shadows = Cvar_Get("r_shadows", "0", CVAR_NONE, "None");
+	r_mirroralpha = Cvar_Get("r_mirroralpha", "1", CVAR_NONE, "None");
+	r_wateralpha = Cvar_Get("r_wateralpha", "1", CVAR_NONE, "None");
+	r_dynamic = Cvar_Get("r_dynamic", "1", CVAR_NONE, "None");
+	r_novis = Cvar_Get("r_novis", "0", CVAR_NONE, "None");
+	r_speeds = Cvar_Get("r_speeds", "0", CVAR_NONE, "None");
 
-	Cvar_RegisterVariable (&gl_finish);
-	Cvar_RegisterVariable (&gl_clear);
-	Cvar_RegisterVariable (&gl_texsort);
+	gl_finish = Cvar_Get("gl_finish", "0", CVAR_NONE, "None");
+	gl_clear = Cvar_Get("gl_clear", "0", CVAR_NONE, "None");
+	gl_texsort = Cvar_Get("gl_texsort", "1", CVAR_NONE, "None");
 
  	if (gl_mtexable)
-		Cvar_SetValue ("gl_texsort", 0.0);
+		Cvar_SetValue(gl_texsort, 0.0);
 
-	Cvar_RegisterVariable (&gl_cull);
-	Cvar_RegisterVariable (&gl_smoothmodels);
-	Cvar_RegisterVariable (&gl_affinemodels);
-	Cvar_RegisterVariable (&gl_polyblend);
-	Cvar_RegisterVariable (&gl_flashblend);
-	Cvar_RegisterVariable (&gl_playermip);
-	Cvar_RegisterVariable (&gl_nocolors);
+	gl_cull = Cvar_Get("gl_cull", "1", CVAR_NONE, "None");
+	gl_smoothmodels = Cvar_Get("gl_smoothmodels", "1", CVAR_NONE, "None");
+	gl_affinemodels = Cvar_Get("gl_affinemodels", "0", CVAR_NONE, "None");
+	gl_polyblend = Cvar_Get("gl_polyblend", "1", CVAR_NONE, "None");
+	gl_flashblend = Cvar_Get("gl_flashblend", "1", CVAR_NONE, "None");
+	gl_playermip = Cvar_Get("gl_playermip", "0", CVAR_NONE, "None");
+	gl_nocolors = Cvar_Get("gl_nocolors", "0", CVAR_NONE, "None");
 
-	Cvar_RegisterVariable (&gl_keeptjunctions);
-	Cvar_RegisterVariable (&gl_reporttjunctions);
+	gl_keeptjunctions = Cvar_Get("gl_keeptjunctions", "0", CVAR_NONE, "None");
+	gl_reporttjunctions = Cvar_Get("gl_reporttjunctions", "0", CVAR_NONE, "None");
 
-	Cvar_RegisterVariable (&gl_doubleeyes);
+	gl_doubleeyes = Cvar_Get("gl_doubleeys", "1", CVAR_NONE, "None");
 
 	R_InitParticles ();
 	R_InitParticleTexture ();
@@ -317,12 +316,12 @@ void R_TranslatePlayerSkin (int playernum)
 	// don't mipmap these, because it takes too long
 	GL_Upload8 (translated, paliashdr->skinwidth, paliashdr->skinheight, false, false, true);
 #else
-	scaled_width = gl_max_size.value < 512 ? gl_max_size.value : 512;
-	scaled_height = gl_max_size.value < 256 ? gl_max_size.value : 256;
+	scaled_width = gl_max_size->value < 512 ? gl_max_size->value : 512;
+	scaled_height = gl_max_size->value < 256 ? gl_max_size->value : 256;
 
 	// allow users to crunch sizes down even more if they want
-	scaled_width >>= (int)gl_playermip.value;
-	scaled_height >>= (int)gl_playermip.value;
+	scaled_width >>= (int)gl_playermip->value;
+	scaled_height >>= (int)gl_playermip->value;
 
 	if (VID_Is8bit()) { // 8bit texture upload
 		byte *out2;

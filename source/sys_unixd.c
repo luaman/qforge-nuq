@@ -57,9 +57,9 @@ int nostdout = 0;
 char *basedir = ".";
 char *cachedir = "/tmp";
 
-cvar_t  sys_linerefresh = {"sys_linerefresh","0"};	// set for entity display
-cvar_t	timestamps = {"timestamps", "0"};			// Set for timestamps
-cvar_t	timeformat = {"timeformat", "[%b %e %X] "}; // Default timestamp format
+cvar_t	*sys_linerefresh;
+cvar_t	*timestamps;
+cvar_t	*timeformat;
 
 /* The translation table between the graphical font and plain ASCII  --KB */
 static char qfont_table[256] = {
@@ -257,10 +257,10 @@ Sys_Printf (char *fmt, ...)
     if (nostdout)
         return;
 
-	if (timestamps && timeformat && timeformat.string && timestamps.value) {
+	if (timestamps && timeformat && timestamps && timeformat && timeformat->string && timestamps->value) {
 		mytime = time (NULL);
 		local = localtime (&mytime);
-		strftime (stamp, sizeof (stamp), timeformat.string, local);
+		strftime (stamp, sizeof (stamp), timeformat->string, local);
 		
 		snprintf (final, sizeof (final), "%s%s", stamp, start);
 	} else {
@@ -442,7 +442,7 @@ main (int argc, char *argv[])
 	
 	while (1) { 	// Main message loop
 		time = Sys_DoubleTime ();
-		if ((time - oldtime) < sys_ticrate.value {
+		if ((time - oldtime) < sys_ticrate->value {
 			usleep(1);
 			continue;
 		}

@@ -114,7 +114,7 @@ HDC		maindc;
 
 glvert_t glv;
 
-cvar_t	gl_ztrick = {"gl_ztrick","1"};
+cvar_t	*gl_ztrick;
 
 HWND WINAPI InitializeWindow (HINSTANCE hInstance, int nCmdShow);
 
@@ -151,21 +151,26 @@ qboolean gl_mtexable = false;
 
 //====================================
 
-cvar_t		vid_mode = {"vid_mode","0", false};
+cvar_t	*vid_mode;
 // Note that 0 is MODE_WINDOWED
-cvar_t		_vid_default_mode = {"_vid_default_mode","0", true};
+cvar_t	*_vid_default_mode;
 // Note that 3 is MODE_FULLSCREEN_DEFAULT
-cvar_t		_vid_default_mode_win = {"_vid_default_mode_win","3", true};
-cvar_t		vid_wait = {"vid_wait","0"};
-cvar_t		vid_nopageflip = {"vid_nopageflip","0", true};
-cvar_t		_vid_wait_override = {"_vid_wait_override", "0", true};
-cvar_t		vid_config_x = {"vid_config_x","800", true};
-cvar_t		vid_config_y = {"vid_config_y","600", true};
-cvar_t		vid_stretch_by_2 = {"vid_stretch_by_2","1", true};
-cvar_t		_windowed_mouse = {"_windowed_mouse","1", true};
+cvar_t	*_vid_default_mode_win;
+cvar_t	*vid_wait;
+cvar_t	*vid_nopageflip;
+cvar_t	*_vid_wait_override;
+cvar_t	*vid_config_x;
+cvar_t	*vid_config_y;
+cvar_t	*vid_stretch_by_2;
+cvar_t	*_windowed_mouse;
 
 int			window_center_x, window_center_y, window_x, window_y, window_width, window_height;
 RECT		window_rect;
+
+void
+VID_InitCvars(void)
+{
+}
 
 // direct draw software compatability stuff
 
@@ -409,7 +414,7 @@ int VID_SetMode (int modenum, unsigned char *palette)
 	// Set either the fullscreen or windowed mode
 	if (modelist[modenum].type == MS_WINDOWED)
 	{
-		if (_windowed_mouse.value && key_dest == key_game)
+		if (_windowed_mouse->value && key_dest == key_game)
 		{
 			stat = VID_SetWindowedMode(modenum);
 			IN_ActivateMouse ();
@@ -454,7 +459,7 @@ int VID_SetMode (int modenum, unsigned char *palette)
 	SetForegroundWindow (mainwindow);
 	VID_SetPalette (palette);
 	vid_modenum = modenum;
-	Cvar_SetValue ("vid_mode", (float)vid_modenum);
+	Cvar_SetValue(vid_mode, (float)vid_modenum);
 
 	while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
 	{
@@ -669,8 +674,6 @@ GL_BeginRendering
 */
 void GL_BeginRendering (int *x, int *y, int *width, int *height)
 {
-	extern cvar_t gl_clear;
-
 	*x = *y = 0;
 	*width = WindowRect.right - WindowRect.left;
 	*height = WindowRect.bottom - WindowRect.top;
@@ -690,7 +693,7 @@ void GL_EndRendering (void)
 // handle the mouse state when windowed if that's changed
 	if (modestate == MS_WINDOWED)
 	{
-		if (!_windowed_mouse.value) {
+		if (!_windowed_mouse->value) {
 			if (windowed_mouse)	{
 				IN_DeactivateMouse ();
 				IN_ShowMouse ();
@@ -996,7 +999,7 @@ void AppActivate(BOOL fActive, BOOL minimize)
 				ShowWindow(mainwindow, SW_SHOWNORMAL);
 			}
 		}
-		else if ((modestate == MS_WINDOWED) && _windowed_mouse.value && key_dest == key_game)
+		else if ((modestate == MS_WINDOWED) && _windowed_mouse->value && key_dest == key_game)
 		{
 			IN_ActivateMouse ();
 			IN_HideMouse ();
@@ -1014,7 +1017,7 @@ void AppActivate(BOOL fActive, BOOL minimize)
 				vid_wassuspended = true;
 			}
 		}
-		else if ((modestate == MS_WINDOWED) && _windowed_mouse.value)
+		else if ((modestate == MS_WINDOWED) && _windowed_mouse->value)
 		{
 			IN_DeactivateMouse ();
 			IN_ShowMouse ();
@@ -1592,17 +1595,17 @@ void	VID_Init (unsigned char *palette)
 
 	memset(&devmode, 0, sizeof(devmode));
 
-	Cvar_RegisterVariable (&vid_mode);
-	Cvar_RegisterVariable (&vid_wait);
-	Cvar_RegisterVariable (&vid_nopageflip);
-	Cvar_RegisterVariable (&_vid_wait_override);
-	Cvar_RegisterVariable (&_vid_default_mode);
-	Cvar_RegisterVariable (&_vid_default_mode_win);
-	Cvar_RegisterVariable (&vid_config_x);
-	Cvar_RegisterVariable (&vid_config_y);
-	Cvar_RegisterVariable (&vid_stretch_by_2);
-	Cvar_RegisterVariable (&_windowed_mouse);
-	Cvar_RegisterVariable (&gl_ztrick);
+	vid_mode = Cvar_Get("vid_mode", "0", CVAR_NONE, "None");
+	vid_wait = Cvar_Get("vid_wait", "0", CVAR_NONE, "None");
+	vid_nopageflip = Cvar_Get("vid_nopageflip", "0", CVAR_ARCHIVE, "None");
+	_vid_wait_override = Cvar_Get("_vid_wait_override", "0", CVAR_ARCHIVE, "None");
+	_vid_default_mode = Cvar_Get("_vid_default_mode", "0", CVAR_ARCHIVE, "None");
+	_vid_default_mode_win = Cvar_Get("_vid_default_mode_win", "3", CVAR_ARCHIVE, "None");
+	vid_config_x = Cvar_Get("vid_config_x", "800", CVAR_ARCHIVE, "None");
+	vid_config_y = Cvar_Get("vid_config_y", "600", CVAR_ARCHIVE, "None");
+	vid_stretch_by_2 = Cvar_Get("vid_stretch_by_2", "1", CVAR_ARCHIVE, "None");
+	_windowed_mouse = Cvar_Get("_windowed_mouse", "0", CVAR_ARCHIVE, "None");
+	gl_ztrick = Cvar_Get("gl_ztrick", "1", CVAR_NONE, "None");
 
 	Cmd_AddCommand ("vid_nummodes", VID_NumModes_f);
 	Cmd_AddCommand ("vid_describecurrentmode", VID_DescribeCurrentMode_f);

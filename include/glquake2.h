@@ -189,26 +189,26 @@ extern	int	playertextures;
 
 extern	int	skytexturenum;		// index in cl.loadmodel, not gl texture object
 
-extern	cvar_t	r_drawentities;
-extern	cvar_t	r_drawworld;
-extern	cvar_t	r_drawviewmodel;
-extern	cvar_t	r_speeds;
-extern	cvar_t	r_waterwarp;
-extern	cvar_t	r_fullbright;
-extern	cvar_t	r_lightmap;
-extern	cvar_t	r_shadows;
-extern	cvar_t	r_dynamic;
+extern	cvar_t	*r_drawentities;
+extern	cvar_t	*r_drawworld;
+extern	cvar_t	*r_drawviewmodel;
+extern	cvar_t	*r_speeds;
+extern	cvar_t	*r_waterwarp;
+extern	cvar_t	*r_fullbright;
+extern	cvar_t	*r_lightmap;
+extern	cvar_t	*r_shadows;
+extern	cvar_t	*r_dynamic;
 
-extern	cvar_t	gl_clear;
-extern	cvar_t	gl_cull;
-extern	cvar_t	gl_poly;
-extern	cvar_t	gl_texsort;
-extern	cvar_t	gl_smoothmodels;
-extern	cvar_t	gl_affinemodels;
-extern	cvar_t	gl_fogblend;
-extern	cvar_t	gl_polyblend;
-extern	cvar_t	gl_keeptjunctions;
-extern	cvar_t	gl_reporttjunctions;
+extern	cvar_t	*gl_clear;
+extern	cvar_t	*gl_cull;
+extern	cvar_t	*gl_poly;
+extern	cvar_t	*gl_texsort;
+extern	cvar_t	*gl_smoothmodels;
+extern	cvar_t	*gl_affinemodels;
+extern	cvar_t	*gl_fogblend;
+extern	cvar_t	*gl_polyblend;
+extern	cvar_t	*gl_keeptjunctions;
+extern	cvar_t	*gl_reporttjunctions;
 
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;

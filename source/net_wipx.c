@@ -35,8 +35,6 @@
 #include <wsipx.h>
 #include "net_wipx.h"
 
-extern cvar_t hostname;
-
 #define MAXHOSTNAMELEN		256
 
 static int net_acceptsocket = -1;		// socket for fielding new connections
@@ -89,7 +87,7 @@ int WIPX_Init (void)
 	if (pgethostname(buff, MAXHOSTNAMELEN) == 0)
 	{
 		// if the quake hostname isn't set, set it to the machine name
-		if (Q_strcmp(hostname.string, "UNNAMED") == 0)
+		if (Q_strcmp(hostname->string, "UNNAMED") == 0)
 		{
 			// see if it's a text IP address (well, close enough)
 			for (p = buff; *p; p++)
@@ -104,7 +102,7 @@ int WIPX_Init (void)
 						break;
 				buff[i] = 0;
 			}
-			Cvar_Set ("hostname", buff);
+			Cvar_Set(hostname, buff);
 		}
 	}
 

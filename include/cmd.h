@@ -26,6 +26,8 @@
 	$Id$
 */
 
+#ifndef __cmd_h
+#define __cmd_h
 
 //===========================================================================
 
@@ -126,3 +128,4 @@ void	Cmd_Print (char *text);
 // used by command functions to send output to either the graphics console or
 // passed as a print message to the client
 
+#endif __cmd_h
