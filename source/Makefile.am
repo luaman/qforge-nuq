@@ -1,0 +1,230 @@
+## Process this file with automake to produce Makefile.in
+#
+#	Makefile.am
+#
+#	Automake-using build system for QuakeForge
+#
+#	Copyright (C) 2000 Jeff Teunissen <deek@quakeforge.net>
+#
+#	This Makefile is free software; you can redistribute it and/or
+#	modify it under the terms of the GNU General Public License
+#	as published by the Free Software Foundation; either version 2
+#	of the License, or (at your option) any later version.
+#
+#	This program is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#	See the GNU General Public License for more details.
+#
+#	You should have received a copy of the GNU General Public License
+#	along with this program; if not, write to:
+#
+#		Free Software Foundation, Inc.
+#		59 Temple Place - Suite 330
+#		Boston, MA  02111-1307, USA
+#
+#	$Id$
+#
+
+#
+# Stuff that is common to both client and server
+#
+INCLUDES=	-I$(top_srcdir)/include $(GGI_CFLAGS) $(MGL_CFLAGS) $(SDL_CFLAGS) $(SVGA_CFLAGS) $(X_CFLAGS) $(GLX_CFLAGS) $(TDFXGL_CFLAGS)
+
+bin_PROGRAMS =	@TARGETS@
+
+EXTRA_PROGRAMS= uquake-ggi uquake-mgl uquake-sdl uquake-svga uquake-x11 \
+		uquake-3dfx uquake-glx uquake-sgl uquake-wgl
+
+noinst_LIBRARIES= libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+if ASM_ARCH
+math_ASM= 	math.S
+soft_ASM=	d_draw.S d_draw16.S d_parta.S d_polysa.S d_scana.S d_spr8.S \
+		d_varsa.S r_aclipa.S r_aliasa.S r_drawa.S r_edgea.S r_varsa.S \
+		surf16.s surf8.s
+sound_ASM=	snd_mixa.S
+common_ASM=	sys_ia32.S worlda.S $(math_ASM)
+endif
+
+common_SOURCES= crc.c common.c cvar.c cmd.c mathlib.c wad.c world.c \
+		zone.c $(common_ASM)
+
+#
+# ... System type
+#
+if SYSTYPE_WIN32
+libqfsys_a_SOURCES=	sys_win.c fnmatch.c
+else
+libqfsys_a_SOURCES=	sys_unix.c
+endif
+EXTRA_libqfsys_a_SOURCES= dirent.c fnmatch.c sys_unix.c sys_win.c
+
+#
+# ... Digital audio
+#
+if SNDTYPE_ALSA
+libqfsnd_a_SOURCES=	snd_dma.c snd_mem.c snd_mix.c snd_alsa.c $(sound_ASM)
+endif
+if SNDTYPE_MME
+libqfsnd_a_SOURCES=	snd_dma.c snd_mem.c snd_mix.c snd_mme.c $(sound_ASM)
+endif
+if SNDTYPE_OSS
+libqfsnd_a_SOURCES=	snd_dma.c snd_mem.c snd_mix.c snd_oss.c $(sound_ASM)
+endif
+if SNDTYPE_SUN
+libqfsnd_a_SOURCES=	snd_dma.c snd_mem.c snd_mix.c snd_sun.c $(sound_ASM)
+endif
+if SNDTYPE_WIN32
+libqfsnd_a_SOURCES=	snd_dma.c snd_mem.c snd_mix.c snd_win.c $(sound_ASM)
+endif
+if SNDTYPE_NULL
+libqfsnd_a_SOURCES=	snd_null.c $(sound_ASM)
+endif
+EXTRA_libqfsnd_a_SOURCES= snd_dma.c snd_mem.c snd_mix.c snd_alsa.c snd_oss.c \
+			snd_sun.c snd_win.c snd_null.c $(sound_ASM)
+
+#
+# ... CD audio
+#
+if CDTYPE_WIN32
+libqfcd_a_SOURCES=	cd_win.c
+endif
+if CDTYPE_LINUX
+libqfcd_a_SOURCES=	cd_linux.c
+endif
+if CDTYPE_NULL
+libqfcd_a_SOURCES=	cd_null.c
+endif
+EXTRA_libqfcd_a_SOURCES= cd_audio.c cd_win.c cd_linux.c cd_null.c
+
+#
+# ... Networking
+#
+libqfnet_a_SOURCES=	mdfour.c net_bsd.c net_com.c net_dgrm.c net_loop.c \
+			net_main.c net_udp.c net_vcr.c
+
+EXTRA_libqfcd_a_SOURCES=net_dos.c net_bw.c net_ipx.c net_mp.c net_ser.c \
+			net_win.c net_wins.c net_wipx.c
+
+client_LIBS=	-L. -lqfsys -lqfsnd -lqfcd -lqfnet $(SOUND_LIBS) $(NET_LIBS)
+
+client_SOURCES= cl_cam.c cl_demo.c cl_input.c cl_main.c cl_parse.c \
+		cl_tent.c console.c keys.c menu.c sbar.c view.c
+
+server_SOURCES= host.c host_cmd.c \
+		pr_cmds.c pr_edict.c pr_exec.c \
+		sv_main.c sv_move.c sv_phys.c sv_user.c
+
+common_SOURCES+= $(client_SOURCES) $(server_SOURCES)
+
+#
+# Software-rendering targets
+#
+# ... Common stuff
+#
+
+soft_SOURCES=	d_edge.c d_fill.c d_init.c d_modech.c d_part.c d_polyse.c \
+		d_scan.c d_sky.c d_sprite.c d_surf.c d_vars.c d_zpoint.c \
+		draw.c r_aclip.c r_alias.c r_bsp.c r_draw.c r_edge.c r_efrag.c \
+		r_light.c r_main.c r_misc.c r_part.c r_sky.c r_sprite.c \
+		r_surf.c r_vars.c screen.c model.c $(soft_ASM)
+
+#
+# ... GGI
+#
+ggi_SOURCES=		vid_ggi.c
+
+uquake_ggi_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(ggi_SOURCES)
+uquake_ggi_LDADD=	$(client_LIBS) $(GGI_LIBS)
+uquake_ggi_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# ... SciTech MGL
+#
+mgl_SOURCES=		vid_mgl.c in_win.c
+
+uquake_mgl_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(mgl_SOURCES)
+uquake_mgl_LDADD=	$(client_LIBS) $(MGL_LIBS)
+uquake_mgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# ... Sam Lantinga's Simple DirectMedia Layer, version 1.0 and higher
+#
+sdl_SOURCES=		vid_sdl.c
+
+uquake_sdl_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(sdl_SOURCES)
+uquake_sdl_LDADD=	$(client_LIBS) $(SDL_LIBS)
+uquake_sdl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# ... Linux SVGAlib
+#
+svga_SOURCES=		d_copy.S vid_svgalib.c
+
+uquake_svga_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(svga_SOURCES)
+uquake_svga_LDADD=	$(client_LIBS) $(SVGA_LIBS)
+uquake_svga_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# ... X11
+#
+x11_SOURCES=		vid_x11.c dga_check.c
+
+uquake_x11_SOURCES=	$(common_SOURCES) $(soft_SOURCES) $(x11_SOURCES)
+uquake_x11_LDADD=	$(client_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(X_SHM_LIB)
+uquake_x11_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+
+#
+# OpenGL-using targets
+#
+# ... Common stuff
+#
+ogl_SOURCES=	gl_draw.c gl_mesh.c gl_part.c gl_refrag.c gl_rlight.c \
+		gl_rmain.c gl_rmisc.c gl_rsurf.c gl_screen.c gl_view.c gl_warp.c
+
+#
+# ... 3Dfx Voodoo 1 and 2 SVGAlib-based console GL
+#
+tdfx_SOURCES=	vid_3dfxsvga.c in_svgalib.c
+
+uquake_3dfx_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(tdfx_SOURCES)
+uquake_3dfx_LDADD=	$(client_LIBS) $(TDFXGL_LIBS) $(SVGA_LIBS) $(DL_LIBS)
+uquake_3dfx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# ... OpenGL in X Window
+#
+glx_SOURCES=	vid_glx.c in_x11.c context_x11.c dga_check.c
+
+uquake_glx_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(glx_SOURCES)
+uquake_glx_LDADD=	$(client_LIBS) $(GLX_LIBS) $(X_PRE_LIBS) $(VIDMODE_LIBS) $(DGA_LIBS) $(X_LIBS) -lX11 $(X_EXTRA_LIBS) $(DL_LIBS)
+uquake_glx_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# ... Sam Lantinga's Simple DirectMedia Layer, version 1.1 and higher, in GL mode
+#
+sgl_SOURCES=	vid_sgl.c
+
+uquake_sgl_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(sgl_SOURCES)
+uquake_sgl_LDADD=	$(client_LIBS) $(SDL_LIBS) $(GLX_LIBS) $(DL_LIBS)
+uquake_sgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# SGI/Microsoft WGL (Windows OpenGL)
+#
+wgl_SOURCES=	vid_wgl.c
+
+uquake_wgl_SOURCES=	$(common_SOURCES) $(ogl_SOURCES) $(wgl_SOURCES)
+uquake_wgl_LDADD=	$(client_LIBS)
+uquake_wgl_DEPENDENCIES=libqfsys.a libqfsnd.a libqfcd.a libqfnet.a
+
+#
+# Stuff that doesn't get linked into an executable NEEDS to be mentioned here,
+# or it won't be distributed with 'make dist'
+#
+EXTRA_DIST=	uquake-server.mak uquake-server.dsp \
+		uquake-mgl.mak uquake-sdl.mak uquake.dsp \
+		uquake-sgl.mak uquake-wgl.mak
