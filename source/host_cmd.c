@@ -486,7 +486,7 @@ Host_Savegame_f
 void Host_Savegame_f (void)
 {
 	char	name[256];
-	FILE	*f;
+	QFile	*f;
 	int		i;
 	char	comment[SAVEGAME_COMMENT_LENGTH+1];
 
@@ -536,30 +536,30 @@ void Host_Savegame_f (void)
 	COM_DefaultExtension (name, ".sav");
 	
 	Con_Printf ("Saving game to %s...\n", name);
-	f = fopen (name, "w");
+	f = Qopen (name, "w");
 	if (!f)
 	{
 		Con_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 	
-	fprintf (f, "%i\n", SAVEGAME_VERSION);
+	Qprintf (f, "%i\n", SAVEGAME_VERSION);
 	Host_SavegameComment (comment);
-	fprintf (f, "%s\n", comment);
+	Qprintf (f, "%s\n", comment);
 	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
-		fprintf (f, "%f\n", svs.clients->spawn_parms[i]);
-	fprintf (f, "%d\n", current_skill);
-	fprintf (f, "%s\n", sv.name);
-	fprintf (f, "%f\n",sv.time);
+		Qprintf (f, "%f\n", svs.clients->spawn_parms[i]);
+	Qprintf (f, "%d\n", current_skill);
+	Qprintf (f, "%s\n", sv.name);
+	Qprintf (f, "%f\n",sv.time);
 
 // write the light styles
 
 	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
 	{
 		if (sv.lightstyles[i])
-			fprintf (f, "%s\n", sv.lightstyles[i]);
+			Qprintf (f, "%s\n", sv.lightstyles[i]);
 		else
-			fprintf (f,"m\n");
+			Qprintf (f,"m\n");
 	}
 
 
@@ -567,9 +567,9 @@ void Host_Savegame_f (void)
 	for (i=0 ; i<sv.num_edicts ; i++)
 	{
 		ED_Write (f, EDICT_NUM(i));
-		fflush (f);
+		Qflush (f);
 	}
-	fclose (f);
+	Qclose (f);
 	Con_Printf ("done.\n");
 }
 
@@ -582,7 +582,7 @@ Host_Loadgame_f
 void Host_Loadgame_f (void)
 {
 	char	name[MAX_OSPATH];
-	FILE	*f;
+	QFile	*f;
 	char	mapname[MAX_QPATH];
 	float	time, tfloat;
 	char	str[32768], *start;
@@ -590,7 +590,8 @@ void Host_Loadgame_f (void)
 	edict_t	*ent;
 	int		entnum;
 	int		version;
-	float			spawn_parms[NUM_SPAWN_PARMS];
+	float	spawn_parms[NUM_SPAWN_PARMS];
+	char	buf[100];
 
 	if (cmd_source != src_command)
 		return;
@@ -611,25 +612,30 @@ void Host_Loadgame_f (void)
 //	SCR_BeginLoadingPlaque ();
 
 	Con_Printf ("Loading game from %s...\n", name);
-	f = fopen (name, "r");
+	f = Qopen (name, "r");
 	if (!f)
 	{
 		Con_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
-	fscanf (f, "%i\n", &version);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%i\n", &version);
 	if (version != SAVEGAME_VERSION)
 	{
-		fclose (f);
+		Qclose (f);
 		Con_Printf ("Savegame is version %i, not %i\n", version, SAVEGAME_VERSION);
 		return;
 	}
-	fscanf (f, "%s\n", str);
-	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
-		fscanf (f, "%f\n", &spawn_parms[i]);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%s\n", str);
+	for (i=0 ; i<NUM_SPAWN_PARMS ; i++) {
+		Qgets(f,buf,sizeof(buf));
+		sscanf (buf, "%f\n", &spawn_parms[i]);
+	}
 // this silliness is so we can load 1.06 save files, which have float skill values
-	fscanf (f, "%f\n", &tfloat);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%f\n", &tfloat);
 	current_skill = (int)(tfloat + 0.1);
 	Cvar_SetValue(skill, (float)current_skill);
 
@@ -639,8 +645,10 @@ void Host_Loadgame_f (void)
 	Cvar_SetValue(teamplay, 0);
 #endif
 
-	fscanf (f, "%s\n",mapname);
-	fscanf (f, "%f\n",&time);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%s\n",mapname);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%f\n",&time);
 
 	CL_Disconnect_f ();
 	
@@ -661,18 +669,19 @@ void Host_Loadgame_f (void)
 
 	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
 	{
-		fscanf (f, "%s\n", str);
+		Qgets(f,buf,sizeof(buf));
+		sscanf (buf, "%s\n", str);
 		sv.lightstyles[i] = Hunk_Alloc (strlen(str)+1);
 		strcpy (sv.lightstyles[i], str);
 	}
 
 // load the edicts out of the savegame file
 	entnum = -1;		// -1 is the globals
-	while (!feof(f))
+	while (!Qeof(f))
 	{
 		for (i=0 ; i<sizeof(str)-1 ; i++)
 		{
-			r = fgetc (f);
+			r = Qgetc (f);
 			if (r == EOF || !r)
 				break;
 			str[i] = r;
@@ -715,7 +724,7 @@ void Host_Loadgame_f (void)
 	sv.num_edicts = entnum;
 	sv.time = time;
 
-	fclose (f);
+	Qclose (f);
 
 	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
 		svs.clients->spawn_parms[i] = spawn_parms[i];
@@ -731,7 +740,7 @@ void Host_Loadgame_f (void)
 void SaveGamestate()
 {
 	char	name[256];
-	FILE	*f;
+	QFile	*f;
 	int		i;
 	char	comment[SAVEGAME_COMMENT_LENGTH+1];
 	edict_t	*ent;
@@ -746,23 +755,23 @@ void SaveGamestate()
 		return;
 	}
 	
-	fprintf (f, "%i\n", SAVEGAME_VERSION);
+	Qprintf (f, "%i\n", SAVEGAME_VERSION);
 	Host_SavegameComment (comment);
-	fprintf (f, "%s\n", comment);
+	Qprintf (f, "%s\n", comment);
 //	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
-//		fprintf (f, "%f\n", svs.clients->spawn_parms[i]);
-	fprintf (f, "%f\n", skill->value);
-	fprintf (f, "%s\n", sv.name);
-	fprintf (f, "%f\n", sv.time);
+//		Qprintf (f, "%f\n", svs.clients->spawn_parms[i]);
+	Qprintf (f, "%f\n", skill->value);
+	Qprintf (f, "%s\n", sv.name);
+	Qprintf (f, "%f\n", sv.time);
 
 // write the light styles
 
 	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
 	{
 		if (sv.lightstyles[i])
-			fprintf (f, "%s\n", sv.lightstyles[i]);
+			Qprintf (f, "%s\n", sv.lightstyles[i]);
 		else
-			fprintf (f,"m\n");
+			Qprintf (f,"m\n");
 	}
 
 
@@ -771,18 +780,18 @@ void SaveGamestate()
 		ent = EDICT_NUM(i);
 		if ((int)ent->v.flags & FL_ARCHIVE_OVERRIDE)
 			continue;
-		fprintf (f, "%i\n",i);
+		Qprintf (f, "%i\n",i);
 		ED_Write (f, ent);
-		fflush (f);
+		Qflush (f);
 	}
-	fclose (f);
+	Qclose (f);
 	Con_Printf ("done.\n");
 }
 
 int LoadGamestate(char *level, char *startspot)
 {
 	char	name[MAX_OSPATH];
-	FILE	*f;
+	QFile	*f;
 	char	mapname[MAX_QPATH];
 	float	time, sk;
 	char	str[32768], *start;
@@ -802,21 +811,26 @@ int LoadGamestate(char *level, char *startspot)
 		return -1;
 	}
 
-	fscanf (f, "%i\n", &version);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%i\n", &version);
 	if (version != SAVEGAME_VERSION)
 	{
-		fclose (f);
+		Qclose (f);
 		Con_Printf ("Savegame is version %i, not %i\n", version, SAVEGAME_VERSION);
 		return -1;
 	}
-	fscanf (f, "%s\n", str);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%s\n", str);
 //	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
 //		fscanf (f, "%f\n", &spawn_parms[i]);
-	fscanf (f, "%f\n", &sk);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%f\n", &sk);
 	Cvar_SetValue(skill, sk);
 
-	fscanf (f, "%s\n",mapname);
-	fscanf (f, "%f\n",&time);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%s\n",mapname);
+	Qgets(f,buf,sizeof(buf));
+	sscanf (buf, "%f\n",&time);
 
 	SV_SpawnServer (mapname, startspot);
 
@@ -829,7 +843,8 @@ int LoadGamestate(char *level, char *startspot)
 // load the light styles
 	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
 	{
-		fscanf (f, "%s\n", str);
+		Qgets(f,buf,sizeof(buf));
+		sscanf (buf, "%s\n", str);
 		sv.lightstyles[i] = Hunk_Alloc (strlen(str)+1);
 		strcpy (sv.lightstyles[i], str);
 	}
@@ -837,7 +852,8 @@ int LoadGamestate(char *level, char *startspot)
 // load the edicts out of the savegame file
 	while (!feof(f))
 	{
-		fscanf (f, "%i\n",&entnum);
+		Qgets(f,buf,sizeof(buf));
+		sscanf (buf, "%i\n",&entnum);
 		for (i=0 ; i<sizeof(str)-1 ; i++)
 		{
 			r = fgetc (f);
@@ -874,7 +890,7 @@ int LoadGamestate(char *level, char *startspot)
 	
 //	sv.num_edicts = entnum;
 	sv.time = time;
-	fclose (f);
+	Qclose (f);
 
 //	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
 //		svs.clients->spawn_parms[i] = spawn_parms[i];

@@ -127,7 +127,7 @@ typedef struct
 typedef struct pack_s
 {
 	char	filename[MAX_OSPATH];
-	FILE	*handle;
+	QFile	*handle;
 	int		numfiles;
 	packfile_t	*files;
 } pack_t;
@@ -192,15 +192,15 @@ COM_FileBase (char *in, char *out)
 	COM_filelength
 */
 int
-COM_filelength (FILE *f)
+COM_filelength (QFile *f)
 {
 	int		pos;
 	int		end;
 
-	pos = ftell (f);
-	fseek (f, 0, SEEK_END);
-	end = ftell (f);
-	fseek (f, pos, SEEK_SET);
+	pos = Qtell (f);
+	Qseek (f, 0, SEEK_END);
+	end = Qtell (f);
+	Qseek (f, pos, SEEK_SET);
 
 	return end;
 }
@@ -209,11 +209,11 @@ COM_filelength (FILE *f)
 	COM_FileOpenRead
 */
 int
-COM_FileOpenRead (char *path, FILE **hndl)
+COM_FileOpenRead (char *path, QFile **hndl)
 {
-	FILE	*f;
+	QFile	*f;
 
-	f = fopen(path, "rb");
+	f = Qopen(path, "rb");
 	if (!f)
 	{
 		*hndl = NULL;
@@ -291,22 +291,22 @@ COM_Maplist_f ( void )
 void
 COM_WriteFile ( char *filename, void *data, int len )
 {
-	FILE	*f;
+	QFile	*f;
 	char	name[MAX_OSPATH];
 
 	snprintf(name, sizeof(name), "%s/%s", com_gamedir, filename);
 
-	f = fopen (name, "wb");
+	f = Qopen (name, "wb");
 	if (!f) {
 		Sys_mkdir(com_gamedir);
-		f = fopen (name, "wb");
+		f = Qopen (name, "wb");
 		if (!f)
 			Sys_Error ("Error opening %s", filename);
 	}
 
 	Sys_Printf ("COM_WriteFile: %s\n", name);
-	fwrite (data, 1, len, f);
-	fclose (f);
+	Qwrite (f, data, len);
+	Qclose (f);
 }
 
 
@@ -344,13 +344,13 @@ COM_CreatePath ( char *path )
 void
 COM_CopyFile (char *netpath, char *cachepath)
 {
-	FILE	*in, *out;
+	QFile	*in, *out;
 	int		remaining, count;
 	char	buf[4096];
 
 	remaining = COM_FileOpenRead (netpath, &in);
 	COM_CreatePath (cachepath);	// create directories up to the cache file
-	out = fopen(cachepath, "wb");
+	out = Qopen(cachepath, "wb");
 	if (!out)
 		Sys_Error ("Error opening %s", cachepath);
 
@@ -360,19 +360,19 @@ COM_CopyFile (char *netpath, char *cachepath)
 			count = remaining;
 		else
 			count = sizeof(buf);
-		fread  (buf, 1, count, in);
-		fwrite (buf, 1, count, out);
+		Qread  (in, buf, count);
+		Qwrite (out, buf, count);
 		remaining -= count;
 	}
 
-	fclose (in);
-	fclose (out);
+	Qclose (in);
+	Qclose (out);
 }
 
 /*
 	COM_OpenRead
 */
-FILE *
+QFile *
 COM_OpenRead (const char *path, int offs, int len)
 {
 	int fd=open(path,O_RDONLY);
@@ -403,7 +403,7 @@ COM_OpenRead (const char *path, int offs, int len)
 #ifdef WIN32
 	setmode(fd,O_BINARY);
 #endif
-        return fdopen(fd,"rb");
+        return Qdopen(fd,"rb");
 	return 0;
 }
 
@@ -416,7 +416,7 @@ int file_from_pak; // global indicating file came from pack file ZOID
 	Sets com_filesize and one of handle or file
 */
 int
-COM_FOpenFile (char *filename, FILE **gzfile)
+COM_FOpenFile (char *filename, QFile **gzfile)
 {
 	searchpath_t	*search;
 	char		netpath[MAX_OSPATH];
@@ -492,7 +492,7 @@ int		loadsize;
 byte *
 COM_LoadFile (char *path, int usehunk)
 {
-	FILE	*h;
+	QFile	*h;
 	byte	*buf;
 	char	base[32];
 	int		len;
@@ -532,8 +532,8 @@ COM_LoadFile (char *path, int usehunk)
 	//if (!is_server) {
 		Draw_BeginDisc();
 	//}
-	fread (buf, 1, len, h);
-	fclose (h);
+	Qread (h, buf, len);
+	Qclose (h);
 	//if (!is_server) {
 		Draw_EndDisc();
 	//}
@@ -589,13 +589,13 @@ COM_LoadPackFile (char *packfile)
 	packfile_t		*newfiles;
 	int			numpackfiles;
 	pack_t			*pack;
-	FILE			*packhandle;
+	QFile			*packhandle;
 	dpackfile_t		info[MAX_FILES_IN_PACK];
 
 	if (COM_FileOpenRead (packfile, &packhandle) == -1)
 		return NULL;
 
-	fread (&header, 1, sizeof(header), packhandle);
+	Qread (packhandle, &header, sizeof(header));
 	if (header.id[0] != 'P' || header.id[1] != 'A'
 	|| header.id[2] != 'C' || header.id[3] != 'K')
 		Sys_Error ("%s is not a packfile", packfile);
@@ -609,8 +609,8 @@ COM_LoadPackFile (char *packfile)
 
 	newfiles = calloc (1, numpackfiles * sizeof(packfile_t));
 
-	fseek (packhandle, header.dirofs, SEEK_SET);
-	fread (info, 1, header.dirlen, packhandle);
+	Qseek (packhandle, header.dirofs, SEEK_SET);
+	Qread (packhandle, info, header.dirlen);
 
 
 // parse the directory
@@ -822,7 +822,7 @@ COM_Gamedir (char *dir)
 	{
 		if (com_searchpaths->pack)
 		{
-			fclose (com_searchpaths->pack->handle);
+			Qclose (com_searchpaths->pack->handle);
 			free (com_searchpaths->pack->files);
 			free (com_searchpaths->pack);
 		}

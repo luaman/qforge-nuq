@@ -52,7 +52,7 @@ being registered.
 */
 void COM_CheckRegistered (void)
 {
-	FILE	*h;
+	QFile	*h;
 	unsigned short	check[128];
 
 	COM_FOpenFile("gfx/pop.lmp", &h);
@@ -60,8 +60,8 @@ void COM_CheckRegistered (void)
 
 	if (h) {
 		static_registered = 1;
-		fread (check, 1, sizeof(check), h);
-		fclose (h);
+		Qread (h, check, sizeof(check));
+		Qclose (h);
 	}
 
 	if (static_registered) {

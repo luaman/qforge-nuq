@@ -21,7 +21,7 @@
 
 static gib_module_t *gibmodules;
 
-void GIB_Module_Load (char *name, FILE *f)
+void GIB_Module_Load (char *name, QFile *f)
 {
 	char line[1024];
 	gib_module_t *newmod;	
@@ -31,7 +31,7 @@ void GIB_Module_Load (char *name, FILE *f)
 
 	newmod = GIB_Create_Module(name);
 
-	while (fgets(line, 1024, f))
+	while (Qgets(f, line, 1024))
 	{
 		if (strncmp("sub", line, 3) == 0)
 		{
@@ -78,14 +78,14 @@ gib_sub_t *GIB_Create_Sub(gib_module_t *mod, char *name)
 	return new;
 }
 
-void GIB_Read_Sub(gib_sub_t *sub, FILE *f)
+void GIB_Read_Sub(gib_sub_t *sub, QFile *f)
 {
 	char line[1024];
 	fpos_t begin;
 	int sublen = 0;
 	int insub = 0;
 	
-	while (fgets(line, 1024, f))
+	while (Qgets(f, line, 1024))
 	{
 		if (strncmp("}}", line, 2) == 0 && insub == 1)
 		{
@@ -98,14 +98,14 @@ void GIB_Read_Sub(gib_sub_t *sub, FILE *f)
 		}
 		if (strncmp("{{", line, 2) == 0)
 		{
-			fgetpos(f, &begin);
+			Qgetpos(f, &begin);
 			insub = 1;
 		}
 	}
 	
 	sub->code = malloc(sublen + 1);
-	fsetpos(f, &begin);
-	fread(sub->code, 1, sublen, f);
+	Qsetpos(f, &begin);
+	Qread(f, sub->code, sublen);
 	sub->code[sublen] = 0;
 	Con_Printf("Loaded sub %s\n", sub->name);
 }

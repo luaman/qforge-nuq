@@ -286,24 +286,24 @@ typedef struct _TargaHeader {
 TargaHeader		targa_header;
 byte			*targa_rgba;
 
-int fgetLittleShort (FILE *f)
+int fgetLittleShort (QFile *f)
 {
 	byte	b1, b2;
 
-	b1 = fgetc(f);
-	b2 = fgetc(f);
+	b1 = Qgetc(f);
+	b2 = Qgetc(f);
 
 	return (short)(b1 + b2*256);
 }
 
-int fgetLittleLong (FILE *f)
+int fgetLittleLong (QFile *f)
 {
 	byte	b1, b2, b3, b4;
 
-	b1 = fgetc(f);
-	b2 = fgetc(f);
-	b3 = fgetc(f);
-	b4 = fgetc(f);
+	b1 = Qgetc(f);
+	b2 = Qgetc(f);
+	b3 = Qgetc(f);
+	b4 = Qgetc(f);
 
 	return b1 + (b2<<8) + (b3<<16) + (b4<<24);
 }
@@ -314,26 +314,26 @@ int fgetLittleLong (FILE *f)
 LoadTGA
 =============
 */
-void LoadTGA (FILE *fin)
+void LoadTGA (QFile *fin)
 {
 	int				columns, rows, numPixels;
 	byte			*pixbuf;
 	int				row, column;
 	unsigned char	red = 0, green = 0, blue = 0, alphabyte = 0;
 
-	targa_header.id_length = fgetc(fin);
-	targa_header.colormap_type = fgetc(fin);
-	targa_header.image_type = fgetc(fin);
+	targa_header.id_length = Qgetc(fin);
+	targa_header.colormap_type = Qgetc(fin);
+	targa_header.image_type = Qgetc(fin);
 	
 	targa_header.colormap_index = fgetLittleShort(fin);
 	targa_header.colormap_length = fgetLittleShort(fin);
-	targa_header.colormap_size = fgetc(fin);
+	targa_header.colormap_size = Qgetc(fin);
 	targa_header.x_origin = fgetLittleShort(fin);
 	targa_header.y_origin = fgetLittleShort(fin);
 	targa_header.width = fgetLittleShort(fin);
 	targa_header.height = fgetLittleShort(fin);
-	targa_header.pixel_size = fgetc(fin);
-	targa_header.attributes = fgetc(fin);
+	targa_header.pixel_size = Qgetc(fin);
+	targa_header.attributes = Qgetc(fin);
 
 	if (targa_header.image_type!=2 
 		&& targa_header.image_type!=10) 
@@ -350,7 +350,7 @@ void LoadTGA (FILE *fin)
 	targa_rgba = malloc (numPixels*4);
 	
 	if (targa_header.id_length != 0)
-		fseek(fin, targa_header.id_length, SEEK_CUR);  // skip TARGA image comment
+		Qseek(fin, targa_header.id_length, SEEK_CUR);  // skip TARGA image comment
 	
 	if (targa_header.image_type==2) {  // Uncompressed, RGB images
 		for(row=rows-1; row>=0; row--) {
@@ -359,19 +359,19 @@ void LoadTGA (FILE *fin)
 				switch (targa_header.pixel_size) {
 					case 24:
 							
-							blue = getc(fin);
-							green = getc(fin);
-							red = getc(fin);
+							blue = Qgetc(fin);
+							green = Qgetc(fin);
+							red = Qgetc(fin);
 							*pixbuf++ = red;
 							*pixbuf++ = green;
 							*pixbuf++ = blue;
 							*pixbuf++ = 255;
 							break;
 					case 32:
-							blue = getc(fin);
-							green = getc(fin);
-							red = getc(fin);
-							alphabyte = getc(fin);
+							blue = Qgetc(fin);
+							green = Qgetc(fin);
+							red = Qgetc(fin);
+							alphabyte = Qgetc(fin);
 							*pixbuf++ = red;
 							*pixbuf++ = green;
 							*pixbuf++ = blue;
@@ -386,21 +386,21 @@ void LoadTGA (FILE *fin)
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; ) {
-				packetHeader=getc(fin);
+				packetHeader=Qgetc(fin);
 				packetSize = 1 + (packetHeader & 0x7f);
 				if (packetHeader & 0x80) {        // run-length packet
 					switch (targa_header.pixel_size) {
 						case 24:
-								blue = getc(fin);
-								green = getc(fin);
-								red = getc(fin);
+								blue = Qgetc(fin);
+								green = Qgetc(fin);
+								red = Qgetc(fin);
 								alphabyte = 255;
 								break;
 						case 32:
-								blue = getc(fin);
-								green = getc(fin);
-								red = getc(fin);
-								alphabyte = getc(fin);
+								blue = Qgetc(fin);
+								green = Qgetc(fin);
+								red = Qgetc(fin);
+								alphabyte = Qgetc(fin);
 								break;
 					}
 	
@@ -424,19 +424,19 @@ void LoadTGA (FILE *fin)
 					for(j=0;j<packetSize;j++) {
 						switch (targa_header.pixel_size) {
 							case 24:
-									blue = getc(fin);
-									green = getc(fin);
-									red = getc(fin);
+									blue = Qgetc(fin);
+									green = Qgetc(fin);
+									red = Qgetc(fin);
 									*pixbuf++ = red;
 									*pixbuf++ = green;
 									*pixbuf++ = blue;
 									*pixbuf++ = 255;
 									break;
 							case 32:
-									blue = getc(fin);
-									green = getc(fin);
-									red = getc(fin);
-									alphabyte = getc(fin);
+									blue = Qgetc(fin);
+									green = Qgetc(fin);
+									red = Qgetc(fin);
+									alphabyte = Qgetc(fin);
 									*pixbuf++ = red;
 									*pixbuf++ = green;
 									*pixbuf++ = blue;
@@ -459,7 +459,7 @@ void LoadTGA (FILE *fin)
 		}
 	}
 	
-	fclose(fin);
+	Qclose(fin);
 }
 
 /*
@@ -471,7 +471,7 @@ char	*suf[6] = {"rt", "bk", "lf", "ft", "up", "dn"};
 void R_LoadSkys (char * skyname)
 {
 	int		i;
-	FILE	*f;
+	QFile	*f;
 	char	name[64];
 
 	if (stricmp (skyname, "none") == 0)

@@ -55,14 +55,14 @@ void GIB_Gib_f (void)
 void GIB_Load_f (void)
 {
 	char filename[256];
-	FILE *f;
+	QFile *f;
 
 	sprintf(filename, "%s/%s.gib", com_gamedir, Cmd_Argv(1));
-	f = fopen(filename, "r");
+	f = Qopen(filename, "r");
 	if (f)
 	{
 		GIB_Module_Load(Cmd_Argv(1), f);
-		fclose(f);
+		Qclose(f);
 	}
 	else
 		Con_Printf("gibload: File not found.\n");

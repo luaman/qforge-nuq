@@ -57,7 +57,7 @@ FILE IO
 
 typedef struct 
 {
-    FILE	    *hFile;
+    QFile	    *hFile;
     char	    *pMap;
     int		    nLen;
     int		    nPos;
@@ -81,7 +81,7 @@ int findhandle (void)
 filelength
 ================
 */
-int filelength (FILE *f)
+int filelength (QFile *f)
 {
     int             pos;
     int             end;
@@ -96,7 +96,7 @@ int filelength (FILE *f)
 
 int Sys_FileOpenRead (char *path, int *hndl)
 {
-    FILE    *f;
+    QFile    *f;
     int             i;
     
     i = findhandle ();
@@ -124,7 +124,7 @@ int Sys_FileOpenRead (char *path, int *hndl)
 
 int Sys_FileOpenWrite (char *path)
 {
-    FILE    *f;
+    QFile    *f;
     int             i;
     
     i = findhandle ();
@@ -183,7 +183,7 @@ int Sys_FileWrite (int handle, void *data, int count)
 
 int Sys_FileTime (char *path)
 {
-    FILE    *f;
+    QFile    *f;
     
     f = fopen(path, "rb");
     if (f)
