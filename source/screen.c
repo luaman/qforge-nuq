@@ -50,8 +50,9 @@ int			scr_copyeverything;
 float		scr_con_current;
 float		scr_conlines;		// lines of console to display
 
-float		oldscreensize, oldfov;
-float		oldsbar;
+int			oldscreensize;
+float		oldfov;
+int			oldsbar;
 
 cvar_t	*scr_viewsize;
 cvar_t	*scr_fov;
@@ -248,7 +249,7 @@ Internal use only
 static void SCR_CalcRefdef (void)
 {
 	vrect_t		vrect;
-	float		size;
+	int			size;
 
 	scr_fullupdate = 0;		// force a background redraw
 	vid.recalc_refdef = 0;
@@ -259,9 +260,9 @@ static void SCR_CalcRefdef (void)
 //========================================
 	
 // bound viewsize
-	if (scr_viewsize->value < 30)
+	if (scr_viewsize->int_val < 30)
 		Cvar_Set (scr_viewsize,"30");
-	if (scr_viewsize->value > 120)
+	if (scr_viewsize->int_val > 120)
 		Cvar_Set (scr_viewsize,"120");
 
 // bound field of view
@@ -277,7 +278,7 @@ static void SCR_CalcRefdef (void)
 	if (cl.intermission)
 		size = 120;
 	else
-		size = scr_viewsize->value;
+		size = scr_viewsize->int_val;
 
 	if (size >= 120)
 		sb_lines = 0;		// no status bar at all
@@ -314,7 +315,7 @@ Keybinding command
 */
 void SCR_SizeUp_f (void)
 {
-	Cvar_SetValue (scr_viewsize,scr_viewsize->value+10);
+	Cvar_SetValue (scr_viewsize,scr_viewsize->int_val+10);
 	vid.recalc_refdef = 1;
 }
 
@@ -328,7 +329,7 @@ Keybinding command
 */
 void SCR_SizeDown_f (void)
 {
-	Cvar_SetValue (scr_viewsize,scr_viewsize->value-10);
+	Cvar_SetValue (scr_viewsize,scr_viewsize->int_val-10);
 	vid.recalc_refdef = 1;
 }
 
@@ -863,7 +864,7 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen (void)
 {
-	static float	oldscr_viewsize;
+	static int		oldscr_viewsize;
 	static float	oldlcd_x;
 	vrect_t		vrect;
 	
@@ -890,9 +891,9 @@ void SCR_UpdateScreen (void)
 	if (!scr_initialized || !con_initialized)
 		return;				// not initialized yet
 
-	if (scr_viewsize->value != oldscr_viewsize)
+	if (scr_viewsize->int_val != oldscr_viewsize)
 	{
-		oldscr_viewsize = scr_viewsize->value;
+		oldscr_viewsize = scr_viewsize->int_val;
 		vid.recalc_refdef = 1;
 	}
 	
@@ -911,9 +912,9 @@ void SCR_UpdateScreen (void)
 		vid.recalc_refdef = true;
 	}
 	
-	if (oldscreensize != scr_viewsize->value)
+	if (oldscreensize != scr_viewsize->int_val)
 	{
-		oldscreensize = scr_viewsize->value;
+		oldscreensize = scr_viewsize->int_val;
 		vid.recalc_refdef = true;
 	}
 

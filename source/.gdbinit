@@ -1,1 +1,1 @@
-set args -nodga +set _windowed_mouse 0
+set args -nosound -nodga +set _windowed_mouse 0

@@ -961,7 +961,7 @@ void Sbar_Draw (void)
 		}
 	}
 
-	headsup = !(cl_sbar->int_val || scr_viewsize->value < 100);
+	headsup = !(cl_sbar->int_val || scr_viewsize->int_val < 100);
 	sbar_centered = (!headsup && !cl.gametype == GAME_DEATHMATCH);
 	
 	if ((sb_updates >= vid.numpages) && !headsup)

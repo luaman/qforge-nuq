@@ -297,7 +297,7 @@ Internal use only
 */
 static void SCR_CalcRefdef (void)
 {
-	float		size;
+	int			size;
 	int 		h;
 	qboolean	full = false;
 
@@ -311,7 +311,7 @@ static void SCR_CalcRefdef (void)
 //========================================
 	
 	// bound viewsize
-	Cvar_SetValue (scr_viewsize, bound (30, scr_viewsize->value, 120));
+	Cvar_SetValue (scr_viewsize, bound (30, scr_viewsize->int_val, 120));
 
 	// bound field of view
 	Cvar_SetValue (scr_fov, bound (10, scr_fov->value, 170));
@@ -320,7 +320,7 @@ static void SCR_CalcRefdef (void)
 	if (cl.intermission)
 		size = 120;
 	else
-		size = scr_viewsize->value;
+		size = scr_viewsize->int_val;
 
 	if (size >= 120)
 		sb_lines = 0;		// no status bar at all
@@ -329,11 +329,11 @@ static void SCR_CalcRefdef (void)
 	else
 		sb_lines = 24+16+8;
 
-	if (scr_viewsize->value >= 100.0) {
+	if (scr_viewsize->int_val >= 100) {
 		full = true;
-		size = 100.0;
+		size = 100;
 	} else {
-		size = scr_viewsize->value;
+		size = scr_viewsize->int_val;
 	}
 	
 	if (cl.intermission) {
@@ -384,7 +384,7 @@ Keybinding command
 */
 void SCR_SizeUp_f (void)
 {
-	Cvar_SetValue (scr_viewsize,scr_viewsize->value+10);
+	Cvar_SetValue (scr_viewsize,scr_viewsize->int_val+10);
 	vid.recalc_refdef = 1;
 }
 
@@ -398,7 +398,7 @@ Keybinding command
 */
 void SCR_SizeDown_f (void)
 {
-	Cvar_SetValue (scr_viewsize,scr_viewsize->value-10);
+	Cvar_SetValue (scr_viewsize,scr_viewsize->int_val-10);
 	vid.recalc_refdef = 1;
 }
 
