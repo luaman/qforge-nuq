@@ -776,12 +776,6 @@ AM_CONDITIONAL(CDTYPE_BSD, test "$CDTYPE" = "BSD")
 AM_CONDITIONAL(CDTYPE_WIN32, test "$CDTYPE" = "WIN32")
 AM_CONDITIONAL(CDTYPE_NULL, test "$CDTYPE" != "LINUX" -a "$CDTYPE" != "BSD" -a "$CDTYPE" != "WIN32")
 
-if test "$CDTTPE" = BSD; then
-	AC_HAVE_STRUCT_FIELD(struct ioc_read_toc_single_entry, entry,
-		[#include <sys/cdio.h>]
-	)
-fi
-
 dnl ==================================================================
 dnl Checks for networking
 dnl ==================================================================
