@@ -837,9 +837,6 @@ COM_Gamedir (char *dir)
 
 	if (strcmp (dir, fs_basegame->string) == 0)
 		return;
-	if (strcmp (dir, "qw") == 0 
-			&& strcmp (fs_basegame->string, "id1") == 0)
-		return;
 
 	COM_AddGameDirectory (dir);
 }
@@ -906,13 +903,6 @@ COM_InitFilesystem ( void )
 	COM_CreatePath (va("%s/%s/dummy", fs_userpath->string,
 				fs_basegame->string));
 	COM_AddGameDirectory(fs_basegame->string);
-
-	// If we're dealing with id1, use qw too
-	if (stricmp (fs_basegame->string, "id1") == 0)
-	{
-		COM_CreatePath (va("%s/qw/dummy", fs_userpath->string));
-		COM_AddGameDirectory ("qw");
-	}
 
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;
