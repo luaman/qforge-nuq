@@ -1,7 +1,7 @@
 /*
-	view.c
+	gl_view.c
 
-	@description@
+	OpenGL-specific view management functions
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -48,56 +48,55 @@ float		v_blend[4];		// rgba 0.0 - 1.0
 void
 V_CalcBlend (void)
 {
-	float	r, g, b, a, a2, a3;
-	int		j;
+	float	r = 0;
+	float	g = 0;
+	float	b = 0;
+	float	a = 0;
 
-	r = 0;
-	g = 0;
-	b = 0;
-	a = 0;
+	float	a2, a3;
+	int		i;
 
-	for (j=0 ; j<NUM_CSHIFTS ; j++)
-	{
+	for (i = 0; i < NUM_CSHIFTS; i++) {
 		if (!gl_cshiftpercent->value)
 			continue;
 
-		a2 = ((cl.cshifts[j].percent * gl_cshiftpercent->value) / 100.0) / 255.0;
+		a2 = ((cl.cshifts[i].percent * gl_cshiftpercent->value) / 100.0) / 255.0;
 
 		if (!a2)
 			continue;
 
 		a2 = min(a2, 1.0);
-		r += (cl.cshifts[j].destcolor[0]-r) * a2;
-		g += (cl.cshifts[j].destcolor[1]-g) * a2;
-		b += (cl.cshifts[j].destcolor[2]-b) * a2;
+		r += (cl.cshifts[i].destcolor[0]-r) * a2;
+		g += (cl.cshifts[i].destcolor[1]-g) * a2;
+		b += (cl.cshifts[i].destcolor[2]-b) * a2;
 		
 		a3 = (1.0 - a) * (1.0 - a2);
 		a = 1.0 - a3;
 	}
 
 	// LordHavoc: saturate color
-	if (a)
-	{
+	if (a) {
 		a2 = 1.0 / a;
 		r *= a2;
 		g *= a2;
 		b *= a2;
-		if (a > 1) // clamp alpha blend too
-			a = 1;
+		//	don't clamp alpha here, we do it below
 	}
 
-	v_blend[0] = min(r, 255.0)/255.0;
-	v_blend[1] = min(g, 255.0)/255.0;
-	v_blend[2] = min(b, 255.0)/255.0;
+	v_blend[0] = min (r, 255.0) / 255.0;
+	v_blend[1] = min (g, 255.0) / 255.0;
+	v_blend[2] = min (b, 255.0) / 255.0;
 	v_blend[3] = bound (0.0, a, 1.0);
 }
 
 /*
-=============
-V_UpdatePalette
-=============
+	V_UpdatePalette
+
+	In software, this function (duh) updates the palette. In GL, all it does is
+	set up some values for shifting the screen color in a particular direction.
 */
-void V_UpdatePalette (void)
+void
+V_UpdatePalette (void)
 {
 	int			i, j;
 	qboolean	new;
@@ -107,12 +106,12 @@ void V_UpdatePalette (void)
 	
 	new = false;
 	
-	for (i=0 ; i<NUM_CSHIFTS ; i++) {
+	for (i = 0; i < NUM_CSHIFTS; i++) {
 		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent) {
 			new = true;
 			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
 		}
-		for (j=0 ; j<3 ; j++) {
+		for (j = 0; j < 3; j++) {
 			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j]) {
 				new = true;
 				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
@@ -122,13 +121,11 @@ void V_UpdatePalette (void)
 	
 	// drop the damage value
 	cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime*150;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
+	cl.cshifts[CSHIFT_DAMAGE].percent = max (cl.cshifts[CSHIFT_DAMAGE].percent, 0);
 
 	// drop the bonus value
 	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100;
-	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
-		cl.cshifts[CSHIFT_BONUS].percent = 0;
+	cl.cshifts[CSHIFT_BONUS].percent = max (cl.cshifts[CSHIFT_BONUS].percent, 0);
 
 	force = V_CheckGamma ();
 	if (!new && !force)
@@ -138,89 +135,46 @@ void V_UpdatePalette (void)
 }
 
 /* 
-============================================================================== 
- 
-						VIEW RENDERING 
- 
-============================================================================== 
-*/ 
+ *	View Rendering
+ */
 
 /*
-==================
-V_RenderView
+	V_RenderView
 
-The player's clipping box goes from (-16 -16 -24) to (16 16 32) from
-the entity origin, so any view position inside that will be valid
-==================
+	The player's clipping box goes from (-16 -16 -24) to (16 16 32) from
+	the entity origin, so any view position inside that will be valid
 */
 extern vrect_t	scr_vrect;
 
-void V_RenderView (void)
+void
+V_RenderView (void)
 {
 	if (con_forcedup)
 		return;
 
 // don't allow cheats in multiplayer
-	if (cl.maxclients > 1)
-	{
+	if (cl.maxclients > 1) {
 		Cvar_Set(scr_ofsx, "0");
 		Cvar_Set(scr_ofsy, "0");
 		Cvar_Set(scr_ofsz, "0");
 	}
 
-	if (cl.intermission)
-	{	// intermission / finale rendering
+	if (cl.intermission) {	// intermission / finale rendering
 		V_CalcIntermissionRefdef ();	
-	}
-	else
-	{
+	} else {
 		if (!cl.paused /* && (sv.maxclients > 1 || key_dest == key_game) */ )
 			V_CalcRefdef ();
 	}
 
 	R_PushDlights (vec3_origin);
 
-	if (lcd_x->value)
-	{
-		//
-		// render two interleaved views
-		//
-		int		i;
-
-		vid.rowbytes <<= 1;
-		vid.aspect *= 0.5;
-
-		r_refdef.viewangles[YAW] -= lcd_yaw->value;
-		for (i=0 ; i<3 ; i++)
-			r_refdef.vieworg[i] -= right[i]*lcd_x->value;
-		R_RenderView ();
-
-		vid.buffer += vid.rowbytes>>1;
-
-		R_PushDlights (vec3_origin);
-
-		r_refdef.viewangles[YAW] += lcd_yaw->value*2;
-		for (i=0 ; i<3 ; i++)
-			r_refdef.vieworg[i] += 2*right[i]*lcd_x->value;
-		R_RenderView ();
-
-		vid.buffer -= vid.rowbytes>>1;
-
-		r_refdef.vrect.height <<= 1;
-
-		vid.rowbytes >>= 1;
-		vid.aspect *= 2;
-	}
-	else
-	{
-		R_RenderView ();
-	}
+	R_RenderView ();
 }
 
 /*
 	BuildGammaTable
 
-	In software mode, this function gets the palette ready for changing...in
+	In software mode, this function gets the palette ready for changing...
 	in GL, it does very little as you can see.
 */
 
