@@ -689,7 +689,7 @@ void IN_MouseMove (usercmd_t *cmd)
 //if (mx ||  my)
 //	Con_DPrintf("mx=%d, my=%d\n", mx, my);
 
-	if (m_filter->value)
+	if (m_filter->int_val)
 	{
 		mouse_x = (mx + old_mouse_x) * 0.5;
 		mouse_y = (my + old_mouse_y) * 0.5;
@@ -707,7 +707,7 @@ void IN_MouseMove (usercmd_t *cmd)
 	mouse_y *= sensitivity->value;
 
 // add mouse X/Y movement to cmd
-	if ( (in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1) ))
+	if ( (in_strafe.state & 1) || (lookstrafe->int_val && (in_mlook.state & 1) ))
 		cmd->sidemove += m_side->value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
@@ -913,7 +913,7 @@ void Joy_AdvancedUpdate_f (void)
 		pdwRawValue[i] = RawValuePointer(i);
 	}
 
-	if( joy_advanced->value == 0.0)
+	if( joy_advanced->int_val == 0.0)
 	{
 		// default joystick initialization
 		// 2 axes only with joystick control
@@ -932,22 +932,22 @@ void Joy_AdvancedUpdate_f (void)
 
 		// advanced initialization here
 		// data supplied by user via joy_axisn cvars
-		dwTemp = (DWORD) joy_advaxisx->value;
+		dwTemp = joy_advaxisx->int_val;
 		dwAxisMap[JOY_AXIS_X] = dwTemp & 0x0000000f;
 		dwControlMap[JOY_AXIS_X] = dwTemp & JOY_RELATIVE_AXIS;
-		dwTemp = (DWORD) joy_advaxisy->value;
+		dwTemp = joy_advaxisy->int_val;
 		dwAxisMap[JOY_AXIS_Y] = dwTemp & 0x0000000f;
 		dwControlMap[JOY_AXIS_Y] = dwTemp & JOY_RELATIVE_AXIS;
-		dwTemp = (DWORD) joy_advaxisz->value;
+		dwTemp = joy_advaxisz->int_val;
 		dwAxisMap[JOY_AXIS_Z] = dwTemp & 0x0000000f;
 		dwControlMap[JOY_AXIS_Z] = dwTemp & JOY_RELATIVE_AXIS;
-		dwTemp = (DWORD) joy_advaxisr->value;
+		dwTemp = joy_advaxisr->int_val;
 		dwAxisMap[JOY_AXIS_R] = dwTemp & 0x0000000f;
 		dwControlMap[JOY_AXIS_R] = dwTemp & JOY_RELATIVE_AXIS;
-		dwTemp = (DWORD) joy_advaxisu->value;
+		dwTemp = joy_advaxisu->int_val;
 		dwAxisMap[JOY_AXIS_U] = dwTemp & 0x0000000f;
 		dwControlMap[JOY_AXIS_U] = dwTemp & JOY_RELATIVE_AXIS;
-		dwTemp = (DWORD) joy_advaxisv->value;
+		dwTemp = joy_advaxisv->int_val;
 		dwAxisMap[JOY_AXIS_V] = dwTemp & 0x0000000f;
 		dwControlMap[JOY_AXIS_V] = dwTemp & JOY_RELATIVE_AXIS;
 	}
@@ -1051,7 +1051,7 @@ qboolean IN_ReadJoystick (void)
 		// this is a hack -- there is a bug in the Logitech WingMan Warrior DirectInput Driver
 		// rather than having 32768 be the zero point, they have the zero point at 32668
 		// go figure -- anyway, now we get the full resolution out of the device
-		if (joy_wwhack1->value != 0.0)
+		if (joy_wwhack1->int_val)
 		{
 			ji.dwUpos += 100;
 		}
@@ -1089,7 +1089,7 @@ void IN_JoyMove (usercmd_t *cmd)
 	}
 
 	// verify joystick is available and that the user wants to use it
-	if (!joy_avail || !in_joystick->value)
+	if (!joy_avail || !in_joystick->int_val)
 	{
 		return; 
 	}
@@ -1114,7 +1114,7 @@ void IN_JoyMove (usercmd_t *cmd)
 		// move centerpoint to zero
 		fAxisValue -= 32768.0;
 
-		if (joy_wwhack2->value != 0.0)
+		if (joy_wwhack2->int_val)
 		{
 			if (dwAxisMap[i] == AxisTurn)
 			{
@@ -1136,7 +1136,7 @@ void IN_JoyMove (usercmd_t *cmd)
 		switch (dwAxisMap[i])
 		{
 		case AxisForward:
-			if ((joy_advanced->value == 0.0) && (in_mlook.state & 1))
+			if ((!joy_advanced->int_val) && (in_mlook.state & 1))
 			{
 				// user wants forward control to become look control
 				if (fabs(fAxisValue) > joy_pitchthreshold->value)
@@ -1159,7 +1159,7 @@ void IN_JoyMove (usercmd_t *cmd)
 					// disable pitch return-to-center unless requested by user
 					// *** this code can be removed when the lookspring bug is fixed
 					// *** the bug always has the lookspring feature on
-					if(lookspring->value == 0.0)
+					if(lookspring->int_val)
 						V_StopPitchDrift();
 				}
 			}
@@ -1181,7 +1181,7 @@ void IN_JoyMove (usercmd_t *cmd)
 			break;
 
 		case AxisTurn:
-			if ((in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1)))
+			if ((in_strafe.state & 1) || (lookstrafe->int_val && (in_mlook.state & 1)))
 			{
 				// user wants turn control to become side control
 				if (fabs(fAxisValue) > joy_sidethreshold->value)
@@ -1229,7 +1229,7 @@ void IN_JoyMove (usercmd_t *cmd)
 					// disable pitch return-to-center unless requested by user
 					// *** this code can be removed when the lookspring bug is fixed
 					// *** the bug always has the lookspring feature on
-					if(lookspring->value == 0.0)
+					if(lookspring->int_val)
 						V_StopPitchDrift();
 				}
 			}

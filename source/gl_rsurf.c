@@ -252,7 +252,7 @@ R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 	lightmap = surf->samples;
 
 	// set to full bright if no light data
-	if (/*r_fullbright->value ||*/ !cl.worldmodel->lightdata)
+	if (/*r_fullbright->int_val ||*/ !cl.worldmodel->lightdata)
 	{
 		bl = blocklights;
 		for (i=0 ; i<size ; i++)
@@ -297,7 +297,7 @@ R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 
 store:
 	// bound and shift
-	if (gl_colorlights->value)
+	if (gl_colorlights->int_val)
 	{
 		stride -= smax * 3;
 		bl = blocklights;
@@ -455,7 +455,7 @@ void R_DrawMultitexturePoly (msurface_t *s)
 	glEnable(GL_TEXTURE_2D);
 
 	// check for lightmap modification
-	if (r_dynamic->value)
+	if (r_dynamic->int_val)
 	{
 		for (maps = 0;maps < MAXLIGHTMAPS && s->styles[maps] != 255;maps++)
 			if (d_lightstylevalue[s->styles[maps]] != s->cached_light[maps])
@@ -620,7 +620,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 		|| fa->cached_dlight)			// dynamic previously
 	{
 dynamic:
-		if (r_dynamic->value)
+		if (r_dynamic->int_val)
 		{
 			lightmap_modified[fa->lightmaptexturenum] = true;
 			theRect = &lightmap_rectchange[fa->lightmaptexturenum];
@@ -793,7 +793,7 @@ void R_DrawBrushModel (entity_t *e)
 
 	// calculate dynamic lighting for bmodel if it's not an
 	// instanced model
-	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->value)
+	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->int_val)
 	{
 		vec3_t lightorigin;
 		for (k=0 ; k<MAX_DLIGHTS ; k++)
@@ -815,7 +815,7 @@ void R_DrawBrushModel (entity_t *e)
 
 	// LordHavoc: anyone without multitexture won't want texsort 0 anyway...
 	if (!gl_mtexable)
-		gl_texsort->value = 1;
+		Cvar_SetValue (gl_texsort, 1);
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
@@ -838,14 +838,14 @@ void R_DrawBrushModel (entity_t *e)
 		{
 			if (psurf->flags & SURF_DRAWTURB)
 				GL_WaterSurface(psurf);
-			else if (gl_texsort->value)
+			else if (gl_texsort->int_val)
 				R_RenderBrushPoly (psurf);
 			else
 				R_DrawMultitexturePoly (psurf);
 		}
 	}
 
-	if (gl_texsort->value)
+	if (gl_texsort->int_val)
 		R_BlendLightmaps ();
 
 	if (gl_fb_bmodels->int_val)
@@ -963,7 +963,7 @@ void R_RecursiveWorldNode (mnode_t *node)
 				surf->texturechain = waterchain;
 				waterchain = surf;
 			}
-			else if (gl_texsort->value)
+			else if (gl_texsort->int_val)
 			{
 				surf->texturechain = surf->texinfo->texture->texturechain;
 				surf->texinfo->texture->texturechain = surf;
@@ -1000,7 +1000,7 @@ void R_DrawWorld (void)
 
 	// LordHavoc: anyone without multitexture won't want texsort 0 anyway...
 	if (!gl_mtexable)
-		gl_texsort->value = 1;
+		Cvar_SetValue (gl_texsort, 1);
 
 	glColor3f (1.0, 1.0, 1.0);
 	memset (lightmap_polys, 0, sizeof(lightmap_polys));
@@ -1015,7 +1015,7 @@ void R_DrawWorld (void)
 
 	DrawTextureChains ();
 
-	if (gl_texsort->value)
+	if (gl_texsort->int_val)
 		R_BlendLightmaps ();
 
 	if (gl_fb_bmodels->int_val)
@@ -1039,7 +1039,7 @@ void R_MarkLeaves (void)
 	int		i;
 	byte	solid[4096];
 
-	if (r_oldviewleaf == r_viewleaf && !r_novis->value)
+	if (r_oldviewleaf == r_viewleaf && !r_novis->int_val)
 		return;
 	
 	if (mirror)
@@ -1048,7 +1048,7 @@ void R_MarkLeaves (void)
 	r_visframecount++;
 	r_oldviewleaf = r_viewleaf;
 
-	if (r_novis->value)
+	if (r_novis->int_val)
 	{
 		vis = solid;
 		memset (solid, 0xff, (cl.worldmodel->numleafs+7)>>3);
@@ -1209,7 +1209,7 @@ void BuildSurfaceDisplayList (msurface_t *fa)
 	//
 	// remove co-linear points - Ed
 	//
-	if (!gl_keeptjunctions->value && !(fa->flags & SURF_UNDERWATER) )
+	if (!gl_keeptjunctions->int_val && !(fa->flags & SURF_UNDERWATER) )
 	{
 		for (i = 0 ; i < lnumverts ; ++i)
 		{
@@ -1297,7 +1297,7 @@ void GL_BuildLightmaps (void)
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_ROM,
 			"Whether to use RGB lightmaps or not");
 
-	if (gl_colorlights->value)
+	if (gl_colorlights->int_val)
 	{
 		gl_lightmap_format = GL_RGB;
 		lightmap_bytes = 3;
@@ -1328,7 +1328,7 @@ void GL_BuildLightmaps (void)
 		}
 	}
 
- 	if (gl_mtexable && !gl_texsort->value)
+ 	if (gl_mtexable && !gl_texsort->int_val)
 		qglSelectTexture (gl_mtex_enum+1);
 
 	//
@@ -1351,7 +1351,7 @@ void GL_BuildLightmaps (void)
 				GL_UNSIGNED_BYTE, lightmaps[i]);
 	}
 
- 	if (gl_mtexable && !gl_texsort->value)
+ 	if (gl_mtexable && !gl_texsort->int_val)
 		qglSelectTexture (gl_mtex_enum+0);
 }
 

@@ -438,7 +438,7 @@ void Draw_Init (void)
 	// LordHavoc: 3DFX's dithering has terrible artifacting when using lightmode 1
 	if (!strncasecmp ((char *)gl_renderer, "3dfx",4))
 		Cvar_Set (gl_lightmode, "0");
-	lighthalf = gl_lightmode->value != 0; // to avoid re-rendering all lightmaps on first frame
+	lighthalf = gl_lightmode->int_val != 0; // to avoid re-rendering all lightmaps on first frame
 
 	Cmd_AddCommand ("gl_texturemode", &Draw_TextureMode_f);
 
@@ -565,12 +565,12 @@ void Draw_Crosshair(void)
 	extern vrect_t		scr_vrect;
 	unsigned char *pColor;
 
-	if (crosshair->value == 2)
+	if (crosshair->int_val == 2)
 	{
-		x = scr_vrect.x + scr_vrect.width/2 - 3 + cl_crossx->value; 
-		y = scr_vrect.y + scr_vrect.height/2 - 3 + cl_crossy->value;
+		x = scr_vrect.x + scr_vrect.width/2 - 3 + cl_crossx->int_val; 
+		y = scr_vrect.y + scr_vrect.height/2 - 3 + cl_crossy->int_val;
 
-		pColor = (unsigned char *) &d_8to24table[(byte) crosshaircolor->value];
+		pColor = (unsigned char *) &d_8to24table[(byte) crosshaircolor->int_val];
 		if (lighthalf)
 			glColor4ub((byte) ((int) pColor[0] >> 1),(byte) ((int) pColor[1] >> 1), (byte) ((int) pColor[2] >> 1), pColor[3]);
 		else
@@ -588,9 +588,9 @@ void Draw_Crosshair(void)
 		glVertex2f (x - 4, y+12);
 		glEnd ();
 	}
-	else if (crosshair->value)
-		Draw_Character8 (scr_vrect.x + scr_vrect.width/2-4 + cl_crossx->value, 
-			scr_vrect.y + scr_vrect.height/2-4 + cl_crossy->value, '+');
+	else if (crosshair->int_val)
+		Draw_Character8 (scr_vrect.x + scr_vrect.width/2-4 + cl_crossx->int_val, 
+			scr_vrect.y + scr_vrect.height/2-4 + cl_crossy->int_val, '+');
 }
 
 /*
@@ -1104,11 +1104,11 @@ static	unsigned	scaled[1024*512];	// [512*256];
 	for (scaled_height = 1 ; scaled_height < height ; scaled_height<<=1)
 		;
 
-	scaled_width >>= (int)gl_picmip->value;
-	scaled_height >>= (int)gl_picmip->value;
+	scaled_width >>= gl_picmip->int_val;
+	scaled_height >>= gl_picmip->int_val;
 
-	scaled_width = min(scaled_width, gl_max_size->value);
-	scaled_height = min(scaled_height, gl_max_size->value);
+	scaled_width = min(scaled_width, gl_max_size->int_val);
+	scaled_height = min(scaled_height, gl_max_size->int_val);
 
 	if (scaled_width * scaled_height > sizeof(scaled)/4)
 		Sys_Error ("GL_LoadTexture: too big");
@@ -1203,11 +1203,11 @@ void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboole
 	for (scaled_height = 1 ; scaled_height < height ; scaled_height<<=1)
 		;
 
-	scaled_width >>= (int)gl_picmip->value;
-	scaled_height >>= (int)gl_picmip->value;
+	scaled_width >>= gl_picmip->int_val;
+	scaled_height >>= gl_picmip->int_val;
 
-	scaled_width = min(scaled_width, gl_max_size->value);
-	scaled_height = min(scaled_height, gl_max_size->value);
+	scaled_width = min(scaled_width, gl_max_size->int_val);
+	scaled_height = min(scaled_height, gl_max_size->int_val);
 
 	if (scaled_width * scaled_height > sizeof(scaled))
 		Sys_Error ("GL_LoadTexture: too big");

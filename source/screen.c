@@ -373,7 +373,7 @@ SCR_DrawRam
 */
 void SCR_DrawRam (void)
 {
-	if (!scr_showram->value)
+	if (!scr_showram->int_val)
 		return;
 
 	if (!r_cache_thrash)
@@ -391,7 +391,7 @@ void SCR_DrawTurtle (void)
 {
 	static int	count;
 	
-	if (!scr_showturtle->value)
+	if (!scr_showturtle->int_val)
 		return;
 
 	if (host_frametime < 0.1)
@@ -431,7 +431,7 @@ void SCR_DrawPause (void)
 {
 	qpic_t	*pic;
 
-	if (!scr_showpause->value)		// turn off for screenshots
+	if (!scr_showpause->int_val)		// turn off for screenshots
 		return;
 
 	if (!cl.paused)
@@ -890,9 +890,9 @@ void SCR_UpdateScreen (void)
 		vid.recalc_refdef = true;
 	}
 
-	if (oldsbar != cl_sbar->value)
+	if (oldsbar != cl_sbar->int_val)
 	{
-		oldsbar = cl_sbar->value;
+		oldsbar = cl_sbar->int_val;
 		vid.recalc_refdef = true;
 	}
 	

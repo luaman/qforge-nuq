@@ -248,7 +248,7 @@ Con_DPrintf ("CL_SignonReply: %i\n", cls.signon);
 		MSG_WriteString (&cls.message, va("name \"%s\"\n", cl_name->string));
 	
 		MSG_WriteByte (&cls.message, clc_stringcmd);
-		MSG_WriteString (&cls.message, va("color %i %i\n", ((int)cl_color->value)>>4, ((int)cl_color->value)&15));
+		MSG_WriteString (&cls.message, va("color %i %i\n", (cl_color->int_val)>>4, (cl_color->int_val)&15));
 	
 		MSG_WriteByte (&cls.message, clc_stringcmd);
 		snprintf (str, sizeof(str), "spawn %s", cls.spawnparms);
@@ -496,7 +496,7 @@ float	CL_LerpPoint (void)
 
 	f = cl.mtime[0] - cl.mtime[1];
 	
-	if (!f || cl_nolerp->value || cls.timedemo || sv.active)
+	if (!f || cl_nolerp->int_val || cls.timedemo || sv.active)
 	{
 		cl.time = cl.mtime[0];
 		return 1;
@@ -707,7 +707,7 @@ void CL_RelinkEntities (void)
 
 		ent->forcelink = false;
 
-		if (i == cl.viewentity && !chase_active->value)
+		if (i == cl.viewentity && !chase_active->int_val)
 			continue;
 
 #ifdef QUAKE2
@@ -750,7 +750,7 @@ int CL_ReadFromServer (void)
 		CL_ParseServerMessage ();
 	} while (ret && cls.state == ca_connected);
 	
-	if (cl_shownet->value)
+	if (cl_shownet->int_val)
 		Con_Printf ("\n");
 
 	CL_RelinkEntities ();

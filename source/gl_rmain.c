@@ -579,7 +579,7 @@ static void R_DrawAliasModel (entity_t *e)
 		if (shadelight < 8)
 			shadelight = 8;
 	}
-	else if (!gl_fb_models->value && (!strcmp (clmodel->name, "progs/flame.mdl") || !strcmp (clmodel->name, "progs/flame2.mdl")))
+	else if (!gl_fb_models->int_val && (!strcmp (clmodel->name, "progs/flame.mdl") || !strcmp (clmodel->name, "progs/flame2.mdl")))
 	{
 		// HACK HACK HACK -- no fullbright colors, so make torches full light
 		shadelight = 200;
@@ -628,23 +628,23 @@ static void R_DrawAliasModel (entity_t *e)
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
-	if (currententity->colormap != vid.colormap && !gl_nocolors->value)
+	if (currententity->colormap != vid.colormap && !gl_nocolors->int_val)
 	{
 		i = currententity - cl_entities;
 		if (i >= 1 && i<=cl.maxclients /* && !strcmp (currententity->model->name, "progs/player.mdl") */)
 		    glBindTexture (GL_TEXTURE_2D, playertextures - 1 + i);
 	}
 
-	if (gl_smoothmodels->value)
+	if (gl_smoothmodels->int_val)
 		glShadeModel (GL_SMOOTH);
 
-	if (gl_affinemodels->value)
+	if (gl_affinemodels->int_val)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 	R_SetupAliasFrame (currententity->frame, paliashdr, false);
 
 	// This block is GL fullbright support for objects...
-	if (clmodel->hasfullbrights && gl_fb_models->value && paliashdr->gl_fb_texturenum[currententity->skinnum][anim])
+	if (clmodel->hasfullbrights && gl_fb_models->int_val && paliashdr->gl_fb_texturenum[currententity->skinnum][anim])
 	{
 		glBlendFunc(GL_ONE, GL_ONE);
 		glEnable (GL_BLEND);
@@ -657,12 +657,12 @@ static void R_DrawAliasModel (entity_t *e)
 	}
 
 	glShadeModel (GL_FLAT);
-	if (gl_affinemodels->value)
+	if (gl_affinemodels->int_val)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	glPopMatrix ();
 
-	if (r_shadows->value)
+	if (r_shadows->int_val)
 	{
 		glPushMatrix ();
 		R_RotateForEntity (e);
@@ -687,7 +687,7 @@ static void R_DrawEntitiesOnList (void)
 {
 	int		i;
 
-	if (!r_drawentities->value)
+	if (!r_drawentities->int_val)
 		return;
 
 	// LordHavoc: split into 3 loops to simplify state changes
@@ -727,10 +727,10 @@ R_DrawViewModel
 static void R_DrawViewModel (void)
 {
 	currententity = &cl.viewent;
-	if (!r_drawviewmodel->value
-	 || chase_active->value
+	if (!r_drawviewmodel->int_val
+	 || chase_active->int_val
 	 || envmap
-	 || !r_drawentities->value
+	 || !r_drawentities->int_val
 	 || (cl.items & IT_INVISIBILITY)
 	 || cl.stats[STAT_HEALTH] <= 0
 	 || !currententity->model)
@@ -803,8 +803,8 @@ R_SetupFrame
 static void R_SetupFrame (void)
 {
 // don't allow cheats in multiplayer
-	r_fullbright->value = 0;
-	r_lightmap->value = 0;
+	Cvar_SetValue (r_fullbright, 0);
+	Cvar_SetValue (r_lightmap, 0);
 
 	R_AnimateLight ();
 
@@ -918,7 +918,7 @@ static void R_SetupGL (void)
 	//
 	// set drawing parms
 	//
-	if (gl_cull->value)
+	if (gl_cull->int_val)
 		glEnable (GL_CULL_FACE);
 	else
 		glDisable (GL_CULL_FACE);
@@ -966,7 +966,7 @@ R_Clear
 */
 static void R_Clear (void)
 {
-	if (gl_clear->value)
+	if (gl_clear->int_val)
 		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	else
 		glClear (GL_DEPTH_BUFFER_BIT);
@@ -1054,7 +1054,7 @@ r_refdef must be set before the first call
 */
 void R_RenderView (void)
 {
-	if (r_norefresh->value)
+	if (r_norefresh->int_val)
 		return;
 
 	if (!r_worldentity.model || !cl.worldmodel)

@@ -731,8 +731,8 @@ void M_Menu_Setup_f (void)
 	m_entersound = true;
 	strcpy(setup_myname, cl_name->string);
 	strcpy(setup_hostname, hostname->string);
-	setup_top = setup_oldtop = ((int)cl_color->value) >> 4;
-	setup_bottom = setup_oldbottom = ((int)cl_color->value) & 15;
+	setup_top = setup_oldtop = (cl_color->int_val) >> 4;
+	setup_bottom = setup_oldbottom = (cl_color->int_val) & 15;
 }
 
 
@@ -1099,7 +1099,7 @@ void M_AdjustSliders (int dir)
 
 	switch (options_cursor) {
 		case 3:	// screen size
-			Cvar_SetValue (scr_viewsize, bound (30, (int)scr_viewsize->value + (dir * 10), 120));
+			Cvar_SetValue (scr_viewsize, bound (30, scr_viewsize->int_val + (dir * 10), 120));
 			break;
 
 		case 4:	// Brightness
@@ -1141,15 +1141,15 @@ void M_AdjustSliders (int dir)
 			break;
 
 		case 11:	// lookspring
-			Cvar_SetValue (lookspring, !lookspring->value);
+			Cvar_SetValue (lookspring, !lookspring->int_val);
 			break;
 
 		case 12:	// lookstrafe
-			Cvar_SetValue (lookstrafe, !lookstrafe->value);
+			Cvar_SetValue (lookstrafe, !lookstrafe->int_val);
 			break;
 
 		case 14:	// _windowed_mouse
-			Cvar_SetValue(_windowed_mouse, !_windowed_mouse->value);
+			Cvar_SetValue(_windowed_mouse, !_windowed_mouse->int_val);
 			break;
 	}
 }
@@ -1238,7 +1238,7 @@ void M_Options_Draw (void)
 #endif
 		if (_windowed_mouse) {
 			M_Print (16, 144, "             Use Mouse");
-			M_DrawCheckbox (220, 144, _windowed_mouse->value);
+			M_DrawCheckbox (220, 144, _windowed_mouse->int_val);
 		}
 #ifdef _WIN32
 	}
@@ -2572,7 +2572,7 @@ void M_GameOptions_Draw (void)
 	M_Print (160, 56, va("%i", maxplayers) );
 
 	M_Print (0, 64, "        Game Type");
-	if (coop->value)
+	if (coop->int_val)
 		M_Print (160, 64, "Cooperative");
 	else
 		M_Print (160, 64, "Deathmatch");
@@ -2582,7 +2582,7 @@ void M_GameOptions_Draw (void)
 	{
 		char *msg;
 
-		switch((int)teamplay->value)
+		switch(teamplay->int_val)
 		{
 			case 1: msg = "No Friendly Fire"; break;
 			case 2: msg = "Friendly Fire"; break;
@@ -2598,7 +2598,7 @@ void M_GameOptions_Draw (void)
 	{
 		char *msg;
 
-		switch((int)teamplay->value)
+		switch(teamplay->int_val)
 		{
 			case 1: msg = "No Friendly Fire"; break;
 			case 2: msg = "Friendly Fire"; break;
@@ -2608,26 +2608,26 @@ void M_GameOptions_Draw (void)
 	}
 
 	M_Print (0, 80, "            Skill");
-	if (skill->value == 0)
+	if (skill->int_val == 0)
 		M_Print (160, 80, "Easy difficulty");
-	else if (skill->value == 1)
+	else if (skill->int_val == 1)
 		M_Print (160, 80, "Normal difficulty");
-	else if (skill->value == 2)
+	else if (skill->int_val == 2)
 		M_Print (160, 80, "Hard difficulty");
 	else
 		M_Print (160, 80, "Nightmare difficulty");
 
 	M_Print (0, 88, "       Frag Limit");
-	if (fraglimit->value == 0)
+	if (fraglimit->int_val == 0)
 		M_Print (160, 88, "none");
 	else
-		M_Print (160, 88, va("%i frags", (int)fraglimit->value));
+		M_Print (160, 88, va("%i frags", fraglimit->int_val));
 
 	M_Print (0, 96, "       Time Limit");
-	if (timelimit->value == 0)
+	if (timelimit->int_val == 0)
 		M_Print (160, 96, "none");
 	else
-		M_Print (160, 96, va("%i minutes", (int)timelimit->value));
+		M_Print (160, 96, va("%i minutes", timelimit->int_val));
 
 	M_Print (0, 112, "         Episode");
    //MED 01/06/97 added hipnotic episodes
@@ -2700,7 +2700,7 @@ void M_NetStart_Change (int dir)
 		break;
 
 	case 2:
-		Cvar_SetValue(coop, coop->value ? 0 : 1);
+		Cvar_SetValue(coop, coop->int_val ? 0 : 1);
 		break;
 
 	case 3:
@@ -2709,34 +2709,34 @@ void M_NetStart_Change (int dir)
 		else
 			count = 2;
 
-		Cvar_SetValue(teamplay, teamplay->value + dir);
-		if (teamplay->value > count)
+		Cvar_SetValue(teamplay, teamplay->int_val + dir);
+		if (teamplay->int_val > count)
 			Cvar_SetValue(teamplay, 0);
-		else if (teamplay->value < 0)
+		else if (teamplay->int_val < 0)
 			Cvar_SetValue(teamplay, count);
 		break;
 
 	case 4:
-		Cvar_SetValue(skill, skill->value + dir);
-		if (skill->value > 3)
+		Cvar_SetValue(skill, skill->int_val + dir);
+		if (skill->int_val > 3)
 			Cvar_SetValue(skill, 0);
-		if (skill->value < 0)
+		if (skill->int_val < 0)
 			Cvar_SetValue(skill, 3);
 		break;
 
 	case 5:
-		Cvar_SetValue(fraglimit, fraglimit->value + dir*10);
-		if (fraglimit->value > 100)
+		Cvar_SetValue(fraglimit, fraglimit->int_val + dir*10);
+		if (fraglimit->int_val > 100)
 			Cvar_SetValue(fraglimit, 0);
-		if (fraglimit->value < 0)
+		if (fraglimit->int_val < 0)
 			Cvar_SetValue(fraglimit, 100);
 		break;
 
 	case 6:
-		Cvar_SetValue(timelimit, timelimit->value + dir*5);
-		if (timelimit->value > 60)
+		Cvar_SetValue(timelimit, timelimit->int_val + dir*5);
+		if (timelimit->int_val > 60)
 			Cvar_SetValue(timelimit, 0);
-		if (timelimit->value < 0)
+		if (timelimit->int_val < 0)
 			Cvar_SetValue(timelimit, 60);
 		break;
 
@@ -2749,7 +2749,7 @@ void M_NetStart_Change (int dir)
 	//PGM 03/02/97 added 1 for dmatch episode
 		else if (rogue)
 			count = 4;
-		else if (registered->value)
+		else if (registered->int_val)
 			count = 7;
 		else
 			count = 2;

@@ -347,7 +347,7 @@ void IN_Move(usercmd_t *cmd)
 	while (mouse_update())
 		;
 
-	if (m_filter->value) {
+	if (m_filter->int_val) {
 		mouse_x = (mx + old_mouse_x) * 0.5;
 		mouse_y = (my + old_mouse_y) * 0.5;
 	} else {
@@ -364,7 +364,7 @@ void IN_Move(usercmd_t *cmd)
 
 	/* Add mouse X/Y movement to cmd */
 	if ( (in_strafe.state & 1) ||
-	     (lookstrafe->value && (in_mlook.state & 1) )) {
+	     (lookstrafe->int_val && (in_mlook.state & 1) )) {
 		cmd->sidemove += m_side->value * mouse_x;
 	} else {
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;

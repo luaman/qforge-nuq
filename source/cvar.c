@@ -371,7 +371,7 @@ void Cvar_Toggle_f (void)
 		return;
 	}
 
-	Cvar_Set (var, var->value ? "0" : "1");
+	Cvar_Set (var, var->value ? "0" : "1"); //XXX should be int or float?
 }
 
 void Cvar_Help_f (void)

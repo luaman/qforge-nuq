@@ -725,12 +725,12 @@ void _Host_Frame (float time)
 	}
 
 // update video
-	if (host_speeds->value)
+	if (host_speeds->int_val)
 		time1 = Sys_DoubleTime ();
 		
 	SCR_UpdateScreen ();
 
-	if (host_speeds->value)
+	if (host_speeds->int_val)
 		time2 = Sys_DoubleTime ();
 		
 // update audio
@@ -744,7 +744,7 @@ void _Host_Frame (float time)
 	
 	CDAudio_Update();
 
-	if (host_speeds->value)
+	if (host_speeds->int_val)
 	{
 		pass1 = (time1 - time3)*1000;
 		time3 = Sys_DoubleTime ();
@@ -765,7 +765,7 @@ void Host_Frame (float time)
 	static int		timecount;
 	int		i, c, m;
 
-	if (!serverprofile->value)
+	if (!serverprofile->int_val)
 	{
 		_Host_Frame (time);
 		return;

@@ -273,7 +273,7 @@ Sbar_DrawPic
 */
 void Sbar_DrawPic (int x, int y, qpic_t *pic)
 {
-	if ((cl_sbar->value && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
 		Draw_Pic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic);
 	else
 		Draw_Pic (x, y + (vid.height-SBAR_HEIGHT), pic);
@@ -288,7 +288,7 @@ JACK: Draws a portion of the picture in the status bar.
 
 void Sbar_DrawSubPic(int x, int y, qpic_t *pic, int srcx, int srcy, int width, int height) 
 {
-	if ((cl_sbar->value && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
 		Draw_SubPic (x + ((vid.width - 320)>>1), y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width, height);
 	else
 		Draw_SubPic (x, y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width, height);
@@ -301,7 +301,7 @@ Sbar_DrawTransPic
 */
 void Sbar_DrawTransPic (int x, int y, qpic_t *pic)
 {
-	if ((cl_sbar->value && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
 		Draw_TransPic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic);
 	else
 		Draw_TransPic (x, y + (vid.height-SBAR_HEIGHT), pic);
@@ -316,7 +316,7 @@ Draws one solid graphics character
 */
 void Sbar_DrawCharacter (int x, int y, int num)
 {
-	if ((cl_sbar->value && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
 		Draw_Character8 (x + ((vid.width - 320)>>1) + 4 , y + vid.height-SBAR_HEIGHT, num);
 	else
 		Draw_Character8 (x + 4 , y + vid.height-SBAR_HEIGHT, num);
@@ -329,7 +329,7 @@ Sbar_DrawString
 */
 void Sbar_DrawString (int x, int y, char *str)
 {
-	if ((cl_sbar->value && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
+	if ((cl_sbar->int_val && !cl.gametype == GAME_DEATHMATCH)	&& (hipnotic || rogue))
 		Draw_String8 (x + ((vid.width - 320)>>1), y+ vid.height-SBAR_HEIGHT, str);
 	else
 		Draw_String8 (x, y+ vid.height-SBAR_HEIGHT, str);
@@ -529,8 +529,8 @@ void Sbar_DrawInventory (void)
 	qboolean	headsup;
 	qboolean    hudswap;
 
-	headsup = !(cl_sbar->value || scr_viewsize->value<100);
-	hudswap = cl_hudswap->value; // Get that nasty float out :)
+	headsup = !(cl_sbar->int_val || scr_viewsize->value<100);
+	hudswap = cl_hudswap->int_val;
 
 	if (hipnotic)
 		headsup = false;
@@ -795,7 +795,7 @@ void Sbar_DrawFace (void)
 	// PGM 01/19/97 - team color drawing
 	// PGM 03/02/97 - fixed so color swatch only appears in CTF modes
 	if (rogue && (cl.maxclients != 1)
-			&& (teamplay->value > 3) && (teamplay->value < 7)) {
+			&& (teamplay->int_val > 3) && (teamplay->int_val < 7)) {
 
 		int 			top, bottom;
 		int 			xofs;
@@ -882,7 +882,7 @@ Sbar_DrawNormal
 */
 void Sbar_DrawNormal (void)
 {
-	if (cl_sbar->value || scr_viewsize->value < 100)
+	if (cl_sbar->int_val || scr_viewsize->value < 100)
 		Sbar_DrawPic (0, 0, sb_sbar);
 
 	if (hipnotic) {
@@ -961,7 +961,7 @@ void Sbar_Draw (void)
 	qboolean headsup;
 //	char st[512];
 
-	headsup = !(cl_sbar->value || scr_viewsize->value<100);
+	headsup = !(cl_sbar->int_val || scr_viewsize->value<100);
 	if ((sb_updates >= vid.numpages) && !headsup)
 		return;
 

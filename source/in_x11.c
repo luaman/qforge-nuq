@@ -267,15 +267,15 @@ static void
 event_motion(XEvent *event)
 {
 #ifdef HAVE_DGA
-	if (in_dgamouse->value) {
+	if (in_dgamouse->int_val) {
 		mouse_x += event->xmotion.x_root * in_dga_mouseaccel->value;
 		mouse_y += event->xmotion.y_root * in_dga_mouseaccel->value;
 	} else
 #endif
 	{
-		//printf("_windowed_mouse: %f\n", _windowed_mouse->value);
+		//printf("_windowed_mouse: %s\n", _windowed_mouse->int_val);
 		//printf("CurrentTime: %ld\n", CurrentTime);
-		if (_windowed_mouse->value) {
+		if (_windowed_mouse->int_val) {
 			if (!event->xmotion.send_event) {
 				mouse_x += (event->xmotion.x - p_mouse_x);
 				mouse_y += (event->xmotion.y - p_mouse_y);
@@ -303,10 +303,10 @@ void
 IN_Commands (void)
 {
 	JOY_Command ();
-	if (old__windowed_mouse != _windowed_mouse->value) {
-		old__windowed_mouse = _windowed_mouse->value;
+	if (old__windowed_mouse != _windowed_mouse->int_val) {
+		old__windowed_mouse = _windowed_mouse->int_val;
 
-		if (!_windowed_mouse->value) {
+		if (!_windowed_mouse->int_val) {
 			/* ungrab the pointer */
 			XUngrabPointer(x_disp,CurrentTime);
 		} else {
@@ -336,7 +336,7 @@ IN_Move (usercmd_t *cmd)
 	if (!mouse_avail)
 		return;
 
-	if (m_filter->value) {
+	if (m_filter->int_val) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
@@ -347,7 +347,7 @@ IN_Move (usercmd_t *cmd)
 	mouse_x *= sensitivity->value;
 	mouse_y *= sensitivity->value;
 
-	if ( (in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1) ))
+	if ( (in_strafe.state & 1) || (lookstrafe->int_val && (in_mlook.state & 1) ))
 		cmd->sidemove += m_side->value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
@@ -371,14 +371,14 @@ static void IN_ExtraOptionDraw(unsigned int options_draw_cursor)
 {
 	// Windowed Mouse
 	M_Print(16, options_draw_cursor+=8, "             Use Mouse");
-	M_DrawCheckbox(220, options_draw_cursor, _windowed_mouse->value);
+	M_DrawCheckbox(220, options_draw_cursor, _windowed_mouse->int_val);
 }
 
 static void IN_ExtraOptionCmd(int option_cursor)
 {
 	switch (option_cursor) {
 	case 1:	// _windowed_mouse
-		_windowed_mouse->value = !_windowed_mouse->value;
+		Cvar_SetValue (_windowed_mouse, !_windowed_mouse->int_val);
 		break;
 	}
 }
@@ -444,7 +444,7 @@ IN_Init (void)
 			"grab keyboard and mouse input when using -nodga");
 
 	if (COM_CheckParm ("-nodga")) {
-		if (in_nodga_grab->value) {
+		if (in_nodga_grab->int_val) {
 			XGrabKeyboard (x_disp, x_win, True, GrabModeAsync, 
 				GrabModeAsync, CurrentTime);
 

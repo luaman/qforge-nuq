@@ -583,7 +583,7 @@ void Sys_Quit (void)
 	
 
 // load the sell screen before shuting everything down
-	if (registered->value)
+	if (registered->int_val)
 		d = COM_LoadHunkFile ("end2.bin"); 
 	else
 		d = COM_LoadHunkFile ("end1.bin"); 

@@ -912,15 +912,15 @@ IN_Commands (void)
 {
 	/* Only supported by LibGII 0.7 or later. */
 #ifdef GII_CMDCODE_PREFER_RELPTR
-	if (old_windowed_mouse != _windowed_mouse->value) {
+	if (old_windowed_mouse != _windowed_mouse->int_val) {
 		gii_event ev;
 
-		old_windowed_mouse = _windowed_mouse->value;
+		old_windowed_mouse = _windowed_mouse->int_val;
 
 		ev.cmd.size = sizeof(gii_cmd_nodata_event);
 		ev.cmd.type = evCommand;
 		ev.cmd.target = GII_EV_TARGET_ALL;
-		ev.cmd.code = (int)_windowed_mouse->value ? GII_CMDCODE_PREFER_RELPTR
+		ev.cmd.code = (int)_windowed_mouse->int_val ? GII_CMDCODE_PREFER_RELPTR
 			: GII_CMDCODE_PREFER_ABSPTR;
 
 		ggiEventSend(ggivis, &ev);
@@ -934,7 +934,7 @@ IN_Move(usercmd_t *cmd)
 {
 	if (!mouse_avail) return;
 
-	if (m_filter->value) {
+	if (m_filter->int_val) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
@@ -945,7 +945,7 @@ IN_Move(usercmd_t *cmd)
 	mouse_x *= sensitivity->value;
 	mouse_y *= sensitivity->value;
 
-	if ( (in_strafe.state & 1) || (lookstrafe->value && freelook ))
+	if ( (in_strafe.state & 1) || (lookstrafe->int_val && freelook ))
 		cmd->sidemove += m_side->value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;

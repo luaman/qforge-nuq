@@ -411,14 +411,14 @@ VID_SetMode(int modenum, unsigned char *palette)
 	int err;
 
 	if ((modenum >= num_modes) || (modenum < 0) || !modes[modenum].width){
-		vid_mode->value = (float)current_mode;
+		vid_mode->int_val = (float)current_mode;
 
 		Con_Printf("No such video mode: %d\n",modenum);
 
 		return 0;
 	}
 
-	vid_mode->value = (float)modenum;
+	vid_mode->int_val = modenum;
 
 	current_mode=modenum;
 
@@ -573,13 +573,13 @@ VID_Update(vrect_t *rects)
 		return;
 	}
 
-	if (vid_waitforrefresh->value) {
+	if (vid_waitforrefresh->int_val) {
 		vga_waitretrace();
 	}
 
 	if (VGA_planar) {
 		VGA_UpdatePlanarScreen(vid.buffer);
-	} else if (vid_redrawfull->value) {
+	} else if (vid_redrawfull->int_val) {
 		int total = vid.rowbytes * vid.height;
 		int offset;
 
@@ -625,8 +625,8 @@ VID_Update(vrect_t *rects)
 		}
 	}
 
-	if (vid_mode->value != current_mode) {
-		VID_SetMode ((int)vid_mode->value, vid_current_palette);
+	if (vid_mode->int_val != current_mode) {
+		VID_SetMode (vid_mode->int_val, vid_current_palette);
 	}
 }
 

@@ -45,11 +45,11 @@ R_CheckVariables
 */
 void R_CheckVariables (void)
 {
-	static float	oldbright;
+	static int	oldbright;
 
-	if (r_fullbright->value != oldbright)
+	if (r_fullbright->int_val != oldbright)
 	{
-		oldbright = r_fullbright->value;
+		oldbright = r_fullbright->int_val;
 		D_FlushCaches ();	// so all lighting changes
 	}
 }
@@ -136,7 +136,7 @@ void R_LineGraph (int x, int y, int h)
 	
 	dest = vid.buffer + vid.rowbytes*y + x;
 	
-	s = r_graphheight->value;
+	s = r_graphheight->int_val;
 	
 	if (h>s)
 		h = s;
@@ -394,7 +394,7 @@ void R_SetupFrame (void)
 		Cvar_Set(r_drawflat, "0");
 	}
 
-	if (r_numsurfs->value)
+	if (r_numsurfs->int_val)
 	{
 		if ((surface_p - surfaces) > r_maxsurfsseen)
 			r_maxsurfsseen = surface_p - surfaces;
@@ -403,7 +403,7 @@ void R_SetupFrame (void)
 				surf_max - surfaces, r_maxsurfsseen);
 	}
 
-	if (r_numedges->value)
+	if (r_numedges->int_val)
 	{
 		edgecount = edge_p - r_edges;
 
@@ -420,7 +420,7 @@ void R_SetupFrame (void)
 		r_refdef.ambientlight = 0;
 
 	if (!sv.active)
-		r_draworder->value = 0;	// don't let cheaters look behind walls
+		Cvar_SetValue (r_draworder, 0);	// don't let cheaters look behind walls
 		
 	R_CheckVariables ();
 	
@@ -451,7 +451,7 @@ r_refdef.viewangles[2]=    0;
 	r_viewleaf = Mod_PointInLeaf (r_origin, cl.worldmodel);
 
 	r_dowarpold = r_dowarp;
-	r_dowarp = r_waterwarp->value && (r_viewleaf->contents <= CONTENTS_WATER);
+	r_dowarp = r_waterwarp->int_val && (r_viewleaf->contents <= CONTENTS_WATER);
 
 	if ((r_dowarp != r_dowarpold) || r_viewchanged || lcd_x->value)
 	{

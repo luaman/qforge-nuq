@@ -103,7 +103,7 @@ void IN_CenterMouse( void )
 //
 static void CheckMouseState(void)
 {
-	if (x_focus && _windowed_mouse->value && !x_grabbed) {
+	if (x_focus && _windowed_mouse->int_val && !x_grabbed) {
 		x_grabbed = true;
 		printf("fooling with mouse!\n");
 		if (XGetPointerControl( x_disp, &x_mouse_num, &x_mouse_denom, &x_mouse_thresh ))
@@ -125,7 +125,7 @@ static void CheckMouseState(void)
 		// safe initial values
 		x_root = x_root_old = vid.width >> 1;
 		y_root = y_root_old = vid.height >> 1;
-	} else if (x_grabbed && (!_windowed_mouse->value || !x_focus)) {
+	} else if (x_grabbed && (!_windowed_mouse->int_val || !x_focus)) {
 		printf("fooling with mouse!\n");
 		x_grabbed = false;
 		// undo mouse warp
@@ -235,7 +235,7 @@ IN_Move (usercmd_t *cmd)
 	}
 	
 	// add mouse X/Y movement to cmd
-	if ((in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1)))
+	if ((in_strafe.state & 1) || (lookstrafe->int_val && (in_mlook.state & 1)))
 		cmd->sidemove += m_side->value * dx;
 	else 
 		cl.viewangles[YAW] -= m_yaw->value * dx;

@@ -565,7 +565,7 @@ void R_RocketTrail (vec3_t start, vec3_t end, int type, entity_t *ent)
 	if (type == 0)
 		R_AddFire (start, end, ent);
 
-	if (!gl_particles->value)
+	if (!gl_particles->int_val)
 		return;
 
 	VectorSubtract (end, start, vec);

@@ -951,11 +951,11 @@ void NET_Poll(void)
 	{
 		if (serialAvailable)
 		{
-			if (config_com_modem->value == 1.0)
+			if (config_com_modem->int_val)
 				useModem = true;
 			else
 				useModem = false;
-			SetComPortConfig (0, (int)config_com_port->value, (int)config_com_irq->value, (int)config_com_baud->value, useModem);
+			SetComPortConfig (0, config_com_port->int_val, config_com_irq->int_val, config_com_baud->int_val, useModem);
 			SetModemConfig (0, config_modem_dialtype->string, config_modem_clear->string, config_modem_init->string, config_modem_hangup->string);
 		}
 		configRestored = true;
@@ -1002,7 +1002,7 @@ void SchedulePollProcedure(PollProcedure *proc, double timeOffset)
 
 qboolean IsID(struct qsockaddr *addr)
 {
-	if (idgods->value == 0.0)
+	if (!idgods->int_val)
 		return false;
 
 	if (addr->sa_family != 2)

@@ -1095,7 +1095,7 @@ void Host_Say(qboolean teamonly)
 	{
 		if (!client || !client->active || !client->spawned)
 			continue;
-		if (teamplay->value && teamonly && client->edict->v.team != save->edict->v.team)
+		if (teamplay->int_val && teamonly && client->edict->v.team != save->edict->v.team)
 			continue;
 		host_client = client;
 		SV_ClientPrintf("%s", text);
@@ -1182,7 +1182,7 @@ void Host_Color_f(void)
 	
 	if (Cmd_Argc() == 1)
 	{
-		Con_Printf ("\"color\" is \"%i %i\"\n", ((int)cl_color->value) >> 4, ((int)cl_color->value) & 0x0f);
+		Con_Printf ("\"color\" is \"%i %i\"\n", (cl_color->int_val) >> 4, (cl_color->int_val) & 0x0f);
 		Con_Printf ("color <0-13> [0-13]\n");
 		return;
 	}
@@ -1259,7 +1259,7 @@ void Host_Pause_f (void)
 		Cmd_ForwardToServer ();
 		return;
 	}
-	if (!pausable->value)
+	if (!pausable->int_val)
 		SV_ClientPrintf ("Pause not allowed.\n");
 	else
 	{

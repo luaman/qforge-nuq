@@ -226,7 +226,7 @@ R_AddFire (vec3_t start, vec3_t end, entity_t *ent)
 	vec3_t		vec;
 	int			key;
 
-	if (!gl_fires->value)
+	if (!gl_fires->int_val)
 		return;
 
 	VectorSubtract (end, start, vec);
@@ -359,7 +359,7 @@ R_UpdateFires (void)
 	int		i;
 	fire_t	*f;
 
-	if (!gl_fires->value)
+	if (!gl_fires->int_val)
 		return;
 
 	glDepthMask (0);

@@ -343,7 +343,7 @@ static void SCR_CalcRefdef (void)
 	}
 	size /= 100.0;
 
-	if (!cl_sbar->value && full)
+	if (!cl_sbar->int_val && full)
 		h = vid.height;
 	else
 		h = vid.height - sb_lines;
@@ -355,7 +355,7 @@ static void SCR_CalcRefdef (void)
 	}
 
 	r_refdef.vrect.height = vid.height * size;
-	if (cl_sbar->value || !full) {
+	if (cl_sbar->int_val || !full) {
 		if (r_refdef.vrect.height > vid.height - sb_lines)
 			r_refdef.vrect.height = vid.height - sb_lines;
 	} else {
@@ -449,7 +449,7 @@ SCR_DrawRam
 */
 void SCR_DrawRam (void)
 {
-	if (!scr_showram->value)
+	if (!scr_showram->int_val)
 		return;
 
 	if (!r_cache_thrash)
@@ -467,7 +467,7 @@ void SCR_DrawTurtle (void)
 {
 	static int	count;
 	
-	if (!scr_showturtle->value)
+	if (!scr_showturtle->int_val)
 		return;
 
 	if (host_frametime < 0.1)
@@ -499,7 +499,7 @@ void SCR_DrawFPS (void)
 	int x, y;
 	char st[80];
 
-	if (!show_fps->value)
+	if (!show_fps->int_val)
 		return;
 
 	t = Sys_DoubleTime();
@@ -525,7 +525,7 @@ void SCR_DrawPause (void)
 {
 	qpic_t	*pic;
 
-	if (!scr_showpause->value)		// turn off for screenshots
+	if (!scr_showpause->int_val)		// turn off for screenshots
 		return;
 
 	if (!cl.paused)
@@ -896,7 +896,7 @@ void SCR_UpdateScreen (void)
 	if (block_drawing)
 		return;
 
-	vid.numpages = 2 + (int) gl_triplebuffer->value;
+	vid.numpages = 2 + gl_triplebuffer->int_val;
 
 	scr_copytop = 0;
 	scr_copyeverything = 0;
@@ -917,7 +917,7 @@ void SCR_UpdateScreen (void)
 
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	
-	if (r_speeds->value)
+	if (r_speeds->int_val)
 	{
 		time1 = Sys_DoubleTime ();
 		c_brush_polys = 0;
@@ -941,9 +941,9 @@ void SCR_UpdateScreen (void)
 //
 
 	// LordHavoc: set lighthalf based on gl_lightmode cvar
-	if (lighthalf != (gl_lightmode->value != 0))
+	if (lighthalf != (gl_lightmode->int_val != 0))
 	{
-		lighthalf = gl_lightmode->value != 0;
+		lighthalf = gl_lightmode->int_val != 0;
 		R_ForceLightUpdate();
 	}
 
@@ -981,7 +981,7 @@ void SCR_UpdateScreen (void)
 	}
 	else
 	{
-		if (crosshair->value)
+		if (crosshair->int_val)
 			Draw_Crosshair();
 		
 		SCR_DrawRam ();
@@ -998,7 +998,7 @@ void SCR_UpdateScreen (void)
 //            also makes polyblend apply to whole screen
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
-	brightness->value = bound(1, brightness->value, 5);
+	Cvar_SetValue (brightness, bound(1, brightness->value, 5));
 	if (lighthalf) // LordHavoc: render was done at half brightness
 		f = brightness->value * 2;
 	else
@@ -1022,8 +1022,8 @@ void SCR_UpdateScreen (void)
 		glEnd ();
 	}
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	contrast->value = bound(0.2, contrast->value, 1.0);
-	if ((gl_polyblend->value && v_blend[3]) || contrast->value < 1)
+	Cvar_SetValue (contrast, bound(0.2, contrast->value, 1.0));
+	if ((gl_polyblend->int_val && v_blend[3]) || contrast->value < 1)
 	{
 		glBegin (GL_QUADS);
 		if (contrast->value < 1)
@@ -1034,7 +1034,7 @@ void SCR_UpdateScreen (void)
 			glVertex2f (vid.width, vid.height);
 			glVertex2f (0, vid.height);
 		}
-		if (gl_polyblend->value && v_blend[3])
+		if (gl_polyblend->int_val && v_blend[3])
 		{
 			glColor4fv (v_blend);
 			glVertex2f (0,0);
@@ -1050,7 +1050,7 @@ void SCR_UpdateScreen (void)
 
 	V_UpdatePalette ();
 
-	if (r_speeds->value)
+	if (r_speeds->int_val)
 	{
 //		glFinish ();
 		time2 = Sys_DoubleTime ();

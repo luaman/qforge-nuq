@@ -261,7 +261,7 @@ Sys_Printf (char *fmt, ...)
     if (nostdout)
         return;
 
-	if (timestamps && timeformat && timestamps && timeformat && timeformat->string && timestamps->value) {
+	if (timestamps && timeformat && timestamps && timeformat && timeformat->string && timestamps->int_val) {
 		mytime = time (NULL);
 		local = localtime (&mytime);
 		strftime (stamp, sizeof (stamp), timeformat->string, local);

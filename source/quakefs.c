@@ -460,7 +460,7 @@ COM_FOpenFile (char *filename, QFile **gzfile)
 #endif
 				if (fn)
 				{	// found it!
-					if (developer->value)
+					if (developer->int_val)
 						Sys_Printf ("PackFile: %s : %s\n",pak->filename, fn);
 					// open a new file on the pakfile
 					*gzfile=COM_OpenRead(pak->filename,pak->files[i].filepos,
@@ -487,7 +487,7 @@ COM_FOpenFile (char *filename, QFile **gzfile)
 					continue;
 			}
 
-			if(developer->value)
+			if(developer->int_val)
 				Sys_Printf ("FindFile: %s\n",netpath);
 
 			*gzfile=COM_OpenRead(netpath,-1,-1);

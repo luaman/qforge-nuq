@@ -268,7 +268,7 @@ x11_set_vidmode(int width, int height)
 	}
 	Con_SafePrintf ("hasvidmode = %i\nnummodes = %i\n", hasvidmode, nummodes);
 
-	if (hasvidmode && vid_fullscreen->value) {
+	if (hasvidmode && vid_fullscreen->int_val) {
 		int smallest_mode=0, x=MAXINT, y=MAXINT;
 
 		// FIXME: does this depend on mode line order in XF86Config?
@@ -311,7 +311,7 @@ x11_create_window(int width, int height)
 	attr.event_mask = X_MASK;
 	mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
-	if (hasvidmode && vid_fullscreen->value) {
+	if (hasvidmode && vid_fullscreen->int_val) {
 		attr.override_redirect=1;
 		mask|=CWOverrideRedirect;
 	}
@@ -349,7 +349,7 @@ void
 x11_grab_keyboard(void)
 {
 #ifdef HAVE_VIDMODE
-	if (hasvidmode && vid_fullscreen->value) {
+	if (hasvidmode && vid_fullscreen->int_val) {
 		XGrabKeyboard(x_disp, x_win, 1, GrabModeAsync, GrabModeAsync,
 					  CurrentTime);
 	}

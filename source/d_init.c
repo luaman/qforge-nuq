@@ -145,7 +145,7 @@ void D_SetupFrame (void)
 	d_roverwrapped = false;
 	d_initial_rover = sc_rover;
 
-	d_minmip = d_mipcap->value;
+	d_minmip = d_mipcap->int_val;
 	if (d_minmip > 3)
 		d_minmip = 3;
 	else if (d_minmip < 0)
@@ -155,7 +155,7 @@ void D_SetupFrame (void)
 		d_scalemip[i] = basemip[i] * d_mipscale->value;
 
 #ifdef	USE_INTEL_ASM
-				if (d_subdiv16->value)
+				if (d_subdiv16->int_val)
 					d_drawspans = D_DrawSpans16;
 				else
 					d_drawspans = D_DrawSpans8;
